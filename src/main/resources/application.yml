@@ -1,0 +1,22 @@
+# General configuration of the IPF application.
+
+# https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#core-properties
+spring:
+  application:
+    name: ipf-hapifhir-iti-example
+
+# https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#server-properties
+server:
+  port: 9091 # Application listening port
+
+ipf:
+  # https://oehf.github.io/ipf-docs/docs/ihe/atna/
+  atna:
+    audit-enabled: false # Disable ATNA logging as it requires more efforts to work
+logging:
+  level:
+    root: debug
+camel:
+  springboot:
+    xmlRoutes: false
+    main-run-controller: true

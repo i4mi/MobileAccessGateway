@@ -1,0 +1,12 @@
+### RESTClient VSCode scripts
+### Note ipf with a spring boot version has as default a fhir prefix, the ipf-tutorials-fhir is without the fhir prefix
+
+@host = http://localhost:9091/fhir
+
+GET {{host}}/metadata HTTP/1.1
+Accept: application/fhir+json
+
+### ITI-83 pixm mock call
+GET {{host}}/Patient/$ihe-pix?sourceIdentifier=urn:oid:1.2.3.4|0815&targetSystem=urn:oid:1.2.3.4.6 HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json
