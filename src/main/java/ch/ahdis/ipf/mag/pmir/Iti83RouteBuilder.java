@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.ahdis.ipf.mag.iti83;
+package ch.ahdis.ipf.mag.pmir;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateFhir;
 
@@ -32,7 +32,7 @@ class Iti83RouteBuilder extends RouteBuilder {
 
 	public Iti83RouteBuilder() {
 		super();
-		log.debug("Iti83RouteBuilder intialized");
+		log.debug("Iti83RouteBuilder initialized");
 	}
 
 	@Override

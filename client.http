@@ -10,3 +10,8 @@ Accept: application/fhir+json
 GET {{host}}/Patient/$ihe-pix?sourceIdentifier=urn:oid:1.2.3.4|0815&targetSystem=urn:oid:1.2.3.4.6 HTTP/1.1
 Accept: application/fhir+json
 Content-Type: application/fhir+json
+
+### ITI-66 Find Document Manifests mock call
+GET {{host}}/DocumentManifest?status=current&patient.identifier=urn:oid:2.999|11111111 HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json

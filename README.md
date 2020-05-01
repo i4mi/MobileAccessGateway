@@ -47,7 +47,7 @@ and the response should be:
 
 ### Eclipse setup
 - install [groovy-eclipse plugin](https://github.com/groovy/groovy-eclipse)
-- install [lombok[(https://projectlombok.org/setup/eclipse)
+- install [lombok](https://projectlombok.org/setup/eclipse)
 - open [issue](https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!msg/ipf-dev/DBDXZv3kfHE/hcg62rElBAAJ) when importing maven ipf projects in eclipse: "message": "The import org.openehealth.ipf.commons.map.BidiMappingService cannot be resolved" 
 
 ### open issues

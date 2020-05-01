@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootApplication
 @Slf4j
 @ComponentScan(basePackages={"org.openehealth.ipf","ch.ahdis.ipf.mag"})	
-// withouth it does not work directly with mvn and current snapshot, when running the Pixm query an error is returmed   "resourceType": "OperationOutcome", "issue": [ { "severity": "error", "code": "processing", "diagnostics": "Unknown resource type 'Patient' - Server knows how to handle: [StructureDefinition, OperationDefinition]" } ]
+// without it does not work directly with mvn and current snapshot, when running the Pixm query an error is returned   "resourceType": "OperationOutcome", "issue": [ { "severity": "error", "code": "processing", "diagnostics": "Unknown resource type 'Patient' - Server knows how to handle: [StructureDefinition, OperationDefinition]" } ]
 // it looks like the META-INF directory is not correct configured that is copied to the output, if it is added in eclipse as on open project to java/main/resources it works without above line 
 @EnableAutoConfiguration
 public class MobileAccessGateway {
