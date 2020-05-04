@@ -15,3 +15,8 @@ Content-Type: application/fhir+json
 GET {{host}}/DocumentManifest?status=current&patient.identifier=urn:oid:2.999|11111111 HTTP/1.1
 Accept: application/fhir+json
 Content-Type: application/fhir+json
+
+### ITI-67 Find Document References mock call
+GET {{host}}/DocumentReference?status=current&patient.identifier=urn:oid:2.999|11111111 HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json

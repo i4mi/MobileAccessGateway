@@ -24,7 +24,7 @@ import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.openehealth.ipf.commons.ihe.fhir.Constants;
 import org.openehealth.ipf.commons.ihe.fhir.FhirSearchParameters;
-import org.openehealth.ipf.commons.ihe.fhir.iti67.Iti67SearchParameters;
+import org.openehealth.ipf.commons.ihe.fhir.iti66.Iti66SearchParameters;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -34,11 +34,11 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-class Iti66RouteBuilder extends RouteBuilder {
+class Iti67RouteBuilder extends RouteBuilder {
 
-    public Iti66RouteBuilder() {
+    public Iti67RouteBuilder() {
         super();
-        log.debug("Iti67RouteBuilder initialized");
+        log.debug("Iti66RouteBuilder initialized");
     }
 
     public static Processor searchParameterToBody() {
@@ -52,11 +52,11 @@ class Iti66RouteBuilder extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        log.debug("Iti67RouteBuilder configure");
-        from("mhd-iti67:translation?audit=false").routeId("mdh-documentreference-adapter")
+        log.debug("Iti66RouteBuilder configure");
+        from("mhd-iti66:translation?audit=false").routeId("mdh-documentmanifest-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler()).process(searchParameterToBody())
                 // translate, forward, translate back
-                .process(translateToFhir(new MhdDocumentReferenceMockTranslator(), Iti67SearchParameters.class));
+                .process(translateToFhir(new MhdDocumentManifestMockTranslator(), Iti66SearchParameters.class));
     }
 }
