@@ -20,3 +20,8 @@ Content-Type: application/fhir+json
 GET {{host}}/DocumentReference?status=current&patient.identifier=urn:oid:2.999|11111111 HTTP/1.1
 Accept: application/fhir+json
 Content-Type: application/fhir+json
+
+### ITI-68 Retrieve Document mock call
+GET http://localhost:9091/camel/xdsretrieve?docId=1 HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json

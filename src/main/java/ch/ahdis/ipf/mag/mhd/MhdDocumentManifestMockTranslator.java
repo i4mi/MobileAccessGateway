@@ -27,7 +27,6 @@ public class MhdDocumentManifestMockTranslator implements ToFhirTranslator<Iti66
 
 	@Override
 	public List<DocumentManifest> translateToFhir(Iti66SearchParameters input, Map<String, Object> parameters) {
-		// TODO Auto-generated method stub
 		ArrayList<DocumentManifest> list = new ArrayList<DocumentManifest>();
 		DocumentManifest documentManifest = new DocumentManifest();
 		documentManifest.setId("id");		

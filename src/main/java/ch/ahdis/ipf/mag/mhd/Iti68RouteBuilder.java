@@ -18,37 +18,54 @@ package ch.ahdis.ipf.mag.mhd;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
-import java.util.Map;
+import java.io.ByteArrayInputStream;
+import java.util.Arrays;
 
-import org.apache.camel.Processor;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.openehealth.ipf.commons.ihe.fhir.Constants;
-import org.openehealth.ipf.commons.ihe.fhir.FhirSearchParameters;
-import org.openehealth.ipf.commons.ihe.fhir.iti67.Iti67SearchParameters;
+import org.apache.camel.support.ExpressionAdapter;
+import org.openehealth.ipf.commons.ihe.fhir.iti66.Iti66SearchParameters;
+import org.openehealth.ipf.commons.ihe.fhir.iti68.Iti68AuditDataset;
+import org.openehealth.ipf.platform.camel.ihe.atna.interceptor.AuditInterceptor;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * IHE MHD: Find Document References [ITI-67] for Document Responder
+ * IHE MHD: Retrieve Document [ITI-68] for Document Responder see also
+ * https://oehf.github.io/ipf-docs/docs/boot-fhir/
  */
 @Slf4j
 @Component
-class Iti67RouteBuilder extends RouteBuilder {
+class Iti68RouteBuilder extends RouteBuilder {
 
-    public Iti67RouteBuilder() {
+    static final byte[] DATA;
+
+    static {
+        DATA = new byte[10000];
+        Arrays.fill(DATA, (byte) 'X');
+    }
+
+    public Iti68RouteBuilder() {
         super();
-        log.debug("Iti67RouteBuilder initialized");
+        log.debug("Iti68RouteBuilder initialized");
     }
 
     @Override
     public void configure() throws Exception {
-        log.debug("Iti67RouteBuilder configure");
-        from("mhd-iti67:translation?audit=false").routeId("mdh-documentreference-adapter")
+        log.debug("Iti66RouteBuilder configure");
+        from("mhd-iti68:camel/xdsretrieve").routeId("mdh-retrievedoc-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(Utils.searchParameterToBody())
                 // translate, forward, translate back
-                .process(translateToFhir(new MhdDocumentReferenceMockTranslator() , Iti67SearchParameters.class));
+                .transform(new Iti68Responder());
+    }
+
+    private class Iti68Responder extends ExpressionAdapter {
+
+        @Override
+        public Object evaluate(Exchange exchange) {
+            return new ByteArrayInputStream(DATA);
+        }
     }
 }
