@@ -16,24 +16,21 @@
 
 package ch.ahdis.ipf.mag.mhd;
 
-import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
-
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.support.ExpressionAdapter;
-import org.openehealth.ipf.commons.ihe.fhir.iti66.Iti66SearchParameters;
-import org.openehealth.ipf.commons.ihe.fhir.iti68.Iti68AuditDataset;
-import org.openehealth.ipf.platform.camel.ihe.atna.interceptor.AuditInterceptor;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * IHE MHD: Retrieve Document [ITI-68] for Document Responder see also
+ * https://oehf.github.io/ipf-docs/docs/ihe/iti68/
  * https://oehf.github.io/ipf-docs/docs/boot-fhir/
+ * https://camel.apache.org/components/latest/servlet-component.html
  */
 @Slf4j
 @Component

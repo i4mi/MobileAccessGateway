@@ -18,12 +18,7 @@ package ch.ahdis.ipf.mag.mhd;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
-import java.util.Map;
-
-import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
-import org.openehealth.ipf.commons.ihe.fhir.Constants;
-import org.openehealth.ipf.commons.ihe.fhir.FhirSearchParameters;
 import org.openehealth.ipf.commons.ihe.fhir.iti67.Iti67SearchParameters;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * IHE MHD: Find Document References [ITI-67] for Document Responder
+ * https://oehf.github.io/ipf-docs/docs/ihe/iti67/
  */
 @Slf4j
 @Component

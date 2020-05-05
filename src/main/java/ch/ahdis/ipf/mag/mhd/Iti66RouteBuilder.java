@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * IHE MHD: Find Document Manifests [ITI-66] for Document Responder
+ * https://oehf.github.io/ipf-docs/docs/ihe/iti66/
  */
 @Slf4j
 @Component

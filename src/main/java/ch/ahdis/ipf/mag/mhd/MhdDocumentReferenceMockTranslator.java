@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.r4.model.DocumentManifest;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.openehealth.ipf.commons.ihe.fhir.iti67.Iti67SearchParameters;
 import org.openehealth.ipf.commons.ihe.fhir.translation.ToFhirTranslator;
