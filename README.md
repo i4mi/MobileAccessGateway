@@ -1,6 +1,6 @@
 # IPF HAPI-FHIR IHE ITI springboot example 
 
-This is a simple [IPF](https://oehf.github.io/ipf/) [HAPI-FHIR](https://hapifhir.io/) example. It demonstrates a mock [IHE PIXm actor Patient Identifier Crossreference Manager](https://oehf.github.io/ipf-docs/docs/ihe/iti83/) for the ITI-83 transaction. It does not use any Groovy code or XML configuration files for Camel, everything is done in Java code and in a single YAML file for the Spring Boot configuration. This example is based on a combination of [qligier/ipf-example](https://github.com/qligier/ipf-example) and [ipf-tutorials-fhir](https://github.com/oehf/ipf/tree/master/tutorials/fhir). 
+This is a simple [IPF](https://oehf.github.io/ipf/) [HAPI-FHIR](https://hapifhir.io/) example. It demonstrates a mock interface for IHE MHD [ITI-65, 66, 67, 68] and IHE PIXm, PRIM for the ITI-83 and ITI-93 transaction for the server actors. It does not use any Groovy code or XML configuration files for Camel, everything is done in Java code and in a single YAML file for the Spring Boot configuration. This example is based on a combination of [qligier/ipf-example](https://github.com/qligier/ipf-example) and [ipf-tutorials-fhir](https://github.com/oehf/ipf/tree/master/tutorials/fhir). 
 
 
 ## Run the JAR
@@ -38,9 +38,8 @@ and the response should be:
 
 
 ## Caution
-
 - a @ComponentScan had to be added to the main Application class, otherwise the routes / component could note  be defined (see open issues)
-
+- Currently ITI-66 (Find Document Manifests) is not working together with ITI-67 (Find Document References), if boths are activated, DocumentManifest is not available anymore in HAPI: "Unknown resource type 'DocumentManifest' - Server knows how to handle: [StructureDefinition, Patient, OperationDefinition, DocumentReference]
 
 ## Dev environment
 

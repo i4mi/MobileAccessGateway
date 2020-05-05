@@ -1,0 +1,49 @@
+{
+    "resourceType": "Bundle",
+    "type": "message",
+    "entry": [
+      {   
+        "fullUrl": "http://example.com/fhir/MessageHeader/1",
+        "resource": {
+          "resourceType": "MessageHeader",
+          "id": "1",
+          "eventUri": "urn:ihe:iti:pmir:2019:patient-feed",
+          "source": {
+            "endpoint": "http://example.com/patientSource"
+          },
+          "focus": [
+            {
+              "reference": "Bundle/abc"
+            }
+          ],  
+          "destination": [
+            {
+              "endpoint": "http://example.com/patientEndpoint"
+            }
+          ]   
+        }
+      },  
+      {  
+        "fullUrl": "http://example.com/fhir/Bundle/abc",
+        "resource": { 
+          "resourceType": "Bundle",
+          "id": "abc",
+          "type": "history",
+          "entry": [
+            {
+              "fullUrl": "http://example.com/fhir/Patient/123",
+              "resource": {
+                "resourceType": "Patient",
+                "id": "123",
+                "active": false
+              },
+              "request": {
+                "method": "POST"
+              }
+            }
+          ]
+        }
+      }   
+    ]
+  }
+  

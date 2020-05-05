@@ -1,15 +1,17 @@
 ### RESTClient VSCode scripts
-### Note ipf with a spring boot version has as default a fhir prefix, the ipf-tutorials-fhir is without the fhir prefix
+### Note ipf with a spring boot version has as default a fhir prefix, the ipf-tutorials-fhir is without the fhir prefix, iti-65 needs the camel servlet (different prefix camel)
 
 @host = http://localhost:9091/fhir
 
 GET {{host}}/metadata HTTP/1.1
 Accept: application/fhir+json
 
-### ITI-83 pixm mock call
-GET {{host}}/Patient/$ihe-pix?sourceIdentifier=urn:oid:1.2.3.4|0815&targetSystem=urn:oid:1.2.3.4.6 HTTP/1.1
+### ITI-65 Provide Document Bundle mock call
+POST {{host}} HTTP/1.1
 Accept: application/fhir+json
 Content-Type: application/fhir+json
+
+< ./src/test/resources/mhdch.json
 
 ### ITI-66 Find Document Manifests mock call
 GET {{host}}/DocumentManifest?status=current&patient.identifier=urn:oid:2.999|11111111 HTTP/1.1
@@ -25,3 +27,15 @@ Content-Type: application/fhir+json
 GET http://localhost:9091/camel/xdsretrieve?docId=1 HTTP/1.1
 Accept: application/fhir+json
 Content-Type: application/fhir+json
+
+### ITI-83 pixm mock call
+GET {{host}}/Patient/$ihe-pix?sourceIdentifier=urn:oid:1.2.3.4|0815&targetSystem=urn:oid:1.2.3.4.6 HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json
+
+### ITI-93 PRIM patient identity feed
+POST {{host}}/$process-message HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json
+
+< ./src/test/resources/patientfeed.json
