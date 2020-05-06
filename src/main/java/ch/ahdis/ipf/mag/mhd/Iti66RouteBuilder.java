@@ -40,7 +40,7 @@ class Iti66RouteBuilder extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         log.debug("Iti66RouteBuilder configure");
-        from("mhd-iti66:translation?audit=false").routeId("mdh-documentreference-adapter")
+        from("mhd-iti66:translation?audit=false").routeId("mdh-documentmanifest-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 .process(Utils.searchParameterToBody())

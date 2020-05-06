@@ -39,7 +39,6 @@ and the response should be:
 
 ## Caution
 - a @ComponentScan had to be added to the main Application class, otherwise the routes / component could note  be defined (see open issues)
-- Currently ITI-66 (Find Document Manifests) is not working together with ITI-67 (Find Document References), if boths are activated, DocumentManifest is not available anymore in HAPI: "Unknown resource type 'DocumentManifest' - Server knows how to handle: [StructureDefinition, Patient, OperationDefinition, DocumentReference]
 
 ## Dev environment
 
