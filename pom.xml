@@ -85,6 +85,10 @@
 			<artifactId>ipf-platform-camel-ihe-fhir-r4-mhd</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.openehealth.ipf.platform-camel</groupId>
+			<artifactId>ipf-platform-camel-ihe-xds</artifactId>
+		</dependency>
 
 		<!-- nsatisfied dependency expressed through field 'config'; nested exception 
 			is org.springframework.boot.context.properties.ConfigurationPropertiesBindException: 
