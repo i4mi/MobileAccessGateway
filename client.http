@@ -13,20 +13,19 @@ Content-Type: application/fhir+json
 
 < ./src/test/resources/mhdch.json
 
-### ITI-66 Find Document Manifests mock call
+### ITI-66 Find Document Manifests
 GET {{host}}/DocumentManifest?status=current&patient.identifier=urn:oid:2.999|11111111 HTTP/1.1
 Accept: application/fhir+json
 Content-Type: application/fhir+json
 
-### ITI-67 Find Document References mock call
-GET {{host}}/DocumentReference?status=current&patient.identifier=urn:oid:2.999|11111111 HTTP/1.1
+### ITI-67 Find Document References
+GET {{host}}/DocumentReference?status=current&patient.identifier=urn:oid:2.999.756.42.2|12345678 HTTP/1.1
 Accept: application/fhir+json
 Content-Type: application/fhir+json
 
-### ITI-68 Retrieve Document mock call
-GET http://localhost:9091/camel/xdsretrieve?docId=1 HTTP/1.1
+### ITI-68 Retrieve Document call
+GET http://localhost:9091/camel/xdsretrieve?uniqueId=7fba239a-f518-11e9-802a-5aa538984bd8&repositoryUniqueId=2.999.756.42.1
 Accept: application/fhir+json
-Content-Type: application/fhir+json
 
 ### ITI-83 pixm mock call
 GET {{host}}/Patient/$ihe-pix?sourceIdentifier=urn:oid:1.2.3.4|0815&targetSystem=urn:oid:1.2.3.4.6 HTTP/1.1

@@ -16,14 +16,12 @@
 
 package ch.ahdis.ipf.mag.mhd;
 
-import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 
-import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.support.ExpressionAdapter;
 import org.springframework.stereotype.Component;
 
+import ch.ahdis.ipf.mag.Config;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -36,33 +34,28 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 class Iti68RouteBuilder extends RouteBuilder {
 
-    static final byte[] DATA;
-
-    static {
-        DATA = new byte[10000];
-        Arrays.fill(DATA, (byte) 'X');
-    }
-
-    public Iti68RouteBuilder() {
+    private final Config config;
+    
+    public Iti68RouteBuilder(final Config config) {
         super();
+        this.config = config;
         log.debug("Iti68RouteBuilder initialized");
     }
+
 
     @Override
     public void configure() throws Exception {
         log.debug("Iti66RouteBuilder configure");
+        final String xds43Endpoint = String.format("xds-iti43://%s/xds/iti43" +
+                "?secure=%s", this.config.getHostUrl(), this.config.isHttps() ? "true" : "false");
+
         from("mhd-iti68:camel/xdsretrieve").routeId("mdh-retrievedoc-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 // translate, forward, translate back
-                .transform(new Iti68Responder());
+                .process(Utils.queryParameterToRetrieveDocumentSet())
+                .to(xds43Endpoint)
+                .process(Utils.retrievedDocumentSetToHttResponse());
     }
 
-    private class Iti68Responder extends ExpressionAdapter {
-
-        @Override
-        public Object evaluate(Exchange exchange) {
-            return new ByteArrayInputStream(DATA);
-        }
-    }
 }
