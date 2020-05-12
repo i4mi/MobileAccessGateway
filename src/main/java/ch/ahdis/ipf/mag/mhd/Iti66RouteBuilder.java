@@ -19,9 +19,10 @@ package ch.ahdis.ipf.mag.mhd;
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.openehealth.ipf.commons.ihe.fhir.iti66.Iti66SearchParameters;
+import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.springframework.stereotype.Component;
 
+import ch.ahdis.ipf.mag.Config;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -31,20 +32,27 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 class Iti66RouteBuilder extends RouteBuilder {
+    
+    private final Config config;
 
-    public Iti66RouteBuilder() {
+    public Iti66RouteBuilder(final Config config) {
         super();
+        this.config = config;
         log.debug("Iti66RouteBuilder initialized");
     }
 
     @Override
     public void configure() throws Exception {
         log.debug("Iti66RouteBuilder configure");
+        final String xds18Endpoint = String.format("xds-iti18://%s/xds/iti18" +
+          "?secure=%s", this.config.getHostUrl(), this.config.isHttps() ? "true" : "false");
+
         from("mhd-iti66:translation?audit=false").routeId("mdh-documentmanifest-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 .process(Utils.searchParameterToBody())
-                // translate, forward, translate back
-                .process(translateToFhir(new MhdDocumentManifestMockTranslator(), Iti66SearchParameters.class));
-    }
+                .process(Utils.searchParameterIti66ToFindSubmissionSetsQuery(config))
+                .to(xds18Endpoint)
+                .process(translateToFhir(new MhdDocumentManifestFromQueryReponse() , QueryResponse.class));
+        }
 }
