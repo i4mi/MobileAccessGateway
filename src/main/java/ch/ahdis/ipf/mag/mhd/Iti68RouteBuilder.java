@@ -16,8 +16,6 @@
 
 package ch.ahdis.ipf.mag.mhd;
 
-import java.util.Arrays;
-
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
@@ -45,10 +43,14 @@ class Iti68RouteBuilder extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        log.debug("Iti66RouteBuilder configure");
+        log.debug("Iti68RouteBuilder configure");
         final String xds43Endpoint = String.format("xds-iti43://%s/xds/iti43" +
-                "?secure=%s", this.config.getHostUrl(), this.config.isHttps() ? "true" : "false");
-
+                "?secure=%s", this.config.getHostUrl(), this.config.isHttps() ? "true" : "false")
+                +
+                "&inInterceptors=#soapResponseLogger" + 
+                "&inFaultInterceptors=#soapResponseLogger"+
+                "&outInterceptors=#soapRequestLogger" + 
+                "&outFaultInterceptors=#soapRequestLogger";
         from("mhd-iti68:camel/xdsretrieve").routeId("mdh-retrievedoc-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())

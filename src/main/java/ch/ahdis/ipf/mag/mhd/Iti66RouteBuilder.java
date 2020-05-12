@@ -45,7 +45,12 @@ class Iti66RouteBuilder extends RouteBuilder {
     public void configure() throws Exception {
         log.debug("Iti66RouteBuilder configure");
         final String xds18Endpoint = String.format("xds-iti18://%s/xds/iti18" +
-          "?secure=%s", this.config.getHostUrl(), this.config.isHttps() ? "true" : "false");
+          "?secure=%s", this.config.getHostUrl(), this.config.isHttps() ? "true" : "false")
+        +
+                "&inInterceptors=#soapResponseLogger" + 
+                "&inFaultInterceptors=#soapResponseLogger"+
+                "&outInterceptors=#soapRequestLogger" + 
+                "&outFaultInterceptors=#soapRequestLogger";
 
         from("mhd-iti66:translation?audit=false").routeId("mdh-documentmanifest-adapter")
                 // pass back errors to the endpoint

@@ -15,7 +15,7 @@ ipf:
     audit-enabled: false # Disable ATNA logging as it requires more efforts to work
 logging:
   level:
-    root: debug
+    root: info
 camel:
   springboot:
     xmlRoutes: false
