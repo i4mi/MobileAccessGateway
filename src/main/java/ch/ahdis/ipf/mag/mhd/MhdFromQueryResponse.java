@@ -23,7 +23,7 @@ import org.openehealth.ipf.commons.ihe.fhir.translation.ToFhirTranslator;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 
-public abstract class MhdFromQueryReponse implements ToFhirTranslator<QueryResponse> {
+public abstract class MhdFromQueryResponse implements ToFhirTranslator<QueryResponse> {
 
     public String getSystem(String schemeName) {
         switch (schemeName) {

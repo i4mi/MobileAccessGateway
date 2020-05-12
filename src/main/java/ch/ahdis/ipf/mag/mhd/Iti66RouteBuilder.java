@@ -53,6 +53,6 @@ class Iti66RouteBuilder extends RouteBuilder {
                 .process(Utils.searchParameterToBody())
                 .process(Utils.searchParameterIti66ToFindSubmissionSetsQuery(config))
                 .to(xds18Endpoint)
-                .process(translateToFhir(new MhdDocumentManifestFromQueryReponse() , QueryResponse.class));
+                .process(translateToFhir(new MhdDocumentManifestFromQueryResponse() , QueryResponse.class));
         }
 }

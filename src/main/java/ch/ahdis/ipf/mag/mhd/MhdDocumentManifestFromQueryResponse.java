@@ -27,7 +27,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.SubmissionSet;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 
-public class MhdDocumentManifestFromQueryReponse extends MhdFromQueryReponse {
+public class MhdDocumentManifestFromQueryResponse extends MhdFromQueryResponse {
     
     @Override
     public List<DocumentManifest> translateToFhir(QueryResponse input, Map<String, Object> parameters) {

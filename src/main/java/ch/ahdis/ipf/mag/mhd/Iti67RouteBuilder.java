@@ -53,6 +53,6 @@ class Iti67RouteBuilder extends RouteBuilder {
                 .process(Utils.searchParameterToBody())
                 .process(Utils.searchParameterIti67ToFindDocumentsQuery(config))
                 .to(xds18Endpoint)
-                .process(translateToFhir(new MhdDocumentReferenceFromQueryReponse(config) , QueryResponse.class));
+                .process(translateToFhir(new MhdDocumentReferenceFromQueryResponse(config) , QueryResponse.class));
     }
 }

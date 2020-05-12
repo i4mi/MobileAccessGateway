@@ -1,12 +1,15 @@
-# IPF HAPI-FHIR IHE ITI springboot example 
+# MobileAccessGateway
 
 This is a simple [IPF](https://oehf.github.io/ipf/) [HAPI-FHIR](https://hapifhir.io/) example. It demonstrates a mock interface for IHE MHD [ITI-65, 66, 67, 68] and IHE PIXm, PRIM for the ITI-83 and ITI-93 transaction for the server actors. It does not use any Groovy code or XML configuration files for Camel, everything is done in Java code and in a single YAML file for the Spring Boot configuration. This example is based on a combination of [qligier/ipf-example](https://github.com/qligier/ipf-example) and [ipf-tutorials-fhir](https://github.com/oehf/ipf/tree/master/tutorials/fhir). 
 
 
 ## Run the JAR
 
-1. Install the dependencies: `mvn install`
-2. Either run it from your favorite IDE or in the CLI: `mvn clean compile && mvn exec:java -Dexec.mainClass="ch.ahdis.ipf.mag.MobileAccessGateway"`
+1. Clone https://github.com/oehf/ipf.git 
+2. run mvn clean install -DskipTests in this directory, this should produce 4.0-SNAPSHOT (you need at least jdk11)
+3. Clone this repo 
+4. Install the dependencies: `mvn install`
+5. Either run it from your favorite IDE or in the CLI: `mvn clean compile && mvn exec:java -Dexec.mainClass="ch.ahdis.ipf.mag.MobileAccessGateway"`
 
 ### [ITI-83] PIXm Query
 You should be able to run the query which returns for the sourceIdentifier 0815 in urn:oid:1.2.3 "mockid" in targetSystem urn:oid:1.2.3.4.6 in a console application with curl (use client.http with VSCode rest extension).

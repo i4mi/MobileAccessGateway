@@ -33,11 +33,11 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 
 import ch.ahdis.ipf.mag.Config;
 
-public class MhdDocumentReferenceFromQueryReponse extends MhdFromQueryReponse {
+public class MhdDocumentReferenceFromQueryResponse extends MhdFromQueryResponse {
 
     private final Config config;
 
-    public MhdDocumentReferenceFromQueryReponse(final Config config) {
+    public MhdDocumentReferenceFromQueryResponse(final Config config) {
         this.config = config;
     }
 
