@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.ahdis.ipf.mag.mhd;
+package ch.bfh.ti.i4mi.mag.mhd;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -66,7 +67,7 @@ public class MhdDocumentManifestFromQueryResponse extends MhdFromQueryResponse {
                     // patientId -> subject Reference(Patient| Practitioner| Group| Device) [0..1], Reference(Patient)
                     // submissionTime -> created dateTime [0..1]
                     if (submissionSet.getSubmissionTime()!=null) {
-                        documentManifest.setCreated(submissionSet.getSubmissionTime().getDateTime().toDate());
+                        documentManifest.setCreated(Date.from(submissionSet.getSubmissionTime().getDateTime().toInstant()));
                     }
 
                     // authorInstitution, authorPerson, authorRole, authorSpeciality, authorTelecommunication -> author Reference(Practitioner| PractitionerRole| Organization| Device| Patient| RelatedPerson) [0..*]

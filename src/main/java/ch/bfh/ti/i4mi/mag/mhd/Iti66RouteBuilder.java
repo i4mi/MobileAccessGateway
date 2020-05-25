@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.ahdis.ipf.mag.mhd;
+package ch.bfh.ti.i4mi.mag.mhd;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
@@ -22,7 +22,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.springframework.stereotype.Component;
 
-import ch.ahdis.ipf.mag.Config;
+import ch.bfh.ti.i4mi.mag.Config;
 import lombok.extern.slf4j.Slf4j;
 
 /**

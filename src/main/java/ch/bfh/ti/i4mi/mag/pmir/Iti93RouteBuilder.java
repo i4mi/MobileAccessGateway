@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.ahdis.ipf.mag.pmir;
+package ch.bfh.ti.i4mi.mag.pmir;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;

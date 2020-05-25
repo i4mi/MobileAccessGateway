@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.ahdis.ipf.mag.mhd;
+package ch.bfh.ti.i4mi.mag.mhd;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntry;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 
-import ch.ahdis.ipf.mag.Config;
+import ch.bfh.ti.i4mi.mag.Config;
 
 public class MhdDocumentReferenceFromQueryResponse extends MhdFromQueryResponse {
 
@@ -97,7 +98,7 @@ public class MhdDocumentReferenceFromQueryResponse extends MhdFromQueryResponse 
 
                     // creationTime -> date instant [0..1]
                     if (documentEntry.getCreationTime() != null) {
-                        documentReference.setDate(documentEntry.getCreationTime().getDateTime().toDate());
+                        documentReference.setDate(Date.from(documentEntry.getCreationTime().getDateTime().toInstant()));
                     }
 
                     // TODO: authorPerson, authorInstitution, authorPerson, authorRole,
@@ -158,7 +159,7 @@ public class MhdDocumentReferenceFromQueryResponse extends MhdFromQueryResponse 
 
                     // TcreationTime -> content.attachment.creation dateTime [0..1]
                     if (documentEntry.getCreationTime() != null) {
-                        attachment.setCreation(documentEntry.getCreationTime().getDateTime().toDate());
+                        attachment.setCreation(Date.from(documentEntry.getCreationTime().getDateTime().toInstant()));
                     }
 
                     // formatCode -> content.format Coding [0..1]

@@ -1,4 +1,4 @@
-package ch.ahdis.ipf.mag.mhd;
+package ch.bfh.ti.i4mi.mag.mhd;
 /*
  * Copyright 2020 the original author or authors.
  *
@@ -38,7 +38,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindSubmissionSet
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryReturnType;
 
 import ca.uhn.fhir.rest.param.TokenParam;
-import ch.ahdis.ipf.mag.Config;
+import ch.bfh.ti.i4mi.mag.Config;
 
 public class Utils {
 

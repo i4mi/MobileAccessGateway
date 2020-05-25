@@ -1,4 +1,4 @@
-package ch.ahdis.ipf.mag;
+package ch.bfh.ti.i4mi.mag;
 
 import org.openehealth.ipf.commons.ihe.ws.cxf.payload.InPayloadLoggerInterceptor;
 import org.openehealth.ipf.commons.ihe.ws.cxf.payload.OutPayloadLoggerInterceptor;

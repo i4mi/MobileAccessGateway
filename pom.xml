@@ -4,8 +4,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>ch.ahdis</groupId>
-	<artifactId>ipf-hapifhir-iti-example</artifactId>
+	<groupId>ch.bfh</groupId>
+	<artifactId>i4mi-ipf-hapifhir-gateway</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<description>IPF HAPI-FHIR IHE ITI springboot example</description>
 
@@ -104,10 +104,10 @@
 			javax.validation.NoProviderFoundException: Unable to create a Configuration, 
 			because no Jakarta Bean Validation provider could be found. Add a provider 
 			like Hibernate Validator (RI) to your classpath. -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
-		</dependency>
+		</dependency>  -->
 
 		<!-- Development tools -->
 		<dependency>

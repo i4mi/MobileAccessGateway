@@ -14,50 +14,49 @@
  * limitations under the License.
  */
 
-package ch.ahdis.ipf.mag.mhd;
+package ch.bfh.ti.i4mi.mag.mhd;
+
+import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.springframework.stereotype.Component;
 
-import ch.ahdis.ipf.mag.Config;
+import ch.bfh.ti.i4mi.mag.Config;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * IHE MHD: Retrieve Document [ITI-68] for Document Responder see also
- * https://oehf.github.io/ipf-docs/docs/ihe/iti68/
- * https://oehf.github.io/ipf-docs/docs/boot-fhir/
- * https://camel.apache.org/components/latest/servlet-component.html
+ * IHE MHD: Find Document References [ITI-67] for Document Responder
+ * https://oehf.github.io/ipf-docs/docs/ihe/iti67/
  */
 @Slf4j
 @Component
-class Iti68RouteBuilder extends RouteBuilder {
-
-    private final Config config;
+class Iti67RouteBuilder extends RouteBuilder {
     
-    public Iti68RouteBuilder(final Config config) {
-        super();
-        this.config = config;
-        log.debug("Iti68RouteBuilder initialized");
-    }
+    private final Config config;
 
+    public Iti67RouteBuilder(final Config config) {
+        super();
+        log.debug("Iti67RouteBuilder initialized");
+        this.config = config;
+    }
 
     @Override
     public void configure() throws Exception {
-        log.debug("Iti68RouteBuilder configure");
-        final String xds43Endpoint = String.format("xds-iti43://%s/xds/iti43" +
+        log.debug("Iti67RouteBuilder configure");
+        final String xds18Endpoint = String.format("xds-iti18://%s/xds/iti18" +
                 "?secure=%s", this.config.getHostUrl(), this.config.isHttps() ? "true" : "false")
                 +
                 "&inInterceptors=#soapResponseLogger" + 
                 "&inFaultInterceptors=#soapResponseLogger"+
                 "&outInterceptors=#soapRequestLogger" + 
                 "&outFaultInterceptors=#soapRequestLogger";
-        from("mhd-iti68:camel/xdsretrieve").routeId("mdh-retrievedoc-adapter")
+        from("mhd-iti67:translation?audit=false").routeId("mdh-documentreference-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                // translate, forward, translate back
-                .process(Utils.queryParameterToRetrieveDocumentSet())
-                .to(xds43Endpoint)
-                .process(Utils.retrievedDocumentSetToHttResponse());
+                .process(Utils.searchParameterToBody())
+                .process(Utils.searchParameterIti67ToFindDocumentsQuery(config))
+                .to(xds18Endpoint)
+                .process(translateToFhir(new MhdDocumentReferenceFromQueryResponse(config) , QueryResponse.class));
     }
-
 }
