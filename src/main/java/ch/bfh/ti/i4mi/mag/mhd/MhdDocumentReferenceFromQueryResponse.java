@@ -27,6 +27,8 @@ import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Identifier.IdentifierUse;
+import org.hl7.fhir.r4.model.Period;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Author;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntry;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
@@ -103,7 +105,12 @@ public class MhdDocumentReferenceFromQueryResponse extends MhdFromQueryResponse 
 
                     // TODO: authorPerson, authorInstitution, authorPerson, authorRole,
                     // authorSpeciality, authorTelecommunication -> author Reference(Practitioner|
-                    // PractitionerRole| Organization| Device| Patient| RelatedPerson) [0..*]
+                    // PractitionerRole| Organization| Device| Patient| RelatedPerson) [0..*]                   
+                    if (documentEntry.getAuthors() != null) {
+                    	for (Author author : documentEntry.getAuthors()) {
+                    		
+                    	}
+                    }
                     // TODO: legalAuthenticator -> authenticator Note 1
                     // Reference(Practitioner|Practition erRole|Organization [0..1]
                     // TODO: Relationship Association -> relatesTo [0..*]
@@ -151,6 +158,9 @@ public class MhdDocumentReferenceFromQueryResponse extends MhdFromQueryResponse 
 
                     // on the data prior to base64 encoding, if the data is base64 encoded.
                     // TODO: hash -> content.attachment.hash string [0..1]
+                    if (documentEntry.getHash()!=null) {
+                    	attachment.setHash(documentEntry.getHash().getBytes());
+                    }
 
                     // comments -> content.attachment.title string [0..1]
                     if (documentEntry.getComments() != null) {
@@ -173,8 +183,17 @@ public class MhdDocumentReferenceFromQueryResponse extends MhdFromQueryResponse 
                     // TODO: referenceIdList -> context.encounter Reference(Encounter) [0..*] When
                     // referenceIdList contains an encounter, and a FHIR Encounter is available, it
                     // may be referenced.
-                    // TODO: eventCodeList -> context.event CodeableConcept [0..*]
-                    // TODO: serviceStartTime serviceStopTime -> context.period Period [0..1]
+                    // eventCodeList -> context.event CodeableConcept [0..*]
+                    if (documentEntry.getEventCodeList()!=null) {
+                    	documentReference.getContext().setEvent(transformMultiple(documentEntry.getEventCodeList()));
+                    }
+                    // serviceStartTime serviceStopTime -> context.period Period [0..1]
+                    if (documentEntry.getServiceStartTime()!=null || documentEntry.getServiceStopTime()!=null) {
+                    	Period period = new Period();
+                    	period.setStartElement(transform(documentEntry.getServiceStartTime()));
+                    	period.setEndElement(transform(documentEntry.getServiceStopTime()));
+                    	documentReference.getContext().setPeriod(period);
+                    }
 
                     // healthcareFacilityTypeCode -> context.facilityType CodeableConcept
                     // [0..1]

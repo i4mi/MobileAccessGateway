@@ -54,8 +54,8 @@ class Iti67RouteBuilder extends RouteBuilder {
         from("mhd-iti67:translation?audit=false").routeId("mdh-documentreference-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(Utils.searchParameterToBody())
-                .process(Utils.searchParameterIti67ToFindDocumentsQuery(config))
+                .bean(Utils.class,"searchParameterToBody")
+                .bean(Utils.class,"searchParameterIti67ToFindDocumentsQuery")
                 .to(xds18Endpoint)
                 .process(translateToFhir(new MhdDocumentReferenceFromQueryResponse(config) , QueryResponse.class));
     }

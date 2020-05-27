@@ -15,13 +15,20 @@
  */
 package ch.bfh.ti.i4mi.mag.mhd;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.openehealth.ipf.commons.ihe.fhir.translation.ToFhirTranslator;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp.Precision;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
+
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 
 public abstract class MhdFromQueryResponse implements ToFhirTranslator<QueryResponse> {
 
@@ -46,6 +53,33 @@ public abstract class MhdFromQueryResponse implements ToFhirTranslator<QueryResp
             }
         }
         return cc; 
+    }
+    
+    public List<CodeableConcept> transformMultiple(List<Code> codes) {
+        List<CodeableConcept> ccList = new ArrayList<CodeableConcept>();
+        if (codes!=null) {
+            for(Code code: codes) {
+            	ccList.add(transform(code));               
+            }
+        }
+        return ccList; 
+    }
+    
+    public DateTimeType transform(Timestamp timestamp) {
+    	if (timestamp == null) return null;
+    	Date date = Date.from(timestamp.getDateTime().toInstant());
+    	Precision precision = timestamp.getPrecision();
+    	TemporalPrecisionEnum fhirPrecision;
+    	switch(precision) {
+    	case YEAR: fhirPrecision = TemporalPrecisionEnum.YEAR;break;
+    	case DAY: fhirPrecision = TemporalPrecisionEnum.DAY;break;
+    	// There is no mapping for HOUR
+    	case HOUR: fhirPrecision = TemporalPrecisionEnum.MINUTE;break;
+    	case MINUTE: fhirPrecision = TemporalPrecisionEnum.MINUTE;break;
+    	case SECOND: fhirPrecision = TemporalPrecisionEnum.SECOND;break;
+    	default: fhirPrecision = TemporalPrecisionEnum.MILLI;break;
+    	}
+    	return new DateTimeType(date, fhirPrecision);
     }
 
 }

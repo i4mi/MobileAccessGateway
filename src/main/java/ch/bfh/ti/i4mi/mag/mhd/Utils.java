@@ -17,9 +17,13 @@ package ch.bfh.ti.i4mi.mag.mhd;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.camel.Body;
+import org.apache.camel.Headers;
 import org.apache.camel.Processor;
 import org.openehealth.ipf.commons.ihe.fhir.Constants;
 import org.openehealth.ipf.commons.ihe.fhir.FhirSearchParameters;
@@ -29,26 +33,33 @@ import org.openehealth.ipf.commons.ihe.xds.core.ebxml.ebxml30.RetrieveDocumentSe
 import org.openehealth.ipf.commons.ihe.xds.core.ebxml.ebxml30.RetrieveDocumentSetResponseType.DocumentResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntry;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.ReferenceId;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.QueryRegistry;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.RetrieveDocumentSet;
+import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindDocumentsByReferenceIdQuery;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindDocumentsQuery;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindSubmissionSetsQuery;
+import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryList;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryReturnType;
 
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ch.bfh.ti.i4mi.mag.Config;
 
 public class Utils {
 
-    public static Processor searchParameterToBody() {
-        return exchange -> {
-            Map<String, Object> parameters = exchange.getIn().getHeaders();
+    public static FhirSearchParameters searchParameterToBody(@Headers Map<String, Object> parameters) {        
             FhirSearchParameters searchParameter = (FhirSearchParameters) parameters
                     .get(Constants.FHIR_REQUEST_PARAMETERS);
-            exchange.getIn().setBody(searchParameter);
-        };
+            return searchParameter;        
     }
 
     public static Processor searchParameterIti66ToFindSubmissionSetsQuery(Config config) {
@@ -87,40 +98,68 @@ public class Utils {
         };
     }
 
-    public static Processor searchParameterIti67ToFindDocumentsQuery(Config config) {
-        return exchange -> {
-
+    public static Timestamp timestampFromDateParam(DateParam dateParam) {
+    	if (dateParam == null) return null;    	
+    	String dateString = dateParam.getValueAsString();
+    	dateString = dateString.replaceAll("-","");
+    	return Timestamp.fromHL7(dateString);
+    }
+    
+    public static Code codeFromToken(TokenParam param) {
+    	return new Code(param.getValue(), null, param.getSystem());
+    }
+    
+    public static List<Code> codesFromTokens(TokenOrListParam params) {
+    	if (params == null) return null;
+    	List<Code> codes = new ArrayList<Code>();
+    	for (TokenParam token : params.getValuesAsQueryTokens()) {
+    		codes.add(codeFromToken(token));
+    	}
+    	return codes;    	
+    }
+    
+    public static QueryRegistry searchParameterIti67ToFindDocumentsQuery(@Body Iti67SearchParameters searchParameter) {
+      
             boolean getLeafClass = true;
+        
+            FindDocumentsQuery query;
+            
+            //  TODO   related Note 4                  -->  $XDSDocumentEntryReferenceIdList
+            TokenOrListParam related = searchParameter.getRelated();
+            if (related != null) {
+            	FindDocumentsByReferenceIdQuery referenceIdQuery = new FindDocumentsByReferenceIdQuery();;
+            	QueryList<ReferenceId> outerReferences = new QueryList<ReferenceId>();
+            	List<ReferenceId> references = new ArrayList<ReferenceId>();
+            	for (TokenParam token : related.getValuesAsQueryTokens()) {
+            		references.add(new ReferenceId(token.getValue(), null, token.getSystem()));
+            	}
+            	outerReferences.getOuterList().add(references);
+            	referenceIdQuery.setTypedReferenceIds(outerReferences);
+            	query = referenceIdQuery;            	
+            } else query = new FindDocumentsQuery();          
 
-            Iti67SearchParameters searchParameter = (Iti67SearchParameters) exchange.getIn().getBody();
+            ReferenceParam patientRef = searchParameter.getPatientReference();           
+            
 
-            final FindDocumentsQuery query = new FindDocumentsQuery();
 
-//  TODO   patient or patient.identifier   -->  $XDSDocumentEntryPatientId
-//          query.setPatientId((patientId != null) ? patientId : new Identifiable());
-//  TODO   date Note 1 Note 5              -->  $DSDocumentEntryCreationTimeFrom
-//  TODO   date Note 2 Note 5              -->  $XDSDocumentEntryCreationTimeTo
-//  TODO   author.given / author.family    -->  $XDSDocumentEntryAuthorPerson            
-//  TODO   status                          -->  $XDSDocumentEntryStatus
-//  TODO   (Not supported) Note 3          -->  $XDSDocumentEntryType
-//  TODO   category                        -->  $XDSDocumentEntryClassCode
-//  TODO   type                            -->  $XDSDocumentEntryTypeCode
-//  TODO   setting                         -->  $XDSDocumentEntryPracticeSettingCode
-//  TODO   period Note 1                   -->  $XDSDocumentEntryServiceStartTimeFrom
-//  TODO   period Note 2                   -->  $XDSDocumentEntryServiceStartTimeTo
-//  TODO   period Note 1                   -->  $XDSDocumentEntryServiceStopTimeFrom
-//  TODO   period Note 2                   -->  $XDSDocumentEntryServiceStopTimeTo
-//  TODO   facility                        -->  $XDSDocumentEntryHealthcareFacilityTypeCode
-//  TODO   event                           -->  $XDSDocumentEntryEventCodeList
-//  TODO   security-label                  -->  $XDSDocumentEntryConfidentialityCode
-//  TODO   format                          -->  $XDSDocumentEntryFormatCode
-//  TODO   related Note 4                  -->  $XDSDocumentEntryReferenceIdList
+            
+//  (Not supported) Note 3          -->  $XDSDocumentEntryType
 
 //            query.setMetadataLevel(metadataLevel);
-            List<AvailabilityStatus> availabilites = new ArrayList<AvailabilityStatus>();
-            availabilites.add(AvailabilityStatus.APPROVED);
-            query.setStatus(availabilites);
+            
+            // status  -->  $XDSDocumentEntryStatus
+            TokenOrListParam status = searchParameter.getStatus();
+            if (status != null) {
+	            List<AvailabilityStatus> availabilites = new ArrayList<AvailabilityStatus>();
+	            for (TokenParam statusToken : status.getValuesAsQueryTokens()) {
+	            	String tokenValue = statusToken.getValue();
+	            	if (tokenValue.equals("current")) availabilites.add(AvailabilityStatus.APPROVED);
+	            	else if (tokenValue.equals("superseded")) availabilites.add(AvailabilityStatus.DEPRECATED);
+	            }            
+	            query.setStatus(availabilites);
+            }
 
+            // patient or patient.identifier  -->  $XDSDocumentEntryPatientId
             TokenParam tokenIdentifier = searchParameter.getPatientIdentifier();
             if (tokenIdentifier != null) {
                 String system = tokenIdentifier.getSystem();
@@ -131,28 +170,81 @@ public class Utils {
                 query.setPatientId(new Identifiable(tokenIdentifier.getValue(), new AssigningAuthority(system)));
             }
 
-//            query.setClassCodes(classCodes);
-//            query.setTypeCodes(typeCodes);
-//            query.setPracticeSettingCodes(practiceSettingCodes);
-//            query.setAuthorPersons(authorPersons);
-//            query.getCreationTime().setFrom(creationTimeFrom);
-//            query.getCreationTime().setTo(creationTimeTo);
-//            query.getServiceStartTime().setFrom(serviceStartTimeFrom);
-//            query.getServiceStartTime().setTo(serviceStartTimeTo);
-//            query.getServiceStopTime().setFrom(serviceStopTimeFrom);
-//            query.getServiceStopTime().setTo(serviceStopTimeTo);
-//            query.setHealthcareFacilityTypeCodes(healthcareFacilityTypeCodes);
-//            query.setEventCodes(eventCodeList);
-//            query.setConfidentialityCodes(confidentialityCodes);
-//            query.setFormatCodes(formatCodes);
-//            query.setDocumentEntryTypes(types);
+            // date Note 1 Note 5              -->  $DSDocumentEntryCreationTimeFrom
+            // date Note 2 Note 5              -->  $XDSDocumentEntryCreationTimeTo
+            DateRangeParam dateRange = searchParameter.getDate();
+            if (dateRange != null) {
+	            DateParam creationTimeFrom = dateRange.getLowerBound();
+	            DateParam creationTimeTo = dateRange.getUpperBound();
+	            query.getCreationTime().setFrom(timestampFromDateParam(creationTimeFrom));
+	            query.getCreationTime().setTo(timestampFromDateParam(creationTimeTo));
+            }
+           
+            // period Note 1                   -->  $XDSDocumentEntryServiceStartTimeFrom
+            // period Note 2                   -->  $XDSDocumentEntryServiceStartTimeTo
+            // period Note 1                   -->  $XDSDocumentEntryServiceStopTimeFrom
+            // period Note 2                   -->  $XDSDocumentEntryServiceStopTimeTo           
+            DateRangeParam periodRange = searchParameter.getPeriod();
+            if (periodRange != null) {
+            	DateParam periodFrom = periodRange.getLowerBound();
+            	DateParam periodTo = periodRange.getUpperBound();
+            	            
+            	query.getServiceStopTime().setFrom(timestampFromDateParam(periodFrom));
+            	query.getServiceStartTime().setTo(timestampFromDateParam(periodTo));
+            }
+            
+            //  category                        -->  $XDSDocumentEntryClassCode
+            TokenOrListParam categories = searchParameter.getCategory();
+            query.setClassCodes(codesFromTokens(categories));
+                        
+            //  type                            -->  $XDSDocumentEntryTypeCode
+            TokenOrListParam types = searchParameter.getType();
+            query.setTypeCodes(codesFromTokens(types));
+
+            //  setting                         -->  $XDSDocumentEntryPracticeSettingCode
+            TokenOrListParam settings = searchParameter.getSetting();
+            query.setPracticeSettingCodes(codesFromTokens(settings));
+
+            // facility                        -->  $XDSDocumentEntryHealthcareFacilityTypeCode
+            TokenOrListParam facilities = searchParameter.getFacility();
+            query.setHealthcareFacilityTypeCodes(codesFromTokens(facilities));
+
+            // event                           -->  $XDSDocumentEntryEventCodeList
+            TokenOrListParam events = searchParameter.getEvent();
+            if (events != null) {
+	            QueryList<Code> eventCodeList = new QueryList<Code>();
+	            eventCodeList.getOuterList().add(codesFromTokens(events));
+	            query.setEventCodes(eventCodeList);
+            }
+            
+            //  security-label                  -->  $XDSDocumentEntryConfidentialityCode
+            TokenOrListParam securityLabels = searchParameter.getSecurityLabel();
+            if (securityLabels != null) {
+            	QueryList<Code> confidentialityCodes = new QueryList<Code>();
+            	confidentialityCodes.getOuterList().add(codesFromTokens(securityLabels));
+            	query.setConfidentialityCodes(confidentialityCodes);
+            }
+            
+            //  format                          -->  $XDSDocumentEntryFormatCode
+            TokenOrListParam formats = searchParameter.getFormat();
+            query.setFormatCodes(codesFromTokens(formats));
+           
+        
+        //  TODO   author.given / author.family    -->  $XDSDocumentEntryAuthorPerson
+            StringParam authorGivenName = searchParameter.getAuthorGivenName();
+            StringParam authorFamilyName = searchParameter.getAuthorFamilyName();
+            if (authorGivenName != null || authorFamilyName != null) {
+	            String author = (authorGivenName != null ? authorGivenName.getValue() : "%")+" "+(authorFamilyName != null ? authorFamilyName.getValue() : "%");
+	            List<String> authorPersons = Collections.singletonList(author);
+	            query.setAuthorPersons(authorPersons);
+            }
+
 //            query.setDocumentAvailability(documentAvailabilities);
 
             final QueryRegistry queryRegistry = new QueryRegistry(query);
             queryRegistry.setReturnType((getLeafClass) ? QueryReturnType.LEAF_CLASS : QueryReturnType.OBJECT_REF);
-
-            exchange.getIn().setBody(queryRegistry);
-        };
+            
+            return queryRegistry;
     }
 
     public static Processor queryParameterToRetrieveDocumentSet() {

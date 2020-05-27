@@ -55,7 +55,7 @@ class Iti66RouteBuilder extends RouteBuilder {
         from("mhd-iti66:translation?audit=false").routeId("mdh-documentmanifest-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(Utils.searchParameterToBody())
+                .bean(Utils.class,"searchParameterToBody")
                 .process(Utils.searchParameterIti66ToFindSubmissionSetsQuery(config))
                 .to(xds18Endpoint)
                 .process(translateToFhir(new MhdDocumentManifestFromQueryResponse() , QueryResponse.class));
