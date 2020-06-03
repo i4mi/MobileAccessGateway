@@ -11,20 +11,30 @@ import lombok.Data;
 @Data
 public class Config {
 
-    private String hostUrl = "sct-form.hcuge.ch/sharedtreatmentplan/services";
-    private boolean https = true;
-    private String patientId = "12345678";
-    private String repositoryUniqueId = "2.999.756.42.1";
-    private String sourceId = "2.999.756.123.1";
+    //g eneral configuration
 
-    private String submissionSetPatientPerson = "2.999.1.2.3.1375^Welby^Marcus^^MD^Dr";
-    private String submissionSetPatientRole = "PAT^^^&2.16.756.5.30.1.127.3.10.6&ISO";
     
-    private org.openehealth.ipf.commons.ihe.core.payload.ExpressionResolver resolver;
+    // PMP configuration
+//     private boolean https = true;
+//    private String hostUrl = "sct-form.hcuge.ch/sharedtreatmentplan/services";
+//    private String patientId = "12345678";
+//    private String repositoryUniqueId = "2.999.756.42.1";
+//    private String sourceId = "2.999.756.123.1";
+//
+//    private String submissionSetPatientPerson = "2.999.1.2.3.1375^Welby^Marcus^^MD^Dr";
+//    private String submissionSetPatientRole = "PAT^^^&2.16.756.5.30.1.127.3.10.6&ISO";
+//    
+//    private org.openehealth.ipf.commons.ihe.core.payload.ExpressionResolver resolver;
+//
+//    private String domainMpiOid = "2.999.756.42.2";
+    
+    
 
-    private String domainMpiOid = "2.999.756.42.2";
-    
-    
+    // XDSTools7 configuration https://ehealthsuisse.ihe-europe.net/xdstools7/#
+    private boolean https = false;
+    // private String hostUrl = "ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/reg/sq"; // https
+    private String hostUrl = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
+
     
     private String uriMagXdsRetrieve = "http://localhost:9091/camel/xdsretrieve";
         
