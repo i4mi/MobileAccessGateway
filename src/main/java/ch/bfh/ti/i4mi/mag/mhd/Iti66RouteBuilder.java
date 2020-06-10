@@ -56,7 +56,7 @@ class Iti66RouteBuilder extends RouteBuilder {
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 .bean(Utils.class,"searchParameterToBody")
-                .process(Utils.searchParameterIti66ToFindSubmissionSetsQuery(config))
+                .bean(Utils.class,"searchParameterIti66ToFindSubmissionSetsQuery")                
                 .to(xds18Endpoint)
                 .process(translateToFhir(new MhdDocumentManifestFromQueryResponse() , QueryResponse.class));
         }

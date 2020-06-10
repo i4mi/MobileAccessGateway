@@ -55,7 +55,7 @@ class Iti68RouteBuilder extends RouteBuilder {
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 // translate, forward, translate back
-                .process(Utils.queryParameterToRetrieveDocumentSet())
+                .bean(Utils.class,"queryParameterToRetrieveDocumentSet")                
                 .to(xds43Endpoint)
                 .process(Utils.retrievedDocumentSetToHttResponse());
     }

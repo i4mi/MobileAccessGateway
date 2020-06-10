@@ -62,40 +62,68 @@ public class Utils {
             return searchParameter;        
     }
 
-    public static Processor searchParameterIti66ToFindSubmissionSetsQuery(Config config) {
-        return exchange -> {
+    public static QueryRegistry searchParameterIti66ToFindSubmissionSetsQuery(@Body Iti66SearchParameters searchParameter) {
+      
 
             boolean getLeafClass = true;
-
-            Iti66SearchParameters searchParameter = (Iti66SearchParameters) exchange.getIn().getBody();
-
+          
             final FindSubmissionSetsQuery query = new FindSubmissionSetsQuery();
 
+            // patient or patient.identifier -> $XDSSubmissionSetPatientId
             TokenParam tokenIdentifier = searchParameter.getPatientIdentifier();
             if (tokenIdentifier != null) {
-//                query.setPatientId(new Identifiable(tokenIdentifier.getValue(), new AssigningAuthority(tokenIdentifier.getSystem())));
-// FIXME PoC
-                query.setPatientId(
-                        new Identifiable(config.getPatientId(), new AssigningAuthority(config.getDomainMpiOid())));
+            	String system = tokenIdentifier.getSystem();
+            	if (system.startsWith("urn:oid:")) {
+                    system = system.substring(8);
+                }
+            	
+                 query.setPatientId(new Identifiable(tokenIdentifier.getValue(), new AssigningAuthority(system)));
             }
-
-// TODO          query.setSourceIds(sourceIds);
-// TODO         query.setStatus((statuses != null) ? statuses : new ArrayList<>());
-
-            List<AvailabilityStatus> availabilites = new ArrayList<AvailabilityStatus>();
-            availabilites.add(AvailabilityStatus.APPROVED);
-            query.setStatus(availabilites);
-
-// TODO         query.setContentTypeCodes(contentTypeCodes);
-// TODO         query.setAuthorPerson(authorPerson);
-// TODO         query.getSubmissionTime().setFrom(submissionTimeFrom);
-// TODO           query.getSubmissionTime().setTo(submissionTimeTo);
+           
+            // created Note 1 -> $XDSSubmissionSetSubmissionTimeFrom
+            // created Note 2 -> $XDSSubmissionSetSubmissionTimeTo 
+            DateRangeParam createdRange = searchParameter.getCreated();
+            if (createdRange != null) {
+	            DateParam creationTimeFrom = createdRange.getLowerBound();
+	            DateParam creationTimeTo = createdRange.getUpperBound();
+	            query.getSubmissionTime().setFrom(timestampFromDateParam(creationTimeFrom));
+	            query.getSubmissionTime().setTo(timestampFromDateParam(creationTimeTo));
+            }            
+            
+            // TODO author.given / author.family -> $XDSSubmissionSetAuthorPerson
+            StringParam authorGivenName = searchParameter.getAuthorGivenName();
+            StringParam authorFamilyName = searchParameter.getAuthorFamilyName();
+            if (authorGivenName != null || authorFamilyName != null) {
+	            String author = (authorGivenName != null ? authorGivenName.getValue() : "%")+" "+(authorFamilyName != null ? authorFamilyName.getValue() : "%");	            
+	            query.setAuthorPerson(author);
+            }
+                                    
+            // type -> $XDSSubmissionSetContentType
+            TokenOrListParam types = searchParameter.getType();
+            query.setContentTypeCodes(codesFromTokens(types));
+            
+            
+            // source -> $XDSSubmissionSetSourceId 
+            TokenOrListParam sources = searchParameter.getSource();
+            query.setSourceIds(urisFromTokens(sources));
+            
+            // status -> $XDSSubmissionSetStatus 
+            TokenOrListParam status = searchParameter.getStatus();
+            if (status != null) {
+	            List<AvailabilityStatus> availabilites = new ArrayList<AvailabilityStatus>();
+	            for (TokenParam statusToken : status.getValuesAsQueryTokens()) {
+	            	String tokenValue = statusToken.getValue();
+	            	if (tokenValue.equals("current")) availabilites.add(AvailabilityStatus.APPROVED);
+	            	else if (tokenValue.equals("superseded")) availabilites.add(AvailabilityStatus.DEPRECATED);
+	            }            
+	            query.setStatus(availabilites);
+            }                                                                      
 
             final QueryRegistry queryRegistry = new QueryRegistry(query);
             queryRegistry.setReturnType((getLeafClass) ? QueryReturnType.LEAF_CLASS : QueryReturnType.OBJECT_REF);
 
-            exchange.getIn().setBody(queryRegistry);
-        };
+            return queryRegistry;
+        
     }
 
     public static Timestamp timestampFromDateParam(DateParam dateParam) {
@@ -116,6 +144,16 @@ public class Utils {
     		codes.add(codeFromToken(token));
     	}
     	return codes;    	
+    }
+    
+    // TODO is this the correct mapping for URIs?
+    public static List<String> urisFromTokens(TokenOrListParam params) {
+    	if (params == null) return null;
+    	List<String> result = new ArrayList<String>();
+    	for (TokenParam token : params.getValuesAsQueryTokens()) {
+    		result.add(token.getValue());
+    	}
+    	return result;    	
     }
     
     public static QueryRegistry searchParameterIti67ToFindDocumentsQuery(@Body Iti67SearchParameters searchParameter) {
@@ -247,10 +285,8 @@ public class Utils {
             return queryRegistry;
     }
 
-    public static Processor queryParameterToRetrieveDocumentSet() {
-        return exchange -> {
-            Map<String, Object> parameters = exchange.getIn().getHeaders();
-
+    public static RetrieveDocumentSet queryParameterToRetrieveDocumentSet(@Headers Map<String, Object> parameters) {
+            	           
             RetrieveDocumentSet retrieveDocumentSet = new RetrieveDocumentSet();
             DocumentEntry documentEntry = new DocumentEntry();
             if (parameters.containsKey("repositoryUniqueId")) {
@@ -262,8 +298,7 @@ public class Utils {
 //            documentEntry.setHomeCommunityId("");
             retrieveDocumentSet.addReferenceTo(documentEntry);
             
-            exchange.getIn().setBody(retrieveDocumentSet);
-        };
+            return retrieveDocumentSet;        
     }
     
     

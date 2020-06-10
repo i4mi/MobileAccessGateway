@@ -28,9 +28,17 @@ import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Identifier.IdentifierUse;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Author;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntry;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.PatientInfo;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Person;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.ReferenceId;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Telecom;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 
@@ -97,6 +105,13 @@ public class MhdDocumentReferenceFromQueryResponse extends MhdFromQueryResponse 
                     // Not a contained resource. URL Points to an existing Patient Resource
                     // representing the XDS Affinity Domain Patient.
                     // TODO: This concept needs to be defined
+                    if (documentEntry.getPatientId()!=null) {
+                    	Identifiable patient = documentEntry.getPatientId();
+                    	Identifier id = new Identifier()
+                    			.setSystem(patient.getAssigningAuthority().getUniversalId())
+                    			.setValue(patient.getId());
+                    	documentReference.setSubject(new Reference().setIdentifier(id));
+                    }
 
                     // creationTime -> date instant [0..1]
                     if (documentEntry.getCreationTime() != null) {
@@ -108,12 +123,36 @@ public class MhdDocumentReferenceFromQueryResponse extends MhdFromQueryResponse 
                     // PractitionerRole| Organization| Device| Patient| RelatedPerson) [0..*]                   
                     if (documentEntry.getAuthors() != null) {
                     	for (Author author : documentEntry.getAuthors()) {
+                    		Person person = author.getAuthorPerson();
+                    		Practitioner containedPerson = transformPractitioner(person);
+
+                    		// TODO
+                    		List<Organization> orgs = author.getAuthorInstitution();
+ 
+                    		// TODO
+                    		List<Identifiable> roles = author.getAuthorRole();
+                    		
+                    		// TODO
+                    		List<Identifiable> specialities = author.getAuthorSpecialty();
+                    		
+                    		List<Telecom> telecoms = author.getAuthorTelecom();
+                    		for (Telecom telecom : telecoms) containedPerson.addTelecom(transform(telecom));
+                    		
+                    		documentReference.addContained(containedPerson);
+                    		documentReference.addAuthor().setReference(containedPerson.getId());
                     		
                     	}
                     }
                     // TODO: legalAuthenticator -> authenticator Note 1
                     // Reference(Practitioner|Practition erRole|Organization [0..1]
-                    // TODO: Relationship Association -> relatesTo [0..*]
+                    Person person = documentEntry.getLegalAuthenticator();
+                    if (person != null) {
+                       Practitioner practitioner = transformPractitioner(person);
+                       documentReference.addContained(practitioner);
+                       documentReference.setAuthenticator(new Reference().setReference(practitioner.getId()));
+                    }
+                    
+                    // TODO: Relationship Association -> relatesTo [0..*]                   
                     // TODO: Relationship type -> relatesTo.code code [1..1]
                     // TODO: relationship reference -> relatesTo.target Reference(DocumentReference)
                     // [1..1]
@@ -183,10 +222,20 @@ public class MhdDocumentReferenceFromQueryResponse extends MhdFromQueryResponse 
                     // TODO: referenceIdList -> context.encounter Reference(Encounter) [0..*] When
                     // referenceIdList contains an encounter, and a FHIR Encounter is available, it
                     // may be referenced.
+                    List<ReferenceId> refIds = documentEntry.getReferenceIdList();
+                    if (refIds!=null) {
+                    	for (ReferenceId refId : refIds) {
+                    		if (ReferenceId.ID_TYPE_ENCOUNTER_ID.equals(refId.getIdTypeCode())) {
+                    			context.addEncounter(transform(refId));
+                    		}
+                    	}
+                    }
+                    
                     // eventCodeList -> context.event CodeableConcept [0..*]
                     if (documentEntry.getEventCodeList()!=null) {
                     	documentReference.getContext().setEvent(transformMultiple(documentEntry.getEventCodeList()));
                     }
+                    
                     // serviceStartTime serviceStopTime -> context.period Period [0..1]
                     if (documentEntry.getServiceStartTime()!=null || documentEntry.getServiceStopTime()!=null) {
                     	Period period = new Period();
@@ -209,6 +258,9 @@ public class MhdDocumentReferenceFromQueryResponse extends MhdFromQueryResponse 
                     // TODO: sourcePatientId and sourcePatientInfo -> context.sourcePatientInfo
                     // Reference(Patient) [0..1] Contained Patient Resource with
                     // Patient.identifier.use element set to ‘usual’.
+                    Identifiable sourcePatientId = documentEntry.getSourcePatientId();
+                    PatientInfo sourcePatientInfo = documentEntry.getSourcePatientInfo();
+                    
                 }
             }
         } else {

@@ -21,9 +21,19 @@ import java.util.List;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Communication;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 import org.openehealth.ipf.commons.ihe.fhir.translation.ToFhirTranslator;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.CXiAssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Name;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Person;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.ReferenceId;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Telecom;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp.Precision;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
@@ -80,6 +90,40 @@ public abstract class MhdFromQueryResponse implements ToFhirTranslator<QueryResp
     	default: fhirPrecision = TemporalPrecisionEnum.MILLI;break;
     	}
     	return new DateTimeType(date, fhirPrecision);
+    }
+    
+    public Reference transform(ReferenceId ref) {
+    	String id = ref.getId();
+    	CXiAssigningAuthority authority = ref.getAssigningAuthority();
+    	return new Reference().setReference(id);
+    }
+    
+    public Practitioner transformPractitioner(Person person) {
+    	Practitioner practitioner = new Practitioner();
+    	Name name = person.getName();
+    	if (name != null) {
+    	  practitioner.addName().setFamily(name.getFamilyName()).addGiven(name.getGivenName());
+    	}
+    	return practitioner;
+    }
+    
+    public ContactPoint transform(Telecom telecom) {
+    	ContactPoint result = new ContactPoint();
+    	
+    	String type = telecom.getType();
+    	String use = telecom.getUse();
+    	
+    	// TODO map type
+    	// TODO map use
+    	
+    	result.setSystem(ContactPointSystem.EMAIL);    	
+    	result.setValue(telecom.getEmail());
+    	
+    	result.setSystem(ContactPointSystem.PHONE);
+    	String phone = telecom.getUnformattedPhoneNumber();
+    	result.setValue(phone);
+    	    	
+    	return result;
     }
 
 }
