@@ -16,6 +16,8 @@
 
 package ch.bfh.ti.i4mi.mag.mhd;
 
+import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
+import static org.openehealth.ipf.platform.camel.ihe.xds.XdsCamelValidators.iti41RequestValidator;
 import java.util.Date;
 import java.util.UUID;
 
@@ -28,8 +30,11 @@ import org.hl7.fhir.r4.model.DocumentManifest;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Resource;
+import org.openehealth.ipf.commons.ihe.xds.core.ebxml.ebxml30.ProvideAndRegisterDocumentSetRequestType;
+import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.springframework.stereotype.Component;
 
+import ch.bfh.ti.i4mi.mag.Config;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -40,19 +45,37 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 class Iti65RouteBuilder extends RouteBuilder {
 
-    public Iti65RouteBuilder() {
+	private final Config config;
+	
+    public Iti65RouteBuilder(final Config config) {
         super();
+        this.config = config;
         log.debug("Iti65RouteBuilder initialized");
     }
 
     @Override
     public void configure() throws Exception {
         log.debug("Iti65RouteBuilder configure");
+        
+        
+        final String xds41Endpoint = String.format("xds-iti41://%s/xds/iti41" +
+                "?secure=%s", this.config.getHostUrl(), this.config.isHttps() ? "true" : "false")
+              +
+                      "&inInterceptors=#soapResponseLogger" + 
+                      "&inFaultInterceptors=#soapResponseLogger"+
+                      "&outInterceptors=#soapRequestLogger" + 
+                      "&outFaultInterceptors=#soapRequestLogger";
+        
         from("mhd-iti65:stub?audit=false&fhirContext=#fhirContext").routeId("mdh-providedocumentbundle")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 // translate, forward, translate back
-                .transform(new Responder());
+                .bean(XdsDocumentSetFromMhdDocumentBundle.class)
+                .convertBodyTo(ProvideAndRegisterDocumentSetRequestType.class)
+                //.marshal().mimeMultipart()
+                //.process(iti41RequestValidator())
+                .to(xds41Endpoint)
+                .process(translateToFhir(new MhdDocumentManifestFromQueryResponse() , QueryResponse.class));
     }
 
     private class Responder extends ExpressionAdapter {
