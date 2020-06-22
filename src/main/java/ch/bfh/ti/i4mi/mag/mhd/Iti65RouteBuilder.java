@@ -17,6 +17,7 @@
 package ch.bfh.ti.i4mi.mag.mhd;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
+import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelValidators.itiRequestValidator;
 import static org.openehealth.ipf.platform.camel.ihe.xds.XdsCamelValidators.iti41RequestValidator;
 import java.util.Date;
 import java.util.UUID;
@@ -32,6 +33,7 @@ import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Resource;
 import org.openehealth.ipf.commons.ihe.xds.core.ebxml.ebxml30.ProvideAndRegisterDocumentSetRequestType;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
+import org.openehealth.ipf.commons.ihe.xds.core.responses.Response;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
@@ -69,13 +71,16 @@ class Iti65RouteBuilder extends RouteBuilder {
         from("mhd-iti65:stub?audit=false&fhirContext=#fhirContext").routeId("mdh-providedocumentbundle")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
+                .process(itiRequestValidator())
                 // translate, forward, translate back
+                .process(Utils.keepBody())
                 .bean(XdsDocumentSetFromMhdDocumentBundle.class)
-                .convertBodyTo(ProvideAndRegisterDocumentSetRequestType.class)
-                //.marshal().mimeMultipart()
+                .convertBodyTo(ProvideAndRegisterDocumentSetRequestType.class)               
                 //.process(iti41RequestValidator())
                 .to(xds41Endpoint)
-                .process(translateToFhir(new MhdDocumentManifestFromQueryResponse() , QueryResponse.class));
+                .convertBodyTo(Response.class)
+                .process(Utils.keptBodyToHeader())
+                .process(translateToFhir(new MhdBundleFromResponse() , Response.class));
     }
 
     private class Responder extends ExpressionAdapter {

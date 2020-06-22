@@ -45,7 +45,7 @@ class Iti68RouteBuilder extends RouteBuilder {
     public void configure() throws Exception {
         log.debug("Iti68RouteBuilder configure");
         final String xds43Endpoint = String.format("xds-iti43://%s/xds/iti43" +
-                "?secure=%s", this.config.getHostUrl(), this.config.isHttps() ? "true" : "false")
+                "?secure=%s", this.config.getHostUrl43Http(), this.config.isHttps() ? "true" : "false")
                 +
                 "&inInterceptors=#soapResponseLogger" + 
                 "&inFaultInterceptors=#soapResponseLogger"+
@@ -57,7 +57,8 @@ class Iti68RouteBuilder extends RouteBuilder {
                 // translate, forward, translate back
                 .bean(Utils.class,"queryParameterToRetrieveDocumentSet")                
                 .to(xds43Endpoint)
-                .process(Utils.retrievedDocumentSetToHttResponse());
+                .bean(BinaryFromDocumentSetResponse.class);
+                //.process(Utils.retrievedDocumentSetToHttResponse());
     }
 
 }

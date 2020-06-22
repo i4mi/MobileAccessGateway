@@ -34,6 +34,7 @@ public class Config {
     private boolean https = false;
     // private String hostUrl = "ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/reg/sq"; // https
     private String hostUrl = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
+    private String hostUrl43Http = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/ret"; // http
     private String hostUrl41Http = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/prb"; // http
 
     

@@ -17,6 +17,7 @@
 package ch.bfh.ti.i4mi.mag.mhd;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
+import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelValidators.itiRequestValidator;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
@@ -53,7 +54,7 @@ class Iti67RouteBuilder extends RouteBuilder {
                 "&outFaultInterceptors=#soapRequestLogger";
         from("mhd-iti67:translation?audit=false").routeId("mdh-documentreference-adapter")
                 // pass back errors to the endpoint
-                .errorHandler(noErrorHandler())
+                .errorHandler(noErrorHandler())                
                 .bean(Utils.class,"searchParameterToBody")
                 .bean(Utils.class,"searchParameterIti67ToFindDocumentsQuery")
                 .to(xds18Endpoint)

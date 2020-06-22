@@ -45,6 +45,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindDocumentsQuer
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindSubmissionSetsQuery;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryList;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryReturnType;
+import org.openehealth.ipf.commons.ihe.xds.core.responses.RetrievedDocumentSet;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -56,10 +57,24 @@ import ch.bfh.ti.i4mi.mag.Config;
 
 public class Utils {
 
+	public static final String KEPT_BODY = "KeptBody"; 
+	
     public static FhirSearchParameters searchParameterToBody(@Headers Map<String, Object> parameters) {        
             FhirSearchParameters searchParameter = (FhirSearchParameters) parameters
                     .get(Constants.FHIR_REQUEST_PARAMETERS);
             return searchParameter;        
+    }
+    
+    public static Processor keepBody() {
+        return exchange -> {
+        	exchange.setProperty(KEPT_BODY, exchange.getIn().getBody());        	        
+        };
+    }
+    
+    public static Processor keptBodyToHeader() {
+        return exchange -> {
+        	exchange.getMessage().setHeader(KEPT_BODY, exchange.getProperty(KEPT_BODY));        	        
+        };
     }
 
     public static QueryRegistry searchParameterIti66ToFindSubmissionSetsQuery(@Body Iti66SearchParameters searchParameter) {
@@ -316,7 +331,7 @@ public class Utils {
                     exchange.getIn().setBody(byteArray);
                 }
             } else {
-                // throw error;
+                //
             }
         };
     }

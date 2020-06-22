@@ -82,7 +82,7 @@ public class MhdDocumentManifestFromQueryResponse extends MhdFromQueryResponse {
                 }
             }
         } else {
-            // throw error?
+        	processError(input);
         }
         return list;
     }

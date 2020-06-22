@@ -40,7 +40,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 
-public abstract class MhdFromQueryResponse implements ToFhirTranslator<QueryResponse> {
+public abstract class MhdFromQueryResponse extends MhdFromResponse implements ToFhirTranslator<QueryResponse> {
 
     public String getSystem(String schemeName) {
         switch (schemeName) {

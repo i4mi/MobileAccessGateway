@@ -28,8 +28,8 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContentComponent;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.Identifier.IdentifierUse;
-import org.hl7.fhir.r4.model.codesystems.DocumentReferenceStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Author;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
@@ -119,6 +119,22 @@ public class XdsDocumentSetFromMhdDocumentBundle {
     	return Timestamp.fromHL7(dateString);
     }
 	
+	public static Code transform(Coding coding) {
+		if (coding==null) return null;
+		return new Code(coding.getCode(), new LocalizedString(coding.getDisplay()), coding.getSystem());
+	}
+	
+	public static Code transform(CodeableConcept cc) {
+		if (cc==null) return null;
+		Coding coding = cc.getCodingFirstRep();
+		return transform(coding);
+	}
+	
+	public static Code transform(List<CodeableConcept> ccs) {
+		if (ccs==null || ccs.isEmpty()) return null;
+		return transform(ccs.get(0));
+	}
+	
 	public static Identifiable transformReferenceToIdentifiable(Reference reference, DomainResource container) {
 		String targetRef = reference.getReference();		
 		List<Resource> resources = container.getContained();		
@@ -202,34 +218,25 @@ public class XdsDocumentSetFromMhdDocumentBundle {
         // approved -> status=current
         // deprecated -> status=superseded
         // Other status values are allowed but are not defined in this mapping to XDS.
-        //if (AvailabilityStatus.APPROVED.equals(documentEntry.getAvailabilityStatus())) {
-        //    documentReference.setStatus(DocumentReferenceStatus.CURRENT);
-        //}
-        //if (AvailabilityStatus.DEPRECATED.equals(documentEntry.getAvailabilityStatus())) {
-        //    documentReference.setStatus(DocumentReferenceStatus.SUPERSEDED);
-        //}
-
-        // contentTypeCode -> type CodeableConcept [0..1]
-        //if (documentEntry.getTypeCode() != null) {
-        //    documentReference.setType(transform(documentEntry.getTypeCode()));
-        //}
-        // classCode -> category CodeableConcept [0..*]
-        //if (documentEntry.getClassCode() != null) {
-        //    documentReference.addCategory((transform(documentEntry.getClassCode())));
-        //}
-
-        // patientId -> subject Reference(Patient| Practitioner| Group| Device) [0..1],
-        // Reference(Patient)
-        // Not a contained resource. URL Points to an existing Patient Resource
-        // representing the XDS Affinity Domain Patient.
-        // TODO: This concept needs to be defined
-        //if (documentEntry.getPatientId()!=null) {
-        //	Identifiable patient = documentEntry.getPatientId();
-        //	Identifier id = new Identifier()
-        //			.setSystem(patient.getAssigningAuthority().getUniversalId())
-        //			.setValue(patient.getId());
-        //	documentReference.setSubject(new Reference().setIdentifier(id));
-        //}
+		DocumentReferenceStatus status = reference.getStatus();
+		switch (status) {
+		case CURRENT:entry.setAvailabilityStatus(AvailabilityStatus.APPROVED);break;
+		case SUPERSEDED:entry.setAvailabilityStatus(AvailabilityStatus.DEPRECATED);break;
+		default: // TODO throw error
+		}
+		
+		// contentTypeCode -> type CodeableConcept [0..1]
+		CodeableConcept type = reference.getType();
+		entry.setTypeCode(transform(type));
+		
+		// classCode -> category CodeableConcept [0..*]
+		List<CodeableConcept> category = reference.getCategory();
+		entry.setClassCode(transform(category));
+               
+        // patientId -> subject Reference(Patient| Practitioner| Group| Device) [0..1],       
+		Reference subject = reference.getSubject();
+		entry.setPatientId(transformReferenceToIdentifiable(subject, reference));
+		
 
         // creationTime -> date instant [0..1]
         //if (documentEntry.getCreationTime() != null) {
@@ -272,27 +279,20 @@ public class XdsDocumentSetFromMhdDocumentBundle {
         //content.setAttachment(attachment);
 
         // mimeType -> content.attachment.contentType [1..1] code [0..1]
-        //if (documentEntry.getMimeType() != null) {
-        //    attachment.setContentType(documentEntry.getMimeType());
-        //}
-
+		DocumentReferenceContentComponent content = reference.getContentFirstRep();		
+		if (content==null) throw new NullPointerException(); // TODO throw error
+		Attachment attachment = content.getAttachment();
+		if (attachment==null) throw new NullPointerException(); // TODO throw error
+		entry.setMimeType(attachment.getContentType());
+		       
         // languageCode -> content.attachment.language code [0..1]
-        //if (documentEntry.getLanguageCode() != null) {
-        //    attachment.setLanguage(documentEntry.getLanguageCode());
-        //}
-
-        // TODO: retrievable location of the document -> content.attachment.url uri
-        // [0..1] [1..1
-        // has to defined, for the PoC we define
-        // $host:port/camel/$repositoryid/$uniqueid
-        //attachment.setUrl(config.getUriMagXdsRetrieve() + "?uniqueId=" + documentEntry.getUniqueId()
-        //        + "&repositoryUniqueId=" + documentEntry.getRepositoryUniqueId());
+		entry.setLanguageCode(attachment.getLanguage());
 
         // size -> content.attachment.size integer [0..1] The size is calculated
-        //if (documentEntry.getSize() != null) {
-        //    attachment.setSize(documentEntry.getSize().intValue());
-        //}
+        entry.setSize((long) attachment.getSize());
 
+
+        
         // on the data prior to base64 encoding, if the data is base64 encoded.
         // TODO: hash -> content.attachment.hash string [0..1]
         //if (documentEntry.getHash()!=null) {
@@ -310,9 +310,8 @@ public class XdsDocumentSetFromMhdDocumentBundle {
         //}
 
         // formatCode -> content.format Coding [0..1]
-        //if (documentEntry.getFormatCode() != null) {
-        //    content.setFormat(transform(documentEntry.getFormatCode()).getCodingFirstRep());
-        //}
+        Coding coding = content.getFormat();
+        entry.setFormatCode(transform(coding));       
 
         //DocumentReferenceContextComponent context = new DocumentReferenceContextComponent();
         //documentReference.setContext(context);

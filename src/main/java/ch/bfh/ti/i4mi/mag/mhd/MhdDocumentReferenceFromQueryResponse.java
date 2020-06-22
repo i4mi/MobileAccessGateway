@@ -264,7 +264,7 @@ public class MhdDocumentReferenceFromQueryResponse extends MhdFromQueryResponse 
                 }
             }
         } else {
-            // TODO throw error?
+           processError(input);
         }
         return list;
     }
