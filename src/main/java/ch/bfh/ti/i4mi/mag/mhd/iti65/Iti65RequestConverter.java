@@ -1,4 +1,4 @@
-package ch.bfh.ti.i4mi.mag.mhd;
+package ch.bfh.ti.i4mi.mag.mhd.iti65;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.Identifier.IdentifierUse;
+import org.hl7.fhir.r4.model.InstantType;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Author;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
@@ -54,7 +55,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class XdsDocumentSetFromMhdDocumentBundle {
+public class Iti65RequestConverter {
 
 	public static ProvideAndRegisterDocumentSet convert(@Body Bundle requestBundle) {
 		
@@ -111,6 +112,15 @@ public class XdsDocumentSetFromMhdDocumentBundle {
 	}
 	
 	public static Timestamp timestampFromDate(DateTimeType date) {
+    	if (date == null) return null; 
+    	String dateString = date.asStringValue();
+    	if (dateString==null) return null;
+    	dateString = dateString.replaceAll("-","");
+    	log.info(dateString);
+    	return Timestamp.fromHL7(dateString);
+    }
+	
+	public static Timestamp timestampFromDate(InstantType date) {
     	if (date == null) return null; 
     	String dateString = date.asStringValue();
     	if (dateString==null) return null;
@@ -238,10 +248,8 @@ public class XdsDocumentSetFromMhdDocumentBundle {
 		entry.setPatientId(transformReferenceToIdentifiable(subject, reference));
 		
 
-        // creationTime -> date instant [0..1]
-        //if (documentEntry.getCreationTime() != null) {
-        //    documentReference.setDate(Date.from(documentEntry.getCreationTime().getDateTime().toInstant()));
-        //}
+        // creationTime -> date instant [0..1]     
+		entry.setCreationTime(timestampFromDate(reference.getDateElement()));
 
         // TODO: authorPerson, authorInstitution, authorPerson, authorRole,
         // authorSpeciality, authorTelecommunication -> author Reference(Practitioner|
@@ -263,10 +271,9 @@ public class XdsDocumentSetFromMhdDocumentBundle {
         // [1..1]
 
         // title -> description string [0..1]
-        //if (documentEntry.getTitle() != null) {
-        //    documentReference.setDescription(documentEntry.getTitle().getValue());
-        //}
-
+		String title = reference.getDescription();
+		if (title != null) entry.setTitle(new LocalizedString(title));
+       
         // confidentialityCode -> securityLabel CodeableConcept [0..*] Note: This
         // is NOT the DocumentReference.meta, as that holds the meta tags for the
         // DocumentReference itself.
@@ -274,10 +281,7 @@ public class XdsDocumentSetFromMhdDocumentBundle {
         //    documentReference.addSecurityLabel(transform(documentEntry.getConfidentialityCodes()));
         //}
 
-        //DocumentReferenceContentComponent content = documentReference.addContent();
-        //Attachment attachment = new Attachment();
-        //content.setAttachment(attachment);
-
+      
         // mimeType -> content.attachment.contentType [1..1] code [0..1]
 		DocumentReferenceContentComponent content = reference.getContentFirstRep();		
 		if (content==null) throw new NullPointerException(); // TODO throw error
@@ -290,24 +294,19 @@ public class XdsDocumentSetFromMhdDocumentBundle {
 
         // size -> content.attachment.size integer [0..1] The size is calculated
         entry.setSize((long) attachment.getSize());
-
-
         
         // on the data prior to base64 encoding, if the data is base64 encoded.
         // TODO: hash -> content.attachment.hash string [0..1]
-        //if (documentEntry.getHash()!=null) {
-        //	attachment.setHash(documentEntry.getHash().getBytes());
-        //}
+        byte[] hash = attachment.getHash();
+        if (hash != null) entry.setHash(new String(hash));
 
         // comments -> content.attachment.title string [0..1]
-        //if (documentEntry.getComments() != null) {
-        //    attachment.setTitle(documentEntry.getComments().getValue());
-        //}
+        String comments = attachment.getTitle();
+        if (comments!=null) entry.setComments(new LocalizedString(comments));       
 
         // TcreationTime -> content.attachment.creation dateTime [0..1]
-        //if (documentEntry.getCreationTime() != null) {
-        //    attachment.setCreation(Date.from(documentEntry.getCreationTime().getDateTime().toInstant()));
-        //}
+        // TODO is this a duplicate?
+        //entry.setCreationTime(timestampFromDate(attachment.getCreationElement()));
 
         // formatCode -> content.format Coding [0..1]
         Coding coding = content.getFormat();

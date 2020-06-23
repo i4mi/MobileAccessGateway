@@ -25,11 +25,13 @@ import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.openehealth.ipf.commons.ihe.fhir.translation.ToFhirTranslator;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.CXiAssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.LocalizedString;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Name;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Person;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.ReferenceId;
@@ -40,7 +42,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 
-public abstract class MhdFromQueryResponse extends MhdFromResponse implements ToFhirTranslator<QueryResponse> {
+public abstract class BaseQueryResponseConverter extends BaseResponseConverter implements ToFhirTranslator<QueryResponse> {
 
     public String getSystem(String schemeName) {
         switch (schemeName) {
@@ -124,6 +126,14 @@ public abstract class MhdFromQueryResponse extends MhdFromResponse implements To
     	result.setValue(phone);
     	    	
     	return result;
+    }
+    
+    public Narrative transformToNarrative(LocalizedString in) {
+    	 if (in==null) return null;
+         Narrative result = new Narrative();
+         result.setStatus(org.hl7.fhir.r4.model.Narrative.NarrativeStatus.GENERATED);
+         result.setDivAsString(in.getValue());
+         return result;
     }
 
 }

@@ -15,7 +15,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.Severity;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class MhdFromResponse {
+public class BaseResponseConverter {
 
 	public void processError(Response input) {		
 		throw new InvalidRequestException("Retrieved error response", processErrorAsOutcome(input));

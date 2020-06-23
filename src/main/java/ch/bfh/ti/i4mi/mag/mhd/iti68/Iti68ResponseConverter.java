@@ -1,4 +1,4 @@
-package ch.bfh.ti.i4mi.mag.mhd;
+package ch.bfh.ti.i4mi.mag.mhd.iti68;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,8 +17,9 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.RetrievedDocumentSet;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 
 import ca.uhn.fhir.rest.api.Constants;
+import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
 
-public class BinaryFromDocumentSetResponse extends MhdFromResponse {
+public class Iti68ResponseConverter extends BaseResponseConverter {
 
 	public Object retrievedDocumentSetToHttResponse(@Body RetrievedDocumentSet retrievedDocumentSet, @Headers Map<String, Object> headers) throws IOException {
                 		

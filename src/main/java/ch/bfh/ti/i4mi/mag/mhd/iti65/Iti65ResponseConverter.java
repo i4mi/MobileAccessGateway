@@ -1,4 +1,4 @@
-package ch.bfh.ti.i4mi.mag.mhd;
+package ch.bfh.ti.i4mi.mag.mhd.iti65;
 
 import java.util.Collections;
 import java.util.Date;
@@ -19,8 +19,10 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.Severity;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
+import ch.bfh.ti.i4mi.mag.mhd.Utils;
 
-public class MhdBundleFromResponse extends MhdFromResponse implements ToFhirTranslator<Response> { 
+public class Iti65ResponseConverter extends BaseResponseConverter implements ToFhirTranslator<Response> { 
 
 	@Override
 	public Object translateToFhir(Response input, Map<String, Object> parameters) {
@@ -34,7 +36,7 @@ public class MhdBundleFromResponse extends MhdFromResponse implements ToFhirTran
 	            Bundle.BundleEntryResponseComponent response = new Bundle.BundleEntryResponseComponent()
 	                    .setStatus("201 Created")
 	                    .setLastModified(new Date())
-	                    .setLocation(requestEntry.getResource().getClass().getSimpleName() + "/" + 4711);
+	                    .setLocation(requestEntry.getResource().getClass().getSimpleName() + "/" + requestEntry.getId());
 	            responseBundle.addEntry()
 	                    .setResponse(response);
 	                    

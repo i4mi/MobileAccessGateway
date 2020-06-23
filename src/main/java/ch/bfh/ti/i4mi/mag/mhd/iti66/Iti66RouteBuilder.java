@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.mhd;
+package ch.bfh.ti.i4mi.mag.mhd.iti66;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
@@ -23,6 +23,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.mhd.Utils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -56,8 +57,8 @@ class Iti66RouteBuilder extends RouteBuilder {
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 .bean(Utils.class,"searchParameterToBody")
-                .bean(Utils.class,"searchParameterIti66ToFindSubmissionSetsQuery")                
+                .bean(Iti66RequestConverter.class)                
                 .to(xds18Endpoint)
-                .process(translateToFhir(new MhdDocumentManifestFromQueryResponse() , QueryResponse.class));
+                .process(translateToFhir(new Iti66ResponseConverter() , QueryResponse.class));
         }
 }

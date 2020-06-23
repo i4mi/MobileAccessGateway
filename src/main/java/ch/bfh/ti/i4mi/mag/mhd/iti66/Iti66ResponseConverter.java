@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.bfh.ti.i4mi.mag.mhd;
+package ch.bfh.ti.i4mi.mag.mhd.iti66;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,12 +23,17 @@ import java.util.Map;
 import org.hl7.fhir.r4.model.DocumentManifest;
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.LocalizedString;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.SubmissionSet;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 
-public class MhdDocumentManifestFromQueryResponse extends MhdFromQueryResponse {
+import ch.bfh.ti.i4mi.mag.mhd.BaseQueryResponseConverter;
+
+public class Iti66ResponseConverter extends BaseQueryResponseConverter {
     
     @Override
     public List<DocumentManifest> translateToFhir(QueryResponse input, Map<String, Object> parameters) {
@@ -38,12 +43,17 @@ public class MhdDocumentManifestFromQueryResponse extends MhdFromQueryResponse {
                 for (SubmissionSet submissionSet : input.getSubmissionSets()) {
                     DocumentManifest documentManifest = new DocumentManifest();
                     
-//                    String uuid = UUID.randomUUID().toString();
-                    documentManifest.setId(submissionSet.getEntryUuid()); // FIXME do we need to cache this id in relation to the DocumentManifest itself for 
+                    documentManifest.setId(submissionSet.getEntryUuid());  
                     
                     list.add(documentManifest);
-                    // limitedMetadata -> meta.profile canonical [0..*]
+                    // limitedMetadata -> meta.profile canonical [0..*]                 
+                    
                     // comment -> text Narrative [0..1]
+                    LocalizedString comments = submissionSet.getComments();
+                    if (comments!=null) {
+                    	documentManifest.setText(transformToNarrative(comments));                    	
+                    }
+                    
                     // uniqueId -> masterIdentifier Identifier [0..1] [1..1]
                     if (submissionSet.getUniqueId()!=null) {
                         documentManifest.setMasterIdentifier((new Identifier().setValue("urn:oid:"+submissionSet.getUniqueId())));
@@ -77,7 +87,12 @@ public class MhdDocumentManifestFromQueryResponse extends MhdFromQueryResponse {
                         documentManifest.setSource("urn:oid:"+submissionSet.getSourceId());
                     }
                     // title -> description string [0..1]
-                    // References to DocumentReference Resources representing DocumentEntry objects in the SubmissionSet or List Resources representing Folder objects in the SubmissionSet. -> content Reference(Any) [1..*] Reference( DocumentReference| List)
+                    LocalizedString title = submissionSet.getTitle();
+                    if (title != null) {
+                      documentManifest.setDescription(title.getValue());
+                    }
+                    
+                    // References to DocumentReference Resources representing DocumentEntry objects in the SubmissionSet or List Resources representing Folder objects in the SubmissionSet. -> content Reference(Any) [1..*] Reference( DocumentReference| List)                                       
                     // homeCommunityId -> Note 2: Not Applicable - The Document Sharing metadata element has no equivalent element in the HL7 FHIR; therefore, a Document Source is not able to set these elements, and Document Consumers will not have access to these elements.
                 }
             }

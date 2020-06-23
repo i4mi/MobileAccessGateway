@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.bfh.ti.i4mi.mag.mhd;
+package ch.bfh.ti.i4mi.mag.mhd.iti67;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,12 +43,13 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.mhd.BaseQueryResponseConverter;
 
-public class MhdDocumentReferenceFromQueryResponse extends MhdFromQueryResponse {
+public class Iti67ResponseConverter extends BaseQueryResponseConverter {
 
     private final Config config;
 
-    public MhdDocumentReferenceFromQueryResponse(final Config config) {
+    public Iti67ResponseConverter(final Config config) {
         this.config = config;
     }
 

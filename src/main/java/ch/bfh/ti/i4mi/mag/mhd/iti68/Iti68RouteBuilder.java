@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.mhd;
+package ch.bfh.ti.i4mi.mag.mhd.iti68;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.mhd.Utils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -55,9 +56,9 @@ class Iti68RouteBuilder extends RouteBuilder {
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 // translate, forward, translate back
-                .bean(Utils.class,"queryParameterToRetrieveDocumentSet")                
+                .bean(Iti68RequestConverter.class)                
                 .to(xds43Endpoint)
-                .bean(BinaryFromDocumentSetResponse.class);
+                .bean(Iti68ResponseConverter.class);
                 //.process(Utils.retrievedDocumentSetToHttResponse());
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.mhd;
+package ch.bfh.ti.i4mi.mag.mhd.iti65;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelValidators.itiRequestValidator;
@@ -37,6 +37,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.Response;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.mhd.Utils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -74,13 +75,13 @@ class Iti65RouteBuilder extends RouteBuilder {
                 .process(itiRequestValidator())
                 // translate, forward, translate back
                 .process(Utils.keepBody())
-                .bean(XdsDocumentSetFromMhdDocumentBundle.class)
+                .bean(Iti65RequestConverter.class)
                 .convertBodyTo(ProvideAndRegisterDocumentSetRequestType.class)               
                 //.process(iti41RequestValidator())
                 .to(xds41Endpoint)
                 .convertBodyTo(Response.class)
                 .process(Utils.keptBodyToHeader())
-                .process(translateToFhir(new MhdBundleFromResponse() , Response.class));
+                .process(translateToFhir(new Iti65ResponseConverter() , Response.class));
     }
 
     private class Responder extends ExpressionAdapter {
