@@ -107,8 +107,18 @@ public class Iti65RequestConverter {
 	}
 	
 	public static Code transformCodeableConcept(CodeableConcept cc) {
+		if (cc == null) return null;
+		if (!cc.hasCoding()) return null;
 		Coding coding = cc.getCodingFirstRep();
 		return new Code(coding.getCode(), new LocalizedString(coding.getDisplay()), coding.getSystem());
+	}
+	
+	public static void transformCodeableConcepts(List<CodeableConcept> ccs, List<Code> target) {
+		if (ccs == null || ccs.isEmpty()) return;
+		for (CodeableConcept cc : ccs) {
+			Code code = transformCodeableConcept(cc); 
+			if (code!=null) target.add(code);
+		}
 	}
 	
 	public static Timestamp timestampFromDate(DateTimeType date) {
@@ -173,6 +183,7 @@ public class Iti65RequestConverter {
 		Identifier masterIdentifier = manifest.getMasterIdentifier();
 		submissionSet.setUniqueId(masterIdentifier.getValue());
 		   
+		submissionSet.assignEntryUuid();
 		// TODO
 		//manifest.getIdentifier();
 		//submissionSet.setEntryUuid(entryUuid);
@@ -207,8 +218,8 @@ public class Iti65RequestConverter {
 	
 	private static void processDocumentReference(DocumentReference reference, DocumentEntry entry) {
 		 // FIXME String uuid = UUID.randomUUID().toString();
-		entry.setEntryUuid(reference.getId());
-        
+		//entry.setEntryUuid(reference.getId());
+        entry.assignEntryUuid();
         
         // limitedMetadata -> meta.profile canonical [0..*] TODO
         // uniqueId -> masterIdentifier Identifier [0..1] [1..1]
@@ -312,9 +323,8 @@ public class Iti65RequestConverter {
         Coding coding = content.getFormat();
         entry.setFormatCode(transform(coding));       
 
-        //DocumentReferenceContextComponent context = new DocumentReferenceContextComponent();
-        //documentReference.setContext(context);
-
+        DocumentReferenceContextComponent context = reference.getContext();
+       
         // TODO: referenceIdList -> context.encounter Reference(Encounter) [0..*] When
         // referenceIdList contains an encounter, and a FHIR Encounter is available, it
         // may be referenced.
@@ -328,29 +338,25 @@ public class Iti65RequestConverter {
         //}
         
         // eventCodeList -> context.event CodeableConcept [0..*]
-        //if (documentEntry.getEventCodeList()!=null) {
-        //	documentReference.getContext().setEvent(transformMultiple(documentEntry.getEventCodeList()));
-        //}
-        
+       
+        List<CodeableConcept> events = context.getEvent();
+        transformCodeableConcepts(events, entry.getEventCodeList());
+                
         // serviceStartTime serviceStopTime -> context.period Period [0..1]
-        //if (documentEntry.getServiceStartTime()!=null || documentEntry.getServiceStopTime()!=null) {
-        //	Period period = new Period();
-        //	period.setStartElement(transform(documentEntry.getServiceStartTime()));
-        //	period.setEndElement(transform(documentEntry.getServiceStopTime()));
-        //	documentReference.getContext().setPeriod(period);
-        //}
-
+        Period period = context.getPeriod();
+        if (period != null) {
+        	entry.setServiceStartTime(timestampFromDate(period.getStartElement()));
+        	entry.setServiceStopTime(timestampFromDate(period.getEndElement()));
+        }
+        
         // healthcareFacilityTypeCode -> context.facilityType CodeableConcept
         // [0..1]
-        //if (documentEntry.getHealthcareFacilityTypeCode() != null) {
-        //    context.setFacilityType(transform(documentEntry.getHealthcareFacilityTypeCode()));
-        //}
-
+        entry.setHealthcareFacilityTypeCode(transformCodeableConcept(context.getFacilityType()));
+        
         // practiceSettingCode -> context.practiceSetting CodeableConcept [0..1]
-        //if (documentEntry.getPracticeSettingCode() != null) {
-         //   context.setPracticeSetting(transform(documentEntry.getPracticeSettingCode()));
-        //}
-
+        entry.setPracticeSettingCode(transformCodeableConcept(context.getPracticeSetting()));
+        
+       
         // TODO: sourcePatientId and sourcePatientInfo -> context.sourcePatientInfo
         // Reference(Patient) [0..1] Contained Patient Resource with
         // Patient.identifier.use element set to ‘usual’.
