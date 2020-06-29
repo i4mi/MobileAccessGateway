@@ -9,7 +9,7 @@ This is a simple [IPF](https://oehf.github.io/ipf/) [HAPI-FHIR](https://hapifhir
 2. run mvn clean install -DskipTests in this directory, this should produce 4.0-SNAPSHOT (you need at least jdk11)
 3. Clone this repo 
 4. Install the dependencies: `mvn install`
-5. Either run it from your favorite IDE or in the CLI: `mvn clean compile && mvn exec:java -Dexec.mainClass="ch.ahdis.ipf.mag.MobileAccessGateway"`
+5. Either run it from your favorite IDE or in the CLI: `mvn clean compile && mvn exec:java -Dexec.mainClass="ch.bfh.ti.i4mi.mag.MobileAccessGateway"`
 
 ### [ITI-83] PIXm Query
 You should be able to run the query which returns for the sourceIdentifier 0815 in urn:oid:1.2.3 "mockid" in targetSystem urn:oid:1.2.3.4.6 in a console application with curl (use client.http with VSCode rest extension).
