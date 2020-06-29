@@ -48,16 +48,25 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.Telecom;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.ProvideAndRegisterDocumentSet;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.builder.ProvideAndRegisterDocumentSetBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sun.istack.ByteArrayDataSource;
 
 import ca.uhn.fhir.rest.param.DateParam;
+import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Iti65RequestConverter {
 
-	public static ProvideAndRegisterDocumentSet convert(@Body Bundle requestBundle) {
+	private SchemeMapper schemeMapper;
+	
+	@Autowired
+	public void setSchemeMapper(SchemeMapper schemeMapper) {
+		this.schemeMapper = schemeMapper;
+	}
+	
+	public ProvideAndRegisterDocumentSet convert(@Body Bundle requestBundle) {
 		
 		SubmissionSet submissionSet = new SubmissionSet();
 		
@@ -106,14 +115,14 @@ public class Iti65RequestConverter {
 		return builder.build();
 	}
 	
-	public static Code transformCodeableConcept(CodeableConcept cc) {
+	public  Code transformCodeableConcept(CodeableConcept cc) {
 		if (cc == null) return null;
 		if (!cc.hasCoding()) return null;
 		Coding coding = cc.getCodingFirstRep();
-		return new Code(coding.getCode(), new LocalizedString(coding.getDisplay()), coding.getSystem());
+		return new Code(coding.getCode(), new LocalizedString(coding.getDisplay()), schemeMapper.getScheme(coding.getSystem()));
 	}
 	
-	public static void transformCodeableConcepts(List<CodeableConcept> ccs, List<Code> target) {
+	public  void transformCodeableConcepts(List<CodeableConcept> ccs, List<Code> target) {
 		if (ccs == null || ccs.isEmpty()) return;
 		for (CodeableConcept cc : ccs) {
 			Code code = transformCodeableConcept(cc); 
@@ -121,7 +130,7 @@ public class Iti65RequestConverter {
 		}
 	}
 	
-	public static Timestamp timestampFromDate(DateTimeType date) {
+	public  Timestamp timestampFromDate(DateTimeType date) {
     	if (date == null) return null; 
     	String dateString = date.asStringValue();
     	if (dateString==null) return null;
@@ -130,7 +139,7 @@ public class Iti65RequestConverter {
     	return Timestamp.fromHL7(dateString);
     }
 	
-	public static Timestamp timestampFromDate(InstantType date) {
+	public  Timestamp timestampFromDate(InstantType date) {
     	if (date == null) return null; 
     	String dateString = date.asStringValue();
     	if (dateString==null) return null;
@@ -139,23 +148,23 @@ public class Iti65RequestConverter {
     	return Timestamp.fromHL7(dateString);
     }
 	
-	public static Code transform(Coding coding) {
+	public  Code transform(Coding coding) {
 		if (coding==null) return null;
-		return new Code(coding.getCode(), new LocalizedString(coding.getDisplay()), coding.getSystem());
+		return new Code(coding.getCode(), new LocalizedString(coding.getDisplay()), schemeMapper.getScheme(coding.getSystem()));
 	}
 	
-	public static Code transform(CodeableConcept cc) {
+	public  Code transform(CodeableConcept cc) {
 		if (cc==null) return null;
 		Coding coding = cc.getCodingFirstRep();
 		return transform(coding);
 	}
 	
-	public static Code transform(List<CodeableConcept> ccs) {
+	public  Code transform(List<CodeableConcept> ccs) {
 		if (ccs==null || ccs.isEmpty()) return null;
 		return transform(ccs.get(0));
 	}
 	
-	public static Identifiable transformReferenceToIdentifiable(Reference reference, DomainResource container) {
+	public  Identifiable transformReferenceToIdentifiable(Reference reference, DomainResource container) {
 		String targetRef = reference.getReference();		
 		List<Resource> resources = container.getContained();		
 		for (Resource resource : resources) {			
@@ -178,11 +187,12 @@ public class Iti65RequestConverter {
         return new Identifiable(value, new AssigningAuthority(system));
 	}
 	
-	private static void processDocumentManifest(DocumentManifest manifest, SubmissionSet submissionSet) {
+	private  void processDocumentManifest(DocumentManifest manifest, SubmissionSet submissionSet) {
 		// masterIdentifier	SubmissionSet.uniqueId
 		Identifier masterIdentifier = manifest.getMasterIdentifier();
 		submissionSet.setUniqueId(masterIdentifier.getValue());
 		   
+		
 		submissionSet.assignEntryUuid();
 		// TODO
 		//manifest.getIdentifier();
@@ -209,6 +219,7 @@ public class Iti65RequestConverter {
 		
 		// source	SubmissionSet.sourceId
 		String source = manifest.getSource();
+		if (source != null && source.startsWith("urn:oid:")) source = source.substring("urn:oid:".length());
 		submissionSet.setSourceId(source);
 		  
 		String description = manifest.getDescription();
@@ -216,7 +227,7 @@ public class Iti65RequestConverter {
 		
 	}
 	
-	private static void processDocumentReference(DocumentReference reference, DocumentEntry entry) {
+	private  void processDocumentReference(DocumentReference reference, DocumentEntry entry) {
 		 // FIXME String uuid = UUID.randomUUID().toString();
 		//entry.setEntryUuid(reference.getId());
         entry.assignEntryUuid();
@@ -288,10 +299,9 @@ public class Iti65RequestConverter {
         // confidentialityCode -> securityLabel CodeableConcept [0..*] Note: This
         // is NOT the DocumentReference.meta, as that holds the meta tags for the
         // DocumentReference itself.
-        //if (documentEntry.getConfidentialityCodes() != null) {
-        //    documentReference.addSecurityLabel(transform(documentEntry.getConfidentialityCodes()));
-        //}
-
+		
+		List<CodeableConcept> securityLabels = reference.getSecurityLabel();
+		transformCodeableConcepts(securityLabels, entry.getConfidentialityCodes());				       
       
         // mimeType -> content.attachment.contentType [1..1] code [0..1]
 		DocumentReferenceContentComponent content = reference.getContentFirstRep();		

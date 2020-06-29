@@ -12,6 +12,12 @@ import ca.uhn.fhir.rest.param.TokenParam;
 
 public class BaseRequestConverter {
 
+	private static SchemeMapper schemeMapper = new SchemeMapper();
+	
+    public static String getScheme(String system) {
+    	return schemeMapper.getScheme(system);        
+    }
+    
 	  public static Timestamp timestampFromDateParam(DateParam dateParam) {
 	    	if (dateParam == null) return null;    	
 	    	String dateString = dateParam.getValueAsString();
@@ -20,7 +26,7 @@ public class BaseRequestConverter {
 	    }
 	    
 	    public static Code codeFromToken(TokenParam param) {
-	    	return new Code(param.getValue(), null, param.getSystem());
+	    	return new Code(param.getValue(), null, getScheme(param.getSystem()));
 	    }
 	    
 	    public static List<Code> codesFromTokens(TokenOrListParam params) {

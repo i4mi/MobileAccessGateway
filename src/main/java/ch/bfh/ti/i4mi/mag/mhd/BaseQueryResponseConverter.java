@@ -25,6 +25,7 @@ import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
@@ -39,17 +40,16 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.Telecom;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp.Precision;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 
 public abstract class BaseQueryResponseConverter extends BaseResponseConverter implements ToFhirTranslator<QueryResponse> {
 
+	private SchemeMapper schemeMapper = new SchemeMapper();
+			
     public String getSystem(String schemeName) {
-        switch (schemeName) {
-        case "2.16.840.1.113883.6.96":
-            return "http://snomed.info/sct";
-        }
-        return schemeName;
+    	return schemeMapper.getSystem(schemeName);        
     }
 
     public CodeableConcept transform(Code code) {
@@ -92,6 +92,23 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	default: fhirPrecision = TemporalPrecisionEnum.MILLI;break;
     	}
     	return new DateTimeType(date, fhirPrecision);
+    }
+    
+    public DateType transformToDate(Timestamp timestamp) {
+    	if (timestamp == null) return null;
+    	Date date = Date.from(timestamp.getDateTime().toInstant());
+    	Precision precision = timestamp.getPrecision();
+    	TemporalPrecisionEnum fhirPrecision;
+    	switch(precision) {
+    	case YEAR: fhirPrecision = TemporalPrecisionEnum.YEAR;break;
+    	case DAY: fhirPrecision = TemporalPrecisionEnum.DAY;break;
+    	// There is no mapping for HOUR
+    	case HOUR: fhirPrecision = TemporalPrecisionEnum.MINUTE;break;
+    	case MINUTE: fhirPrecision = TemporalPrecisionEnum.MINUTE;break;
+    	case SECOND: fhirPrecision = TemporalPrecisionEnum.SECOND;break;
+    	default: fhirPrecision = TemporalPrecisionEnum.MILLI;break;
+    	}
+    	return new DateType(date, fhirPrecision);
     }
     
     public Reference transform(ReferenceId ref) {

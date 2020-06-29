@@ -24,8 +24,10 @@ import org.hl7.fhir.r4.model.DocumentManifest;
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.LocalizedString;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.SubmissionSet;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
@@ -75,6 +77,14 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                     }
                     
                     // patientId -> subject Reference(Patient| Practitioner| Group| Device) [0..1], Reference(Patient)
+                    if (submissionSet.getPatientId()!=null) {
+                    	Identifiable patient = submissionSet.getPatientId();
+                    	Identifier id = new Identifier()
+                    			.setSystem(patient.getAssigningAuthority().getUniversalId())
+                    			.setValue(patient.getId());
+                    	documentManifest.setSubject(new Reference().setIdentifier(id));
+                    }
+                    
                     // submissionTime -> created dateTime [0..1]
                     if (submissionSet.getSubmissionTime()!=null) {
                         documentManifest.setCreated(Date.from(submissionSet.getSubmissionTime().getDateTime().toInstant()));
