@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Identifier.IdentifierUse;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
@@ -261,6 +262,21 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     // Patient.identifier.use element set to ‘usual’.
                     Identifiable sourcePatientId = documentEntry.getSourcePatientId();
                     PatientInfo sourcePatientInfo = documentEntry.getSourcePatientInfo();
+                    
+                    Patient sourcePatient = new Patient();
+                    if (sourcePatientId != null) {
+                      sourcePatient.addIdentifier((new Identifier().setSystem(sourcePatientId.getAssigningAuthority().getUniversalId())
+                            .setValue(sourcePatientId.getId())).setUse(IdentifierUse.OFFICIAL));
+                    }
+                    
+                    if (sourcePatientInfo != null) {
+	                    sourcePatient.setBirthDateElement(transformToDate(sourcePatientInfo.getDateOfBirth()));
+	                    String gender = sourcePatientInfo.getGender();
+                    }
+                    
+                    if (sourcePatientId != null || sourcePatientInfo != null) {
+                      context.getSourcePatientInfo().setResource(sourcePatient);
+                    }
                     
                 }
             }

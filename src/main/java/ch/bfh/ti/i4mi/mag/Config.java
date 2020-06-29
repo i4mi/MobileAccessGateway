@@ -5,6 +5,7 @@ import org.openehealth.ipf.commons.ihe.ws.cxf.payload.OutPayloadLoggerIntercepto
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import lombok.Data;
 
 @Configuration
@@ -50,6 +51,11 @@ public class Config {
     @Bean
     public InPayloadLoggerInterceptor soapResponseLogger() {
         return new InPayloadLoggerInterceptor("./logs/[date('yyyyMMdd-HH00')]/[sequenceId]-soap-response.txt");
+    }
+    
+    @Bean
+    public SchemeMapper getSchemeMapper() {
+    	return new SchemeMapper();
     }
     
 }
