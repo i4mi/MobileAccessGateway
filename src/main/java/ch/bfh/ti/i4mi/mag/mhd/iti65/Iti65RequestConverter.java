@@ -49,10 +49,13 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.ProvideAndRegisterDocumentSet;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.builder.ProvideAndRegisterDocumentSetBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.sun.istack.ByteArrayDataSource;
 
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import lombok.extern.slf4j.Slf4j;
 
@@ -115,11 +118,16 @@ public class Iti65RequestConverter {
 		return builder.build();
 	}
 	
+	public LocalizedString localizedString(String string) {
+		if (string==null) return null;
+		return new LocalizedString(string);
+	}
+	
 	public  Code transformCodeableConcept(CodeableConcept cc) {
 		if (cc == null) return null;
 		if (!cc.hasCoding()) return null;
 		Coding coding = cc.getCodingFirstRep();
-		return new Code(coding.getCode(), new LocalizedString(coding.getDisplay()), schemeMapper.getScheme(coding.getSystem()));
+		return new Code(coding.getCode(), localizedString(coding.getDisplay()), schemeMapper.getScheme(coding.getSystem()));
 	}
 	
 	public  void transformCodeableConcepts(List<CodeableConcept> ccs, List<Code> target) {
@@ -134,7 +142,7 @@ public class Iti65RequestConverter {
     	if (date == null) return null; 
     	String dateString = date.asStringValue();
     	if (dateString==null) return null;
-    	dateString = dateString.replaceAll("-","");
+    	dateString = dateString.replaceAll("[T\\-:]","");
     	log.info(dateString);
     	return Timestamp.fromHL7(dateString);
     }
@@ -143,14 +151,14 @@ public class Iti65RequestConverter {
     	if (date == null) return null; 
     	String dateString = date.asStringValue();
     	if (dateString==null) return null;
-    	dateString = dateString.replaceAll("-","");
+    	dateString = dateString.replaceAll("[T\\-:]","");
     	log.info(dateString);
     	return Timestamp.fromHL7(dateString);
     }
 	
 	public  Code transform(Coding coding) {
 		if (coding==null) return null;
-		return new Code(coding.getCode(), new LocalizedString(coding.getDisplay()), schemeMapper.getScheme(coding.getSystem()));
+		return new Code(coding.getCode(), localizedString(coding.getDisplay()), schemeMapper.getScheme(coding.getSystem()));
 	}
 	
 	public  Code transform(CodeableConcept cc) {
@@ -164,33 +172,46 @@ public class Iti65RequestConverter {
 		return transform(ccs.get(0));
 	}
 	
-	public  Identifiable transformReferenceToIdentifiable(Reference reference, DomainResource container) {
-		String targetRef = reference.getReference();		
-		List<Resource> resources = container.getContained();		
-		for (Resource resource : resources) {			
-			if (targetRef.equals(resource.getId())) {
-				Identifier identifier = ((Patient) resource).getIdentifierFirstRep();
-				String system = identifier.getSystem();
-		    	if (system.startsWith("urn:oid:")) {
-		            system = system.substring(8);
-		        }
-				return new Identifiable(identifier.getValue(), new AssigningAuthority(system));
-			}
-		}
-		
-		String system = reference.getIdentifier().getSystem();
-    	if (system.startsWith("urn:oid:")) {
+	public String noPrefix(String system) {
+		if (system == null) return null;
+		if (system.startsWith("urn:oid:")) {
             system = system.substring(8);
         }
-    	String value = reference.getIdentifier().getValue();
-    	
-        return new Identifiable(value, new AssigningAuthority(system));
+		return system;
+	}
+	
+	public  Identifiable transformReferenceToIdentifiable(Reference reference, DomainResource container) {
+		if (reference.hasReference()) {
+			String targetRef = reference.getReference();		
+			List<Resource> resources = container.getContained();		
+			for (Resource resource : resources) {			
+				if (targetRef.equals(resource.getId())) {
+					Identifier identifier = ((Patient) resource).getIdentifierFirstRep();
+					String system = noPrefix(identifier.getSystem());			    	
+					return new Identifiable(identifier.getValue(), new AssigningAuthority(system));
+				}
+			}
+			MultiValueMap<String, String> vals = UriComponentsBuilder.fromUriString(targetRef).build().getQueryParams();
+			if (vals.containsKey("identifier")) {
+				String[] identifier = vals.getFirst("identifier").split("\\|");
+				if (identifier.length == 2) {
+					return new Identifiable(identifier[1], new AssigningAuthority(noPrefix(identifier[0])));
+				}
+			}
+		} else if (reference.hasIdentifier()) {
+		
+			String system = noPrefix(reference.getIdentifier().getSystem());	    	
+	    	String value = reference.getIdentifier().getValue();
+	    	
+	        return new Identifiable(value, new AssigningAuthority(system));
+		} 
+		throw new InvalidRequestException("Cannot resolve patient reference");
 	}
 	
 	private  void processDocumentManifest(DocumentManifest manifest, SubmissionSet submissionSet) {
 		// masterIdentifier	SubmissionSet.uniqueId
 		Identifier masterIdentifier = manifest.getMasterIdentifier();
-		submissionSet.setUniqueId(masterIdentifier.getValue());
+		submissionSet.setUniqueId(noPrefix(masterIdentifier.getValue()));
 		   
 		
 		submissionSet.assignEntryUuid();
@@ -218,12 +239,11 @@ public class Iti65RequestConverter {
 		//submissionSet.set
 		
 		// source	SubmissionSet.sourceId
-		String source = manifest.getSource();
-		if (source != null && source.startsWith("urn:oid:")) source = source.substring("urn:oid:".length());
+		String source = noPrefix(manifest.getSource());		
 		submissionSet.setSourceId(source);
 		  
-		String description = manifest.getDescription();
-		submissionSet.setTitle(new LocalizedString(description));		  
+		String description = manifest.getDescription();		
+		if (description!=null) submissionSet.setTitle(localizedString(description));		  
 		
 	}
 	
@@ -294,7 +314,7 @@ public class Iti65RequestConverter {
 
         // title -> description string [0..1]
 		String title = reference.getDescription();
-		if (title != null) entry.setTitle(new LocalizedString(title));
+		if (title != null) entry.setTitle(localizedString(title));
        
         // confidentialityCode -> securityLabel CodeableConcept [0..*] Note: This
         // is NOT the DocumentReference.meta, as that holds the meta tags for the
@@ -323,7 +343,7 @@ public class Iti65RequestConverter {
 
         // comments -> content.attachment.title string [0..1]
         String comments = attachment.getTitle();
-        if (comments!=null) entry.setComments(new LocalizedString(comments));       
+        if (comments!=null) entry.setComments(localizedString(comments));       
 
         // TcreationTime -> content.attachment.creation dateTime [0..1]
         // TODO is this a duplicate?
@@ -370,7 +390,10 @@ public class Iti65RequestConverter {
         // TODO: sourcePatientId and sourcePatientInfo -> context.sourcePatientInfo
         // Reference(Patient) [0..1] Contained Patient Resource with
         // Patient.identifier.use element set to ‘usual’.
-        //Identifiable sourcePatientId = documentEntry.getSourcePatientId();
+        if (context.hasSourcePatientInfo()) {
+          entry.setSourcePatientId(transformReferenceToIdentifiable(context.getSourcePatientInfo(), reference));
+        }
+        //
         //PatientInfo sourcePatientInfo = documentEntry.getSourcePatientInfo();___________________________________________________________________________ ___________________________________________________________________________ 52 Rev. 3.1 – 2019-03-06 Copyright © 2019: IHE International, Inc.FHIR DocumentReference Resource DefinitionIHE constraintDocument Sharing MetadataNotesmeta.source uri [0..1]Allowed but not defined Note 3meta.profile canonical [0..*]limitedMetadataSee Section 4.5.1.1.1.meta.security Coding [0..*]Allowed but not defined Note 3meta.tag Coding [0..*]Allowed but not defined Note 3implicitRules uri [0..1]Allowed but not defined Note 3language code [0..1]Allowed but not defined Note 3text Narrative [0..1]Allowed but not defined Note 3contained Resource [0..*]Allowed but not defined Note 3extension [0..*]Allowed but not defined Note 3modifierExtension Extension [0..*]Allowed but not defined Note 3masterIdentifierIdentifier [0..1] [1..1]uniqueIdSee ITI  TF-2x: Z.9.1.1 Identifier and CDA root plus extensionidentifierIdentifier [0..*]entryUUIDWhen the DocumentReference.identifier carries the entryUUID then the DocumentReference.identifier.use shall be ‘official’statuscode {DocumentReferenceStatus} [1..1]availabilityStatusapproved  status=currentdeprecated status=supersededOther status values are allowed but are not defined in thismapping to XDS. docStatuscode [0..1]Allowed but not defined Note 3type CodeableConcept [0..1]typeCodecategoryCodeableConcept [0..*] [0..1]classCode 
 	}
 	
