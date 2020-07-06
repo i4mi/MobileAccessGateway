@@ -22,11 +22,16 @@ public class SchemeMapper {
 	
 	public String getSystem(String scheme) {
 		String system = schemeToSystem.get(scheme);
-		return system == null ? scheme : system;
+		if (system != null) return system;
+		return "urn:oid:"+scheme;		
 	}
 	
 	public String getScheme(String system) {
 		String scheme = systemToScheme.get(system);
-		return scheme == null ? system : scheme;
+		if (scheme != null) return scheme;
+		if (system.startsWith("urn:oid:")) {
+            system = system.substring(8);
+        }
+		return system;
 	}
 }

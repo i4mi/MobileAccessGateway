@@ -130,7 +130,8 @@
                   "attachment":{
                      "contentType":"text/xml",
                      "language":"de-CH",
-                     "url":"urn:uuid:d8d1fe44-07e9-4a84-985f-fde97d77d54b"
+                     "url":"urn:uuid:d8d1fe44-07e9-4a84-985f-fde97d77d54b",
+                     "size" : 309219
                   },
                   "format":{
                      "system":"urn:oid:1.3.6.1.4.1.19376.1.2.3",

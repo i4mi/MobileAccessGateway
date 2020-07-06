@@ -26,17 +26,24 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Author;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.LocalizedString;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Recipient;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.SubmissionSet;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 
+import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseQueryResponseConverter;
 
 public class Iti66ResponseConverter extends BaseQueryResponseConverter {
     
+	public Iti66ResponseConverter(final Config config) {
+	   super(config);
+	}
+	
     @Override
     public List<DocumentManifest> translateToFhir(QueryResponse input, Map<String, Object> parameters) {
         ArrayList<DocumentManifest> list = new ArrayList<DocumentManifest>();
@@ -78,11 +85,8 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                     
                     // patientId -> subject Reference(Patient| Practitioner| Group| Device) [0..1], Reference(Patient)
                     if (submissionSet.getPatientId()!=null) {
-                    	Identifiable patient = submissionSet.getPatientId();
-                    	Identifier id = new Identifier()
-                    			.setSystem(patient.getAssigningAuthority().getUniversalId())
-                    			.setValue(patient.getId());
-                    	documentManifest.setSubject(new Reference().setIdentifier(id));
+                    	Identifiable patient = submissionSet.getPatientId();                    	
+                    	documentManifest.setSubject(transformPatient(patient));
                     }
                     
                     // submissionTime -> created dateTime [0..1]
@@ -91,7 +95,18 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                     }
 
                     // authorInstitution, authorPerson, authorRole, authorSpeciality, authorTelecommunication -> author Reference(Practitioner| PractitionerRole| Organization| Device| Patient| RelatedPerson) [0..*]
+                    if (submissionSet.getAuthors() != null) {
+                    	for (Author author : submissionSet.getAuthors()) {
+                    		documentManifest.addAuthor(transformAuthor(author));
+                    	}
+                    }
+                    
                     // intendedRecipient -> recipient Reference(Patient| Practitioner| PractitionerRole| RelatedPerson| Organization) [0..*]
+                    List<Recipient> recipients = submissionSet.getIntendedRecipients();
+                    for (Recipient recipient : recipients) {
+                    	// TODO Ist this patient or practitioner or related person
+                    }
+                    
                     // sourceId -> source uri [0..1] [1..1]
                     if (submissionSet.getSourceId()!=null) {
                         documentManifest.setSource("urn:oid:"+submissionSet.getSourceId());

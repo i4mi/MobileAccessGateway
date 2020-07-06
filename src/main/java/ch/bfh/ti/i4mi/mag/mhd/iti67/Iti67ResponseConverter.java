@@ -18,23 +18,29 @@ package ch.bfh.ti.i4mi.mag.mhd.iti67;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContentComponent;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Identifier.IdentifierUse;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Address;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Author;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntry;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Name;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.PatientInfo;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Person;
@@ -48,11 +54,9 @@ import ch.bfh.ti.i4mi.mag.mhd.BaseQueryResponseConverter;
 
 public class Iti67ResponseConverter extends BaseQueryResponseConverter {
 
-    private final Config config;
-
-    public Iti67ResponseConverter(final Config config) {
-        this.config = config;
-    }
+	public Iti67ResponseConverter(final Config config) {
+		super(config);
+	}
 
     @Override
     public List<DocumentReference> translateToFhir(QueryResponse input, Map<String, Object> parameters) {
@@ -69,6 +73,8 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
 
                     list.add(documentReference);
                     // limitedMetadata -> meta.profile canonical [0..*] TODO
+                    
+                    
                     // uniqueId -> masterIdentifier Identifier [0..1] [1..1]
                     if (documentEntry.getUniqueId() != null) {
                         documentReference.setMasterIdentifier(
@@ -105,14 +111,10 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     // patientId -> subject Reference(Patient| Practitioner| Group| Device) [0..1],
                     // Reference(Patient)
                     // Not a contained resource. URL Points to an existing Patient Resource
-                    // representing the XDS Affinity Domain Patient.
-                    // TODO: This concept needs to be defined
+                    // representing the XDS Affinity Domain Patient.                  
                     if (documentEntry.getPatientId()!=null) {
-                    	Identifiable patient = documentEntry.getPatientId();
-                    	Identifier id = new Identifier()
-                    			.setSystem(patient.getAssigningAuthority().getUniversalId())
-                    			.setValue(patient.getId());
-                    	documentReference.setSubject(new Reference().setIdentifier(id));
+                    	Identifiable patient = documentEntry.getPatientId();                    	
+                    	documentReference.setSubject(transformPatient(patient));
                     }
 
                     // creationTime -> date instant [0..1]
@@ -120,38 +122,21 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                         documentReference.setDate(Date.from(documentEntry.getCreationTime().getDateTime().toInstant()));
                     }
 
-                    // TODO: authorPerson, authorInstitution, authorPerson, authorRole,
+                    // authorPerson, authorInstitution, authorPerson, authorRole,
                     // authorSpeciality, authorTelecommunication -> author Reference(Practitioner|
                     // PractitionerRole| Organization| Device| Patient| RelatedPerson) [0..*]                   
                     if (documentEntry.getAuthors() != null) {
                     	for (Author author : documentEntry.getAuthors()) {
-                    		Person person = author.getAuthorPerson();
-                    		Practitioner containedPerson = transformPractitioner(person);
-
-                    		// TODO
-                    		List<Organization> orgs = author.getAuthorInstitution();
- 
-                    		// TODO
-                    		List<Identifiable> roles = author.getAuthorRole();
-                    		
-                    		// TODO
-                    		List<Identifiable> specialities = author.getAuthorSpecialty();
-                    		
-                    		List<Telecom> telecoms = author.getAuthorTelecom();
-                    		for (Telecom telecom : telecoms) containedPerson.addTelecom(transform(telecom));
-                    		
-                    		documentReference.addContained(containedPerson);
-                    		documentReference.addAuthor().setReference(containedPerson.getId());
-                    		
+                    		documentReference.addAuthor(transformAuthor(author));
                     	}
                     }
-                    // TODO: legalAuthenticator -> authenticator Note 1
+                
+                    // legalAuthenticator -> authenticator Note 1
                     // Reference(Practitioner|Practition erRole|Organization [0..1]
                     Person person = documentEntry.getLegalAuthenticator();
                     if (person != null) {
-                       Practitioner practitioner = transformPractitioner(person);
-                       documentReference.addContained(practitioner);
-                       documentReference.setAuthenticator(new Reference().setReference(practitioner.getId()));
+                       Practitioner practitioner = transformPractitioner(person);                     
+                       documentReference.setAuthenticator((Reference) new Reference().setResource(practitioner));
                     }
                     
                     // TODO: Relationship Association -> relatesTo [0..*]                   
@@ -185,7 +170,7 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                         attachment.setLanguage(documentEntry.getLanguageCode());
                     }
 
-                    // TODO: retrievable location of the document -> content.attachment.url uri
+                    // retrievable location of the document -> content.attachment.url uri
                     // [0..1] [1..1
                     // has to defined, for the PoC we define
                     // $host:port/camel/$repositoryid/$uniqueid
@@ -257,7 +242,7 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                         context.setPracticeSetting(transform(documentEntry.getPracticeSettingCode()));
                     }
 
-                    // TODO: sourcePatientId and sourcePatientInfo -> context.sourcePatientInfo
+                    // sourcePatientId and sourcePatientInfo -> context.sourcePatientInfo
                     // Reference(Patient) [0..1] Contained Patient Resource with
                     // Patient.identifier.use element set to ‘usual’.
                     Identifiable sourcePatientId = documentEntry.getSourcePatientId();
@@ -272,6 +257,24 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     if (sourcePatientInfo != null) {
 	                    sourcePatient.setBirthDateElement(transformToDate(sourcePatientInfo.getDateOfBirth()));
 	                    String gender = sourcePatientInfo.getGender();
+	                    if (gender != null) {
+		                    switch(gender) {
+		                    case "F":sourcePatient.setGender(Enumerations.AdministrativeGender.FEMALE);break;
+		                    case "M":sourcePatient.setGender(Enumerations.AdministrativeGender.MALE);break;
+		                    case "U":sourcePatient.setGender(Enumerations.AdministrativeGender.UNKNOWN);break;
+		                    case "A":sourcePatient.setGender(Enumerations.AdministrativeGender.OTHER);break;
+		                    }
+	                    }
+	                    ListIterator<Name> names = sourcePatientInfo.getNames(); 
+	                    while (names.hasNext()) {
+	                    	Name name = names.next();	                    	
+	                    	sourcePatient.addName(transform(name));
+	                    }
+	                    ListIterator<Address> addresses = sourcePatientInfo.getAddresses();
+	                    while(addresses.hasNext()) {
+	                    	Address address = addresses.next();
+	                    	sourcePatient.addAddress(transform(address));
+	                    }	                    
                     }
                     
                     if (sourcePatientId != null || sourcePatientInfo != null) {
