@@ -37,9 +37,10 @@ public class Config {
     private String hostUrl = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
     private String hostUrl43Http = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/ret"; // http
     private String hostUrl41Http = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/prb"; // http
-
+    private String hostUrl45Http = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/prb"; // http
     
     private String uriMagXdsRetrieve = "http://localhost:9091/camel/xdsretrieve";
+    private String uriPatientEndpoint = "http://localhost:9091/fhir/Patient";
         
     
     // see https://oehf.github.io/ipf-docs/docs/ihe/wsPayloadLogging
