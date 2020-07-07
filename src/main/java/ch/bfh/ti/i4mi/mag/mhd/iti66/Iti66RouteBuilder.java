@@ -59,6 +59,7 @@ class Iti66RouteBuilder extends RouteBuilder {
                 .bean(Utils.class,"searchParameterToBody")
                 .bean(Iti66RequestConverter.class)                
                 .to(xds18Endpoint)
+                .bean(Iti66ResponseBugfix.class)
                 .process(translateToFhir(new Iti66ResponseConverter(config) , QueryResponse.class));
         }
 }
