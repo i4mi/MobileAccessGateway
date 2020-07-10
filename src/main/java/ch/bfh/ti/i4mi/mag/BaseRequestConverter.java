@@ -1,4 +1,4 @@
-package ch.bfh.ti.i4mi.mag.mhd;
+package ch.bfh.ti.i4mi.mag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +9,8 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
+import net.ihe.gazelle.hl7v3.datatypes.ST;
 
 public class BaseRequestConverter {
 
@@ -46,5 +48,11 @@ public class BaseRequestConverter {
 	    		result.add(token.getValue());
 	    	}
 	    	return result;    	
+	    }
+	    
+	    public static ST ST(String text) {
+	    	ST semanticsText = new ST();
+			semanticsText.addMixed(text);
+			return semanticsText;
 	    }
 }

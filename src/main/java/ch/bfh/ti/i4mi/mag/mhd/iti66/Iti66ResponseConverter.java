@@ -34,6 +34,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.Recipient;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.SubmissionSet;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
+import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.query.AdhocQueryResponse;
 
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseQueryResponseConverter;
@@ -44,11 +45,14 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
 	   super(config);
 	}
 	
+	
+	
     @Override
     public List<DocumentManifest> translateToFhir(QueryResponse input, Map<String, Object> parameters) {
         ArrayList<DocumentManifest> list = new ArrayList<DocumentManifest>();
         if (input != null && Status.SUCCESS.equals(input.getStatus())) {
-            if (input.getSubmissionSets() != null) {
+        	System.out.println("XX");
+            if (input.getSubmissionSets() != null) {            	
                 for (SubmissionSet submissionSet : input.getSubmissionSets()) {
                     DocumentManifest documentManifest = new DocumentManifest();
                     

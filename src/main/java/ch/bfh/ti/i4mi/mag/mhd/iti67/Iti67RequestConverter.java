@@ -23,7 +23,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ch.bfh.ti.i4mi.mag.mhd.BaseRequestConverter;
+import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 
 public class Iti67RequestConverter extends BaseRequestConverter {
 

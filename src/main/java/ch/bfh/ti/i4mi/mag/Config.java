@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
+import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import lombok.Data;
 
 @Configuration
@@ -33,12 +34,15 @@ public class Config {
 
     // XDSTools7 configuration https://ehealthsuisse.ihe-europe.net/xdstools7/#
     private boolean https = false;
+    private boolean pixHttps = true;
     // private String hostUrl = "ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/reg/sq"; // https
     private String hostUrl = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
     private String hostUrl43Http = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/ret"; // http
     private String hostUrl41Http = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/prb"; // http
-    private String hostUrl45Http = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/prb"; // http
-    
+    //private String hostUrl45Http = "gazelle.interopsante.org/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType"; // http
+    private String hostUrl45Http = "gazelle.ihe.net/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType"; // http
+       
+ 
     private String uriMagXdsRetrieve = "http://localhost:9091/camel/xdsretrieve";
     private String uriPatientEndpoint = "http://localhost:9091/fhir/Patient";
         
@@ -57,6 +61,11 @@ public class Config {
     @Bean
     public SchemeMapper getSchemeMapper() {
     	return new SchemeMapper();
+    }
+    
+    @Bean
+    public PatientReferenceCreator getPatientReferenceCreator() {
+    	return new PatientReferenceCreator();
     }
     
 }

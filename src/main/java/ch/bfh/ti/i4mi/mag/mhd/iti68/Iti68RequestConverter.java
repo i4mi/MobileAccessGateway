@@ -6,7 +6,7 @@ import org.apache.camel.Headers;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntry;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.RetrieveDocumentSet;
 
-import ch.bfh.ti.i4mi.mag.mhd.BaseRequestConverter;
+import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 
 public class Iti68RequestConverter extends BaseRequestConverter {
 
