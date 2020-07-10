@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.pmir;
+package ch.bfh.ti.i4mi.mag.pmir.iti83;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateFhir;
+import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.mhd.iti67.Iti67ResponseConverter;
+import ch.bfh.ti.i4mi.mag.pmir.BackTest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -30,19 +37,41 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 class Iti83RouteBuilder extends RouteBuilder {
 
-	public Iti83RouteBuilder() {
+	private final Config config;
+	
+	@Autowired
+	Iti83ResponseConverter converter;
+	
+	public Iti83RouteBuilder(final Config config) {
 		super();
+	    this.config = config;
 		log.debug("Iti83RouteBuilder initialized");
 	}
 
 	@Override
 	public void configure() throws Exception {
 		log.debug("Iti83RouteBuilder configure");
+		
+		 final String xds45Endpoint = String.format("pixv3-iti45://%s" +
+	                "?secure=%s", this.config.getHostUrl45Http(), this.config.isPixHttps() ? "true" : "false")
+	                +
+	                "&inInterceptors=#soapResponseLogger" + 
+	                "&inFaultInterceptors=#soapResponseLogger"+
+	                "&outInterceptors=#soapRequestLogger" + 
+	                "&outFaultInterceptors=#soapRequestLogger";
+		
 		from("pixm-iti83:translation?audit=true").routeId("pixm-adapter")
 				// pass back errors to the endpoint
 				.errorHandler(noErrorHandler())
-				// translate, forward, translate back
-				.process(translateFhir(new PixmMockTranslator()));
+				.bean(Iti83RequestConverter.class)
+				//.bean(Test.class)
+				.to(xds45Endpoint)
+				.bean(BackTest.class)
+				// translate, forward, translate back				
+				.process(translateToFhir(converter , byte[].class));
+				
+				//.process(translateFhir(new PixmMockTranslator()));
+
 
 //						new Processor() {
 //					public void process(Exchange exchange) throws Exception {
