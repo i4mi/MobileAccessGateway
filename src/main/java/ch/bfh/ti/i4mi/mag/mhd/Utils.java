@@ -55,6 +55,11 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ch.bfh.ti.i4mi.mag.Config;
 
+/**
+ * utility classes for MobileAccessGateway
+ * @author alexander
+ *
+ */
 public class Utils {
 
 	public static final String KEPT_BODY = "KeptBody"; 

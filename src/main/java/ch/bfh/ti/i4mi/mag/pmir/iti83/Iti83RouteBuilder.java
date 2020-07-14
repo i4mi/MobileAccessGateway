@@ -16,18 +16,13 @@
 
 package ch.bfh.ti.i4mi.mag.pmir.iti83;
 
-import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateFhir;
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
-import ch.bfh.ti.i4mi.mag.mhd.iti67.Iti67ResponseConverter;
-import ch.bfh.ti.i4mi.mag.pmir.BackTest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -63,41 +58,10 @@ class Iti83RouteBuilder extends RouteBuilder {
 		from("pixm-iti83:translation?audit=true").routeId("pixm-adapter")
 				// pass back errors to the endpoint
 				.errorHandler(noErrorHandler())
-				.bean(Iti83RequestConverter.class)
-				//.bean(Test.class)
-				.to(xds45Endpoint)
-				.bean(BackTest.class)
+				.bean(Iti83RequestConverter.class)				
+				.to(xds45Endpoint)				
 				// translate, forward, translate back				
 				.process(translateToFhir(converter , byte[].class));
-				
-				//.process(translateFhir(new PixmMockTranslator()));
-
-
-//						new Processor() {
-//					public void process(Exchange exchange) throws Exception {
-
-// see general method here						
-//						import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateFhir;
-//						import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
-//						
-//												log.info("processor called");						
-
-//                      PixQueryResponseToPixmResponseTranslator
-//						
-//				        if (errorField == 3 && errorComponent == 1) {
-//				            // Case 3: Patient ID not found
-//				            throw Utils.unknownPatientId()
-//				        } else if (errorField == 3 && errorComponent == 4) {
-//				            // Case 4: Unknown Patient Domain
-//				            throw Utils.unknownSourceDomainCode()
-//				        } else if (errorField == 4) {
-//				            // Case 5: Unknown Target Domain
-//				            throw Utils.unknownTargetDomainCode()
-//				        } else {
-//				            throw Utils.unexpectedProblem()
-//												
-
-//					}
-//				});
+							
 	}
 }

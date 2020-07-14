@@ -52,6 +52,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ch.bfh.ti.i4mi.mag.Config;
 
+/**
+ * base query response converter XDS to MHD
+ * @author alexander
+ *
+ */
 public abstract class BaseQueryResponseConverter extends BaseResponseConverter implements ToFhirTranslator<QueryResponse> {
 
 	private SchemeMapper schemeMapper = new SchemeMapper();
