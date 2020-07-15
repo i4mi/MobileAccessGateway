@@ -16,6 +16,7 @@
 
 package ch.bfh.ti.i4mi.mag;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,4 +79,6 @@ public class BaseRequestConverter {
 		semanticsText.addMixed(text);
 		return semanticsText;
 	}
+	
+	
 }

@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContentComponent;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceRelatesToComponent;
+import org.hl7.fhir.r4.model.DocumentReference.DocumentRelationshipType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.Identifier;
@@ -75,12 +76,24 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
         	Map<String, List<DocumentReferenceRelatesToComponent>> relatesToMapping = new HashMap<String, List<DocumentReferenceRelatesToComponent>>();
         	for (Association association : input.getAssociations()) {
         		
-                // TODO: Relationship type -> relatesTo.code code [1..1]
-                // TODO: relationship reference -> relatesTo.target Reference(DocumentReference)
+                // Relationship type -> relatesTo.code code [1..1]
+                // relationship reference -> relatesTo.target Reference(DocumentReference)
 
         		String source = association.getSourceUuid();
         		String target = association.getTargetUuid();
         		AssociationType type = association.getAssociationType();
+        		
+        		DocumentReferenceRelatesToComponent relatesTo = new DocumentReferenceRelatesToComponent();
+        		switch(type) {
+        		case APPEND:relatesTo.setCode(DocumentRelationshipType.APPENDS);break;
+        		case REPLACE:relatesTo.setCode(DocumentRelationshipType.REPLACES);break;
+        		case TRANSFORM:relatesTo.setCode(DocumentRelationshipType.TRANSFORMS);break;
+        		case SIGNS:relatesTo.setCode(DocumentRelationshipType.SIGNS);break;
+        		}
+        		relatesTo.setTarget(new Reference().setReference("urn:oid:"+target));
+        		
+        		if (!relatesToMapping.containsKey(source)) relatesToMapping.put(source, new ArrayList<DocumentReferenceRelatesToComponent>());
+        		relatesToMapping.get(source).add(relatesTo);
         	}
         	
             if (input.getDocumentEntries() != null) {

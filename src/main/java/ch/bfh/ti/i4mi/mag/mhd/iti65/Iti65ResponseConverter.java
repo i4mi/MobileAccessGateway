@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -56,8 +57,12 @@ public class Iti65ResponseConverter extends BaseResponseConverter implements ToF
 			for (Bundle.BundleEntryComponent requestEntry : requestBundle.getEntry()) {
 	            Bundle.BundleEntryResponseComponent response = new Bundle.BundleEntryResponseComponent()
 	                    .setStatus("201 Created")
-	                    .setLastModified(new Date())
-	                    .setLocation(requestEntry.getResource().getClass().getSimpleName() + "/" + requestEntry.getId());
+	                    .setLastModified(new Date());
+	            if (requestEntry.getResource() instanceof Binary) {
+	              // TODO repositoryUniqueId not known
+	            } else {
+	              response.setLocation("urn:uuid:"+requestEntry.getId());
+	            }
 	            responseBundle.addEntry()
 	                    .setResponse(response);
 	                    

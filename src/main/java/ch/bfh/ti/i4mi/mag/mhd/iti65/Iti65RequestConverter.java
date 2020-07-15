@@ -159,7 +159,7 @@ public class Iti65RequestConverter {
                     String contentURL = attachment.getUrl();                
 	                Resource binaryContent = resources.get(contentURL);
 	                if (binaryContent instanceof Binary) {
-	                	Binary binary = (Binary) binaryContent;
+	                	Binary binary = (Binary) binaryContent;	                	
 	                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(binary.getData(),binary.getContentType())));	            
                     }
                 }
@@ -279,11 +279,13 @@ public class Iti65RequestConverter {
 				PatientInfo patientInfo = new PatientInfo();
 				patientInfo.setDateOfBirth(timestampFromDate(patient.getBirthDateElement()));
 				Enumerations.AdministrativeGender gender = patient.getGender();
-				switch(gender) {
-				case MALE: patientInfo.setGender("M");break;
-				case FEMALE: patientInfo.setGender("F");break;
-				case OTHER: patientInfo.setGender("A");break;
-				default: patientInfo.setGender("U");break;
+				if (gender != null) {
+					switch(gender) {
+					case MALE: patientInfo.setGender("M");break;
+					case FEMALE: patientInfo.setGender("F");break;
+					case OTHER: patientInfo.setGender("A");break;
+					default: patientInfo.setGender("U");break;
+					}
 				}
 				
 				for (HumanName name : patient.getName()) {
@@ -347,6 +349,7 @@ public class Iti65RequestConverter {
 		   
 		
 		submissionSet.assignEntryUuid();
+		manifest.setId(submissionSet.getEntryUuid());
 		// TODO
 		//manifest.getIdentifier();
 		//submissionSet.setEntryUuid(entryUuid);
@@ -383,6 +386,7 @@ public class Iti65RequestConverter {
 		 // FIXME String uuid = UUID.randomUUID().toString();
 		//entry.setEntryUuid(reference.getId());
         entry.assignEntryUuid();
+        reference.setId(entry.getEntryUuid());
         
         // limitedMetadata -> meta.profile canonical [0..*] TODO
         // uniqueId -> masterIdentifier Identifier [0..1] [1..1]

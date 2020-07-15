@@ -9,4 +9,4 @@
 
 # Camel registration for the pmir-iti93 component
  
-class=ch.bfh.ti.i4mi.mag.pmir.Iti93Component
+class=ch.bfh.ti.i4mi.mag.pmir.iti93.Iti93Component
