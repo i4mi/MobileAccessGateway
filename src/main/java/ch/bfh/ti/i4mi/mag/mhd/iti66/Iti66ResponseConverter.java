@@ -39,6 +39,11 @@ import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.query.AdhocQueryResp
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseQueryResponseConverter;
 
+/**
+ * ITI-66 from ITI-18 response converter
+ * @author alexander kreutz
+ *
+ */
 public class Iti66ResponseConverter extends BaseQueryResponseConverter {
     
 	public Iti66ResponseConverter(final Config config) {
@@ -46,12 +51,14 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
 	}
 	
 	
-	
+	/**
+	 * convert ITI-18 query response to ITI-66 response bundle
+	 */
     @Override
     public List<DocumentManifest> translateToFhir(QueryResponse input, Map<String, Object> parameters) {
         ArrayList<DocumentManifest> list = new ArrayList<DocumentManifest>();
         if (input != null && Status.SUCCESS.equals(input.getStatus())) {
-        	System.out.println("XX");
+        	
             if (input.getSubmissionSets() != null) {            	
                 for (SubmissionSet submissionSet : input.getSubmissionSets()) {
                     DocumentManifest documentManifest = new DocumentManifest();
@@ -59,7 +66,12 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                     documentManifest.setId(submissionSet.getEntryUuid());  
                     
                     list.add(documentManifest);
-                    // limitedMetadata -> meta.profile canonical [0..*]                 
+                    // limitedMetadata -> meta.profile canonical [0..*]       
+                    if (submissionSet.isLimitedMetadata()) {
+                    	documentManifest.getMeta().addProfile("http://ihe.net/fhir/StructureDefinition/IHE_MHD_Minimal_DocumentManifest");
+                    } else {
+                    	documentManifest.getMeta().addProfile("http://ihe.net/fhir/StructureDefinition/IHE_MHD_Comprehensive_DocumentManifest");
+                    }
                     
                     // comment -> text Narrative [0..1]
                     LocalizedString comments = submissionSet.getComments();

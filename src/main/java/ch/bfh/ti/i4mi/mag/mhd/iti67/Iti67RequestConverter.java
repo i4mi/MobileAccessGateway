@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ch.bfh.ti.i4mi.mag.mhd.iti67;
 
 import java.util.ArrayList;
@@ -25,10 +41,19 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 
+/**
+ * ITI-67 to ITI-18 request converter
+ * @author alexander kreutz
+ *
+ */
 public class Iti67RequestConverter extends BaseRequestConverter {
 
-
-    public static QueryRegistry searchParameterIti67ToFindDocumentsQuery(@Body Iti67SearchParameters searchParameter) {
+	/**
+	  * convert ITI-67 request to ITI-18 request
+	  * @param searchParameter
+	  * @return
+	  */
+    public QueryRegistry searchParameterIti67ToFindDocumentsQuery(@Body Iti67SearchParameters searchParameter) {
       
             boolean getLeafClass = true;
         
@@ -41,19 +66,13 @@ public class Iti67RequestConverter extends BaseRequestConverter {
             	QueryList<ReferenceId> outerReferences = new QueryList<ReferenceId>();
             	List<ReferenceId> references = new ArrayList<ReferenceId>();
             	for (TokenParam token : related.getValuesAsQueryTokens()) {
-            		references.add(new ReferenceId(token.getValue(), null, token.getSystem()));
+            		references.add(new ReferenceId(token.getValue(), null, getScheme(token.getSystem())));
             	}
             	outerReferences.getOuterList().add(references);
             	referenceIdQuery.setTypedReferenceIds(outerReferences);
             	query = referenceIdQuery;            	
             } else query = new FindDocumentsQuery();          
-
-            ReferenceParam patientRef = searchParameter.getPatientReference();           
-            
-
-
-            
-//  (Not supported) Note 3          -->  $XDSDocumentEntryType
+                       
 
 //            query.setMetadataLevel(metadataLevel);
             
@@ -72,12 +91,13 @@ public class Iti67RequestConverter extends BaseRequestConverter {
             // patient or patient.identifier  -->  $XDSDocumentEntryPatientId
             TokenParam tokenIdentifier = searchParameter.getPatientIdentifier();
             if (tokenIdentifier != null) {
-                String system = tokenIdentifier.getSystem();
-                if (system.startsWith("urn:oid:")) {
-                    system = system.substring(8);
-
-                }
+                String system = getScheme(tokenIdentifier.getSystem());                
                 query.setPatientId(new Identifiable(tokenIdentifier.getValue(), new AssigningAuthority(system)));
+            }
+            ReferenceParam patientRef =  searchParameter.getPatientReference();
+            if (patientRef != null) {
+           	 Identifiable id = transformReference(patientRef.getValue());
+           	 query.setPatientId(id);
             }
 
             // date Note 1 Note 5              -->  $DSDocumentEntryCreationTimeFrom
@@ -138,9 +158,8 @@ public class Iti67RequestConverter extends BaseRequestConverter {
             //  format                          -->  $XDSDocumentEntryFormatCode
             TokenOrListParam formats = searchParameter.getFormat();
             query.setFormatCodes(codesFromTokens(formats));
-           
-        
-        //  TODO   author.given / author.family    -->  $XDSDocumentEntryAuthorPerson
+                   
+            //  TODO   author.given / author.family    -->  $XDSDocumentEntryAuthorPerson
             StringParam authorGivenName = searchParameter.getAuthorGivenName();
             StringParam authorFamilyName = searchParameter.getAuthorFamilyName();
             if (authorGivenName != null || authorFamilyName != null) {
@@ -148,8 +167,6 @@ public class Iti67RequestConverter extends BaseRequestConverter {
 	            List<String> authorPersons = Collections.singletonList(author);
 	            query.setAuthorPersons(authorPersons);
             }
-
-//            query.setDocumentAvailability(documentAvailabilities);
 
             final QueryRegistry queryRegistry = new QueryRegistry(query);
             queryRegistry.setReturnType((getLeafClass) ? QueryReturnType.LEAF_CLASS : QueryReturnType.OBJECT_REF);

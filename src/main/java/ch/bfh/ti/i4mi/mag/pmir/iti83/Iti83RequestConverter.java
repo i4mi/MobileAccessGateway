@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ch.bfh.ti.i4mi.mag.pmir.iti83;
 
 import java.io.ByteArrayOutputStream;
@@ -35,6 +51,11 @@ import net.ihe.gazelle.hl7v3.voc.EntityDeterminer;
 import net.ihe.gazelle.hl7v3.voc.XActMoodIntentEvent;
 import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
+/**
+ * ITI-83 to ITI-45 request converter
+ * @author alexander kreutz
+ *
+ */
 public class Iti83RequestConverter extends BaseRequestConverter {
 
 	  public String iti83ToIti45Converter(Parameters parameters) throws JAXBException  {
@@ -101,40 +122,7 @@ public class Iti83RequestConverter extends BaseRequestConverter {
 			dataSource.setValue(Collections.singletonList(new II(sourceSystem, null ,null)));			
 			patientIdentifier.setSemanticsText(ST("DataSource.id"));
 		  }
-		  /*
-		  "<PRPA_IN201309UV02 ITSVersion=\"XML_1.0\" xmlns=\"urn:hl7-org:v3\">\n" + 
-			"    <id extension=\"351\" root=\"1.3.6.1.4.1.12559.11.1.2.2.5.7.1\"/>\n" + 
-			"    <creationTime value=\"20170929103954\"/>\n" + 
-			"    <interactionId extension=\"PRPA_IN201309UV02\" root=\"2.16.840.1.113883.1.18\"/>\n" + 
-			"    <processingCode code=\"T\"/>\n" + 
-			"    <processingModeCode code=\"T\"/>\n" + 
-			"    <acceptAckCode code=\"AL\"/>\n" + 
-			"    <receiver typeCode=\"RCV\">\n" + 
-			"        <device classCode=\"DEV\" determinerCode=\"INSTANCE\">\n" + 
-			"            <id root=\"1.3.6.1.4.1.12559.11.1.2.2.5.11\"/>\n" + 
-			"            <telecom value=\"http://localhost:8380/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType?wsdl\"/>\n" + 
-			"        </device>\n" + 
-			"    </receiver>\n" + 
-			"    <sender typeCode=\"SND\">\n" + 
-			"        <device classCode=\"DEV\" determinerCode=\"INSTANCE\">\n" + 
-			"            <id root=\"1.3.6.1.4.1.12559.11.1.2.2.5.7\"/>\n" + 
-			"        </device>\n" + 
-			"    </sender>\n" + 
-			"    <controlActProcess classCode=\"CACT\" moodCode=\"EVN\">\n" + 
-			"        <code code=\"PRPA_TE201309UV02\" displayName=\"2.16.840.1.113883.1.18\"/>\n" + 
-			"        <queryByParameter>\n" + 
-			"            <queryId extension=\"350\" root=\"1.3.6.1.4.1.12559.11.1.2.2.5.7.2\"/>\n" + 
-			"            <statusCode code=\"new\"/>\n" + 
-			"            <responsePriorityCode code=\"I\"/>\n" + 
-			"            <parameterList>\n" + 
-			"                <patientIdentifier>\n" + 
-			"                    <value extension=\"ID-5678\" root=\"1.3.6.1.4.1.12559.11.20.6\"/>\n" + 
-			"                    <semanticsText>Patient.id</semanticsText>\n" + 
-			"                </patientIdentifier>\n" + 
-			"            </parameterList>\n" + 
-			"        </queryByParameter>\n" + 
-			"    </controlActProcess>\n" + 
-			"</PRPA_IN201309UV02>";*/
+		
 		    ByteArrayOutputStream out = new ByteArrayOutputStream();
 		    System.out.println("PRE CONVERT");
 		    HL7V3Transformer.marshallMessage(PRPAIN201309UV02Type.class, out, resultMsg);

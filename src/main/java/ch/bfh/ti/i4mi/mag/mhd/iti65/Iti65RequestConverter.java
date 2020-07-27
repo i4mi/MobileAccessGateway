@@ -1,51 +1,69 @@
+/*
+ * Copyright 2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ch.bfh.ti.i4mi.mag.mhd.iti65;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.activation.DataHandler;
 
 import org.apache.camel.Body;
+import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DocumentManifest;
 import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContentComponent;
+import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
+import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceRelatesToComponent;
+import org.hl7.fhir.r4.model.DocumentReference.DocumentRelationshipType;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContentComponent;
-import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
-import org.hl7.fhir.r4.model.Identifier.IdentifierUse;
-import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.StringType;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.Author;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Association;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssociationType;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Document;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntry;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.LocalizedString;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Name;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.PatientInfo;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.Person;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.ReferenceId;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.SubmissionSet;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.Telecom;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.XpnName;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.ProvideAndRegisterDocumentSet;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.builder.ProvideAndRegisterDocumentSetBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,11 +72,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.sun.istack.ByteArrayDataSource;
 
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * ITI-65 to ITI-41 request converter
+ * @author alexander kreutz
+ *
+ */
 @Slf4j
 public class Iti65RequestConverter {
 
@@ -69,12 +91,18 @@ public class Iti65RequestConverter {
 		this.schemeMapper = schemeMapper;
 	}
 	
+	/**
+	 * convert ITI-65 to ITI-41 request
+	 * @param requestBundle
+	 * @return
+	 */
 	public ProvideAndRegisterDocumentSet convert(@Body Bundle requestBundle) {
 		
 		SubmissionSet submissionSet = new SubmissionSet();
 		
 		ProvideAndRegisterDocumentSetBuilder builder = new ProvideAndRegisterDocumentSetBuilder(true, submissionSet);
 		
+		// create mapping fullUrl -> resource for each resource in bundle
 		Map<String, Resource> resources = new HashMap<String, Resource>();
 		DocumentManifest manifest = null;
 		for (Bundle.BundleEntryComponent requestEntry : requestBundle.getEntry()) {
@@ -85,15 +113,27 @@ public class Iti65RequestConverter {
             	resources.put(requestEntry.getFullUrl(), resource);
             	
             } else if (resource instanceof ListResource) {
-            	resources.put(requestEntry.getFullUrl(), resource);
+            	new IllegalArgumentException("List Resource is currently not supported");
+            	//resources.put(requestEntry.getFullUrl(), resource);
             } else if (resource instanceof Binary) {
             	resources.put(requestEntry.getFullUrl(), resource);
             } else {
                 throw new IllegalArgumentException(resource + " is not allowed here");
             } 			
         }
-				
+						
 		processDocumentManifest(manifest, submissionSet);
+		
+		// set limited metadata
+		for (CanonicalType profile : requestBundle.getMeta().getProfile()) {
+			if ("http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle".equals(profile.getValue())) {
+				submissionSet.setLimitedMetadata(false);
+			} else if ("http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle".equals(profile.getValue())) {
+				submissionSet.setLimitedMetadata(true);
+			}
+		}
+		
+		// process all resources referenced in DocumentManifest.content
 		for (Reference content : manifest.getContent()) {
 			String refTarget = content.getReference();
 			Resource resource = resources.get(refTarget);
@@ -101,14 +141,38 @@ public class Iti65RequestConverter {
 				DocumentReference documentReference = (DocumentReference) resource;
 				Document doc = new Document();            	
         		DocumentEntry entry = new DocumentEntry();        		        		        		
-                processDocumentReference((DocumentReference) resource, entry);
+                processDocumentReference(documentReference, entry);
                 doc.setDocumentEntry(entry);
                 
-                String contentURL = documentReference.getContentFirstRep().getAttachment().getUrl();
-                Resource binaryContent = resources.get(contentURL);
-                if (binaryContent instanceof Binary) {
-                	Binary binary = (Binary) binaryContent;
-                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(binary.getData(),binary.getContentType())));
+                // create associations
+                for (DocumentReferenceRelatesToComponent relatesTo : documentReference.getRelatesTo()) {
+                	Reference target = relatesTo.getTarget();
+                	DocumentRelationshipType code = relatesTo.getCode();
+                	Association association = new Association();
+                	switch(code) {
+                	case REPLACES:association.setAssociationType(AssociationType.REPLACE);break; 
+                	case TRANSFORMS:association.setAssociationType(AssociationType.TRANSFORM);break; 
+                	case SIGNS:association.setAssociationType(AssociationType.SIGNS);break; 
+                	case APPENDS:association.setAssociationType(AssociationType.APPEND);break;
+                	default:
+                	}
+                	association.setSourceUuid(entry.getEntryUuid());
+                	association.setTargetUuid(transformUriFromReference(target));
+                	
+                	builder.withAssociation(association);
+                }
+                
+                // get binary content from attachment.data or from referenced Binary resource
+                Attachment attachment = documentReference.getContentFirstRep().getAttachment();
+                if (attachment.hasData()) {
+                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(attachment.getData(),attachment.getContentType())));
+                } else if (attachment.hasUrl()) {
+                    String contentURL = attachment.getUrl();                
+	                Resource binaryContent = resources.get(contentURL);
+	                if (binaryContent instanceof Binary) {
+	                	Binary binary = (Binary) binaryContent;	                	
+	                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(binary.getData(),binary.getContentType())));	            
+                    }
                 }
                 
                 builder.withDocument(doc);
@@ -118,6 +182,11 @@ public class Iti65RequestConverter {
 		return builder.build();
 	}
 	
+	/**
+	 * wrap string in localized string
+	 * @param string
+	 * @return
+	 */
 	public LocalizedString localizedString(String string) {
 		if (string==null) return null;
 		return new LocalizedString(string);
@@ -138,12 +207,19 @@ public class Iti65RequestConverter {
 		}
 	}
 	
+	public  Timestamp timestampFromDate(DateType date) {
+    	if (date == null) return null; 
+    	String dateString = date.asStringValue();
+    	if (dateString==null) return null;
+    	dateString = dateString.replaceAll("[T\\-:]","");    	
+    	return Timestamp.fromHL7(dateString);
+    }
+	
 	public  Timestamp timestampFromDate(DateTimeType date) {
     	if (date == null) return null; 
     	String dateString = date.asStringValue();
     	if (dateString==null) return null;
-    	dateString = dateString.replaceAll("[T\\-:]","");
-    	log.info(dateString);
+    	dateString = dateString.replaceAll("[T\\-:]","");    	
     	return Timestamp.fromHL7(dateString);
     }
 	
@@ -151,8 +227,7 @@ public class Iti65RequestConverter {
     	if (date == null) return null; 
     	String dateString = date.asStringValue();
     	if (dateString==null) return null;
-    	dateString = dateString.replaceAll("[T\\-:]","");
-    	log.info(dateString);
+    	dateString = dateString.replaceAll("[T\\-:]","");    	
     	return Timestamp.fromHL7(dateString);
     }
 	
@@ -172,6 +247,11 @@ public class Iti65RequestConverter {
 		return transform(ccs.get(0));
 	}
 	
+	/**
+	 * remove "urn:oid:" prefix from code system
+	 * @param system
+	 * @return
+	 */
 	public String noPrefix(String system) {
 		if (system == null) return null;
 		if (system.startsWith("urn:oid:")) {
@@ -180,15 +260,18 @@ public class Iti65RequestConverter {
 		return system;
 	}
 	
+	public Identifiable transform(Identifier identifier) {
+		String system = noPrefix(identifier.getSystem());			    	
+		return new Identifiable(identifier.getValue(), new AssigningAuthority(system));
+	}
+	
 	public  Identifiable transformReferenceToIdentifiable(Reference reference, DomainResource container) {
 		if (reference.hasReference()) {
 			String targetRef = reference.getReference();		
 			List<Resource> resources = container.getContained();		
 			for (Resource resource : resources) {			
 				if (targetRef.equals(resource.getId())) {
-					Identifier identifier = ((Patient) resource).getIdentifierFirstRep();
-					String system = noPrefix(identifier.getSystem());			    	
-					return new Identifiable(identifier.getValue(), new AssigningAuthority(system));
+					return transform(((Patient) resource).getIdentifierFirstRep());					
 				}
 			}
 			MultiValueMap<String, String> vals = UriComponentsBuilder.fromUriString(targetRef).build().getQueryParams();
@@ -198,14 +281,86 @@ public class Iti65RequestConverter {
 					return new Identifiable(identifier[1], new AssigningAuthority(noPrefix(identifier[0])));
 				}
 			}
-		} else if (reference.hasIdentifier()) {
-		
-			String system = noPrefix(reference.getIdentifier().getSystem());	    	
-	    	String value = reference.getIdentifier().getValue();
-	    	
-	        return new Identifiable(value, new AssigningAuthority(system));
+		} else if (reference.hasIdentifier()) {					
+	        return transform(reference.getIdentifier());
 		} 
 		throw new InvalidRequestException("Cannot resolve patient reference");
+	}
+	
+	public PatientInfo transformReferenceToPatientInfo(Reference ref, DomainResource container) {
+		if (ref == null) return null;
+		if (!ref.hasReference()) return null;
+		List<Resource> resources = container.getContained();		
+		for (Resource resource : resources) {	
+			String targetRef = ref.getReference();
+		
+			if (targetRef.equals(resource.getId())) {
+				Patient patient = ((Patient) resource);
+				
+				PatientInfo patientInfo = new PatientInfo();
+				patientInfo.setDateOfBirth(timestampFromDate(patient.getBirthDateElement()));
+				Enumerations.AdministrativeGender gender = patient.getGender();
+				if (gender != null) {
+					switch(gender) {
+					case MALE: patientInfo.setGender("M");break;
+					case FEMALE: patientInfo.setGender("F");break;
+					case OTHER: patientInfo.setGender("A");break;
+					default: patientInfo.setGender("U");break;
+					}
+				}
+				
+				for (HumanName name : patient.getName()) {
+					Name targetName = new XpnName();
+					if (name.hasPrefix()) targetName.setPrefix(name.getPrefixAsSingleString());
+					if (name.hasSuffix()) targetName.setSuffix(name.getSuffixAsSingleString());
+					targetName.setFamilyName(name.getFamily());
+					List<StringType> given = name.getGiven();
+					if (given != null && !given.isEmpty()) {
+					   targetName.setGivenName(given.get(0).getValue());
+					   if (given.size()>1) {						   
+					       StringBuffer restOfName = new StringBuffer();
+					       for (int part=1;part<given.size();part++) {					    	   
+					           if (part > 1) restOfName.append(" ");
+					    	   restOfName.append(given.get(part).getValue());					    	   
+					       }
+						   targetName.setSecondAndFurtherGivenNames(restOfName.toString());
+					   }
+					}
+					patientInfo.getNames().add(targetName);	
+				}
+				
+				for (Address address : patient.getAddress()) {
+				    org.openehealth.ipf.commons.ihe.xds.core.metadata.Address targetAddress = new org.openehealth.ipf.commons.ihe.xds.core.metadata.Address();
+				    
+				    targetAddress.setCity(address.getCity());
+				    targetAddress.setCountry(address.getCountry());
+				    targetAddress.setStateOrProvince(address.getState());
+				    targetAddress.setZipOrPostalCode(address.getPostalCode());
+				    String streetAddress = null; 
+				    for (StringType street : address.getLine()) {
+				    	if (streetAddress == null) streetAddress = street.getValue();
+				    	else streetAddress += "\n"+street.getValue();
+				    }
+				    targetAddress.setStreetAddress(streetAddress);
+				    
+				    patientInfo.getAddresses().add(targetAddress);
+				}
+				
+				for (Identifier id : patient.getIdentifier()) {
+				  patientInfo.getIds().add(transform(id));
+				}
+				
+				return patientInfo;
+			}
+		}
+		return null;
+	}
+	
+	private String transformUriFromReference(Reference ref) {
+		if (ref.hasIdentifier()) {
+			return ref.getIdentifier().getValue();
+		}
+		return noPrefix(ref.getReference());
 	}
 	
 	private  void processDocumentManifest(DocumentManifest manifest, SubmissionSet submissionSet) {
@@ -215,6 +370,7 @@ public class Iti65RequestConverter {
 		   
 		
 		submissionSet.assignEntryUuid();
+		manifest.setId(submissionSet.getEntryUuid());
 		// TODO
 		//manifest.getIdentifier();
 		//submissionSet.setEntryUuid(entryUuid);
@@ -251,6 +407,7 @@ public class Iti65RequestConverter {
 		 // FIXME String uuid = UUID.randomUUID().toString();
 		//entry.setEntryUuid(reference.getId());
         entry.assignEntryUuid();
+        reference.setId(entry.getEntryUuid());
         
         // limitedMetadata -> meta.profile canonical [0..*] TODO
         // uniqueId -> masterIdentifier Identifier [0..1] [1..1]
@@ -266,6 +423,8 @@ public class Iti65RequestConverter {
         //    documentReference.addIdentifier((new Identifier().setSystem("urn:ietf:rfc:3986")
         //            .setValue("urn:uuid:" + documentEntry.getEntryUuid())).setUse(IdentifierUse.OFFICIAL));
         //}
+        
+        
         // availabilityStatus -> status code {DocumentReferenceStatus} [1..1]
         // approved -> status=current
         // deprecated -> status=superseded
@@ -306,20 +465,14 @@ public class Iti65RequestConverter {
         //   documentReference.addContained(practitioner);
         //   documentReference.setAuthenticator(new Reference().setReference(practitioner.getId()));
         //}
-        
-        // TODO: Relationship Association -> relatesTo [0..*]                   
-        // TODO: Relationship type -> relatesTo.code code [1..1]
-        // TODO: relationship reference -> relatesTo.target Reference(DocumentReference)
-        // [1..1]
-
+              
         // title -> description string [0..1]
 		String title = reference.getDescription();
 		if (title != null) entry.setTitle(localizedString(title));
        
         // confidentialityCode -> securityLabel CodeableConcept [0..*] Note: This
         // is NOT the DocumentReference.meta, as that holds the meta tags for the
-        // DocumentReference itself.
-		
+        // DocumentReference itself.		
 		List<CodeableConcept> securityLabels = reference.getSecurityLabel();
 		transformCodeableConcepts(securityLabels, entry.getConfidentialityCodes());				       
       
@@ -337,7 +490,7 @@ public class Iti65RequestConverter {
         entry.setSize((long) attachment.getSize());
         
         // on the data prior to base64 encoding, if the data is base64 encoded.
-        // TODO: hash -> content.attachment.hash string [0..1]
+        // hash -> content.attachment.hash string [0..1]
         byte[] hash = attachment.getHash();
         if (hash != null) entry.setHash(new String(hash));
 
@@ -367,8 +520,7 @@ public class Iti65RequestConverter {
         //	}
         //}
         
-        // eventCodeList -> context.event CodeableConcept [0..*]
-       
+        // eventCodeList -> context.event CodeableConcept [0..*]       
         List<CodeableConcept> events = context.getEvent();
         transformCodeableConcepts(events, entry.getEventCodeList());
                 
@@ -387,14 +539,14 @@ public class Iti65RequestConverter {
         entry.setPracticeSettingCode(transformCodeableConcept(context.getPracticeSetting()));
         
        
-        // TODO: sourcePatientId and sourcePatientInfo -> context.sourcePatientInfo
+        // sourcePatientId and sourcePatientInfo -> context.sourcePatientInfo
         // Reference(Patient) [0..1] Contained Patient Resource with
         // Patient.identifier.use element set to ‘usual’.
         if (context.hasSourcePatientInfo()) {
           entry.setSourcePatientId(transformReferenceToIdentifiable(context.getSourcePatientInfo(), reference));
+          entry.setSourcePatientInfo(transformReferenceToPatientInfo(context.getSourcePatientInfo(), reference));
         }
-        //
-        //PatientInfo sourcePatientInfo = documentEntry.getSourcePatientInfo();___________________________________________________________________________ ___________________________________________________________________________ 52 Rev. 3.1 – 2019-03-06 Copyright © 2019: IHE International, Inc.FHIR DocumentReference Resource DefinitionIHE constraintDocument Sharing MetadataNotesmeta.source uri [0..1]Allowed but not defined Note 3meta.profile canonical [0..*]limitedMetadataSee Section 4.5.1.1.1.meta.security Coding [0..*]Allowed but not defined Note 3meta.tag Coding [0..*]Allowed but not defined Note 3implicitRules uri [0..1]Allowed but not defined Note 3language code [0..1]Allowed but not defined Note 3text Narrative [0..1]Allowed but not defined Note 3contained Resource [0..*]Allowed but not defined Note 3extension [0..*]Allowed but not defined Note 3modifierExtension Extension [0..*]Allowed but not defined Note 3masterIdentifierIdentifier [0..1] [1..1]uniqueIdSee ITI  TF-2x: Z.9.1.1 Identifier and CDA root plus extensionidentifierIdentifier [0..*]entryUUIDWhen the DocumentReference.identifier carries the entryUUID then the DocumentReference.identifier.use shall be ‘official’statuscode {DocumentReferenceStatus} [1..1]availabilityStatusapproved  status=currentdeprecated status=supersededOther status values are allowed but are not defined in thismapping to XDS. docStatuscode [0..1]Allowed but not defined Note 3type CodeableConcept [0..1]typeCodecategoryCodeableConcept [0..*] [0..1]classCode 
+                  
 	}
 	
 	
