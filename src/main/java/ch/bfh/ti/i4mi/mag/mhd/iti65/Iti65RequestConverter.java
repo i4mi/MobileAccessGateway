@@ -78,7 +78,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * ITI-65 to ITI-41 request converter
- * @author alexander
+ * @author alexander kreutz
  *
  */
 @Slf4j
@@ -91,12 +91,18 @@ public class Iti65RequestConverter {
 		this.schemeMapper = schemeMapper;
 	}
 	
+	/**
+	 * convert ITI-65 to ITI-41 request
+	 * @param requestBundle
+	 * @return
+	 */
 	public ProvideAndRegisterDocumentSet convert(@Body Bundle requestBundle) {
 		
 		SubmissionSet submissionSet = new SubmissionSet();
 		
 		ProvideAndRegisterDocumentSetBuilder builder = new ProvideAndRegisterDocumentSetBuilder(true, submissionSet);
 		
+		// create mapping fullUrl -> resource for each resource in bundle
 		Map<String, Resource> resources = new HashMap<String, Resource>();
 		DocumentManifest manifest = null;
 		for (Bundle.BundleEntryComponent requestEntry : requestBundle.getEntry()) {
@@ -107,16 +113,18 @@ public class Iti65RequestConverter {
             	resources.put(requestEntry.getFullUrl(), resource);
             	
             } else if (resource instanceof ListResource) {
-            	resources.put(requestEntry.getFullUrl(), resource);
+            	new IllegalArgumentException("List Resource is currently not supported");
+            	//resources.put(requestEntry.getFullUrl(), resource);
             } else if (resource instanceof Binary) {
             	resources.put(requestEntry.getFullUrl(), resource);
             } else {
                 throw new IllegalArgumentException(resource + " is not allowed here");
             } 			
         }
-				
+						
 		processDocumentManifest(manifest, submissionSet);
 		
+		// set limited metadata
 		for (CanonicalType profile : requestBundle.getMeta().getProfile()) {
 			if ("http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle".equals(profile.getValue())) {
 				submissionSet.setLimitedMetadata(false);
@@ -125,6 +133,7 @@ public class Iti65RequestConverter {
 			}
 		}
 		
+		// process all resources referenced in DocumentManifest.content
 		for (Reference content : manifest.getContent()) {
 			String refTarget = content.getReference();
 			Resource resource = resources.get(refTarget);
@@ -135,6 +144,7 @@ public class Iti65RequestConverter {
                 processDocumentReference(documentReference, entry);
                 doc.setDocumentEntry(entry);
                 
+                // create associations
                 for (DocumentReferenceRelatesToComponent relatesTo : documentReference.getRelatesTo()) {
                 	Reference target = relatesTo.getTarget();
                 	DocumentRelationshipType code = relatesTo.getCode();
@@ -152,6 +162,7 @@ public class Iti65RequestConverter {
                 	builder.withAssociation(association);
                 }
                 
+                // get binary content from attachment.data or from referenced Binary resource
                 Attachment attachment = documentReference.getContentFirstRep().getAttachment();
                 if (attachment.hasData()) {
                 	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(attachment.getData(),attachment.getContentType())));
@@ -171,6 +182,11 @@ public class Iti65RequestConverter {
 		return builder.build();
 	}
 	
+	/**
+	 * wrap string in localized string
+	 * @param string
+	 * @return
+	 */
 	public LocalizedString localizedString(String string) {
 		if (string==null) return null;
 		return new LocalizedString(string);
@@ -231,6 +247,11 @@ public class Iti65RequestConverter {
 		return transform(ccs.get(0));
 	}
 	
+	/**
+	 * remove "urn:oid:" prefix from code system
+	 * @param system
+	 * @return
+	 */
 	public String noPrefix(String system) {
 		if (system == null) return null;
 		if (system.startsWith("urn:oid:")) {

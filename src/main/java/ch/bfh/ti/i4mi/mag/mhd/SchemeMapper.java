@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * mapper for code systems to schemes
- * @author alexander
+ * @author alexander kreutz
  *
  */
 @Service

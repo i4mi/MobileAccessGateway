@@ -53,7 +53,7 @@ import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
 /**
  * ITI-83 to ITI-45 request converter
- * @author alexander
+ * @author alexander kreutz
  *
  */
 public class Iti83RequestConverter extends BaseRequestConverter {

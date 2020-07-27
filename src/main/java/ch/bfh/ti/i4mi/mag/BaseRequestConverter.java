@@ -20,8 +20,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -78,6 +82,17 @@ public class BaseRequestConverter {
 		ST semanticsText = new ST();
 		semanticsText.addMixed(text);
 		return semanticsText;
+	}
+	
+	public Identifiable transformReference(String targetRef) {
+		MultiValueMap<String, String> vals = UriComponentsBuilder.fromUriString(targetRef).build().getQueryParams();
+		if (vals.containsKey("identifier")) {
+			String[] identifier = vals.getFirst("identifier").split("\\|");
+			if (identifier.length == 2) {
+				return new Identifiable(identifier[1], new AssigningAuthority(getScheme(identifier[0])));
+			}
+		}
+		return null;
 	}
 	
 	

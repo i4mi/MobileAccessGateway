@@ -84,6 +84,7 @@ class Iti65RouteBuilder extends RouteBuilder {
                 .process(translateToFhir(new Iti65ResponseConverter() , Response.class));
     }
 
+     /*
     private class Responder extends ExpressionAdapter {
 
         @Override
@@ -121,4 +122,5 @@ class Iti65RouteBuilder extends RouteBuilder {
             throw new IllegalArgumentException(request + " is not allowed here");
         }
     }
+    */
 }

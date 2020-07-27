@@ -59,7 +59,7 @@ import ch.bfh.ti.i4mi.mag.mhd.BaseQueryResponseConverter;
 
 /**
  * ITI-67 from ITI-18 response converter
- * @author alexander
+ * @author alexander kreutz
  *
  */
 public class Iti67ResponseConverter extends BaseQueryResponseConverter {
@@ -73,6 +73,7 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
         ArrayList<DocumentReference> list = new ArrayList<DocumentReference>();
         if (input != null && Status.SUCCESS.equals(input.getStatus())) {
         	
+        	// process relationship association
         	Map<String, List<DocumentReferenceRelatesToComponent>> relatesToMapping = new HashMap<String, List<DocumentReferenceRelatesToComponent>>();
         	for (Association association : input.getAssociations()) {
         		
@@ -96,11 +97,12 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
         		relatesToMapping.get(source).add(relatesTo);
         	}
         	
+        	
             if (input.getDocumentEntries() != null) {
                 for (DocumentEntry documentEntry : input.getDocumentEntries()) {
                     DocumentReference documentReference = new DocumentReference();
 
-                    // FIXME String uuid = UUID.randomUUID().toString();
+                    
                     documentReference.setId(documentEntry.getEntryUuid()); // FIXME do we need to cache this id in
                                                                            // relation to the DocumentManifest itself
                                                                            // for

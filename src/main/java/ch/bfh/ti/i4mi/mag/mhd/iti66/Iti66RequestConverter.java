@@ -30,6 +30,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryReturnType;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -37,12 +38,17 @@ import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 
 /**
  * ITI-66 to ITI-18 request converter
- * @author alexander
+ * @author alexander kreutz
  *
  */
 public class Iti66RequestConverter extends BaseRequestConverter {
 
-	 public static QueryRegistry searchParameterIti66ToFindSubmissionSetsQuery(@Body Iti66SearchParameters searchParameter) {
+	 /**
+	  * convert ITI-66 request to ITI-18 request
+	  * @param searchParameter
+	  * @return
+	  */
+	 public QueryRegistry searchParameterIti66ToFindSubmissionSetsQuery(@Body Iti66SearchParameters searchParameter) {
 	      
          boolean getLeafClass = true;
        
@@ -57,6 +63,11 @@ public class Iti66RequestConverter extends BaseRequestConverter {
              }
          	
               query.setPatientId(new Identifiable(tokenIdentifier.getValue(), new AssigningAuthority(system)));
+         } 
+         ReferenceParam patientRef =  searchParameter.getPatientReference();
+         if (patientRef != null) {
+        	 Identifiable id = transformReference(patientRef.getValue());
+        	 query.setPatientId(id);
          }
         
          // created Note 1 -> $XDSSubmissionSetSubmissionTimeFrom

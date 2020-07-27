@@ -54,7 +54,7 @@ import ch.bfh.ti.i4mi.mag.Config;
 
 /**
  * base query response converter XDS to MHD
- * @author alexander
+ * @author alexander kreutz
  *
  */
 public abstract class BaseQueryResponseConverter extends BaseResponseConverter implements ToFhirTranslator<QueryResponse> {

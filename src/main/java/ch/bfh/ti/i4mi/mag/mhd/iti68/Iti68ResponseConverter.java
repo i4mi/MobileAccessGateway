@@ -37,7 +37,7 @@ import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
 
 /**
  * ITI-68 from ITI-43 response converter
- * @author alexander
+ * @author alexander kreutz
  *
  */
 public class Iti68ResponseConverter extends BaseResponseConverter {

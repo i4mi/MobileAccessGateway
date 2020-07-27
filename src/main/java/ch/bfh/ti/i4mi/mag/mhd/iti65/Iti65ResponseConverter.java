@@ -41,11 +41,14 @@ import ch.bfh.ti.i4mi.mag.mhd.Utils;
 
 /**
  * ITI-65 from ITI-41 response converter
- * @author alexander
+ * @author alexander kreutz
  *
  */
 public class Iti65ResponseConverter extends BaseResponseConverter implements ToFhirTranslator<Response> { 
 
+	/**
+	 * convert ITI-41 response to ITI-65 response 
+	 */
 	@Override
 	public Object translateToFhir(Response input, Map<String, Object> parameters) {
 		

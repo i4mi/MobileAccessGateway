@@ -34,7 +34,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 /**
  * base class for XDS to MHD response converters
- * @author alexander
+ * @author alexander kreutz
  *
  */
 public class BaseResponseConverter {

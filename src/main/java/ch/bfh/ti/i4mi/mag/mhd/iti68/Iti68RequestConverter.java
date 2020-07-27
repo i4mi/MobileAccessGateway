@@ -26,7 +26,7 @@ import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 
 /**
  * ITI-68 to ITI-43 request converter
- * @author alexander
+ * @author alexander kreutz
  *
  */
 public class Iti68RequestConverter extends BaseRequestConverter {

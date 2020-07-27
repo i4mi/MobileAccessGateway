@@ -41,7 +41,7 @@ import ch.bfh.ti.i4mi.mag.mhd.BaseQueryResponseConverter;
 
 /**
  * ITI-66 from ITI-18 response converter
- * @author alexander
+ * @author alexander kreutz
  *
  */
 public class Iti66ResponseConverter extends BaseQueryResponseConverter {
@@ -51,6 +51,9 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
 	}
 	
 	
+	/**
+	 * convert ITI-18 query response to ITI-66 response bundle
+	 */
     @Override
     public List<DocumentManifest> translateToFhir(QueryResponse input, Map<String, Object> parameters) {
         ArrayList<DocumentManifest> list = new ArrayList<DocumentManifest>();

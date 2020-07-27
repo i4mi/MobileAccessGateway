@@ -57,7 +57,7 @@ import ch.bfh.ti.i4mi.mag.Config;
 
 /**
  * utility classes for MobileAccessGateway
- * @author alexander
+ * @author alexander kreutz
  *
  */
 public class Utils {

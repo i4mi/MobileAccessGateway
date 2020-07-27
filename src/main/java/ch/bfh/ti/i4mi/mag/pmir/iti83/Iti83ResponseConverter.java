@@ -45,7 +45,7 @@ import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
 /**
  * ITI-83 from ITI-45 response converter
- * @author alexander
+ * @author alexander kreutz
  *
  */
 @Component

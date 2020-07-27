@@ -25,8 +25,19 @@ import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.rim.IdentifiableType
 import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.rim.RegistryObjectListType;
 import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.rim.RegistryPackageType;
 
+/**
+ * ITI-18 responses sometimes lack the type classification for the SubmissionSet. 
+ * This causes the SubmissionSets to get lost during transformation from AdhocQueryResponse to QueryResponse
+ * @author alexander kreutz
+ *
+ */
 public class Iti66ResponseBugfix {
 
+	/**
+	 * bugfix: add missing type classification to SubmissionSets in ITI-18 response 
+	 * @param response
+	 * @return
+	 */
 	public AdhocQueryResponse fixResponse(@Body AdhocQueryResponse response) {
 		RegistryObjectListType registryObjectList = response.getRegistryObjectList();
 		if (registryObjectList != null) {

@@ -9,6 +9,11 @@ import net.ihe.gazelle.hl7v3.datatypes.IVLTS;
 import net.ihe.gazelle.hl7v3.datatypes.IVXBTS;
 import net.ihe.gazelle.hl7v3.datatypes.TS;
 
+/**
+ * base class for PMIR/PIX request converters
+ * @author alexander kreutz
+ *
+ */
 public class PMIRRequestConverter extends BaseRequestConverter {
 
 	public static <T extends net.ihe.gazelle.hl7v3.datatypes.ST> T element(Class<T> cl, String content) {

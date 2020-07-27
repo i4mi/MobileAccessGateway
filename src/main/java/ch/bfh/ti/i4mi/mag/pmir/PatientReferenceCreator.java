@@ -22,11 +22,22 @@ import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
 
+/**
+ * create a patient reference using the mobile health gateway base address 
+ * @author alexander kreutz
+ *
+ */
 public class PatientReferenceCreator {
 
 	@Autowired
 	Config config;
 	
+	/**
+	 * create patient reference from identifiable authority and value
+	 * @param system
+	 * @param value
+	 * @return
+	 */
 	public Reference createPatientReference(String system, String value) {
 		Reference result = new Reference();
 		result.setReference(config.getUriPatientEndpoint()+"?identifier=urn:oid:"+system+"|"+value);		
