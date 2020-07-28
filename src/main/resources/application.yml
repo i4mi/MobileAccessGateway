@@ -6,13 +6,20 @@ spring:
     name: ipf-hapifhir-iti-example
 
 # https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#server-properties
+
 server:
+  ssl:
+    key-store: classpath:271.p12
+    key-store-password: a1b2c3
+    key-store-type: pkcs12
+    key-alias: bfh1
+    #key-password: password
   port: 9091 # Application listening port
 
-ipf:
+#ipf:
   # https://oehf.github.io/ipf-docs/docs/ihe/atna/
-  atna:
-    audit-enabled: false # Disable ATNA logging as it requires more efforts to work
+  #atna:
+    #audit-enabled: false # Disable ATNA logging as it requires more efforts to work
 logging:
   level:
     root: info

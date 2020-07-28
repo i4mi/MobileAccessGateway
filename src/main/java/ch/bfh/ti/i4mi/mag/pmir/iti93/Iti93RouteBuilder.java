@@ -47,8 +47,10 @@ class Iti93RouteBuilder extends RouteBuilder {
         log.debug("Iti93RouteBuilder configure");
         
         final String xds44Endpoint = String.format("pixv3-iti44://%s" +
-                "?secure=%s", this.config.getHostUrl45Http(), this.config.isPixHttps() ? "true" : "false")
+                "?secure=%s", this.config.getIti44HostUrl(), this.config.isPixHttps() ? "true" : "false")
                 +
+                "&audit=false" +
+                "&auditContext=#myAuditContext" +
                 "&inInterceptors=#soapResponseLogger" + 
                 "&inFaultInterceptors=#soapResponseLogger"+
                 "&outInterceptors=#soapRequestLogger" + 

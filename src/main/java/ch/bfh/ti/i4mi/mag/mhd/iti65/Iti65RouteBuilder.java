@@ -62,8 +62,10 @@ class Iti65RouteBuilder extends RouteBuilder {
         
         
         final String xds41Endpoint = String.format("xds-iti41://%s/xds/iti41" +
-                "?secure=%s", this.config.getHostUrl41Http(), this.config.isHttps() ? "true" : "false")
+                "?secure=%s", this.config.getIti41HostUrl(), this.config.isHttps() ? "true" : "false")
               +
+                      "&audit=false" +
+                      "&auditContext=#myAuditContext" +
                       "&inInterceptors=#soapResponseLogger" + 
                       "&inFaultInterceptors=#soapResponseLogger"+
                       "&outInterceptors=#soapRequestLogger" + 

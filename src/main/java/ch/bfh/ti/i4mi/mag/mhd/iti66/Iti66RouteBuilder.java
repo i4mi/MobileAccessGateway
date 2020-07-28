@@ -46,8 +46,10 @@ class Iti66RouteBuilder extends RouteBuilder {
     public void configure() throws Exception {
         log.debug("Iti66RouteBuilder configure");
         final String xds18Endpoint = String.format("xds-iti18://%s/xds/iti18" +
-          "?secure=%s", this.config.getHostUrl(), this.config.isHttps() ? "true" : "false")
+          "?secure=%s", this.config.getIti18HostUrl(), this.config.isHttps() ? "true" : "false")
         +
+                "&audit=false" +
+                "&auditContext=#myAuditContext" +
                 "&inInterceptors=#soapResponseLogger" + 
                 "&inFaultInterceptors=#soapResponseLogger"+
                 "&outInterceptors=#soapRequestLogger" + 
