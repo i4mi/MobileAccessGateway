@@ -3,9 +3,9 @@
    "resourceType":"Bundle",
    "meta":{
       "profile":[
-         "http://ihe.net/fhir/tag/iti-65"
+          "http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-mhd-providedocumentbundle-comprehensive"
       ]
-   },
+  },
    "type":"transaction",
    "entry":[
       {
