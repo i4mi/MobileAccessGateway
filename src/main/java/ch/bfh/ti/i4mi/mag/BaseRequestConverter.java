@@ -95,5 +95,11 @@ public class BaseRequestConverter {
 		return null;
 	}
 	
+	private static volatile long currentId = System.currentTimeMillis();
+	
+	public String uniqueId() {		
+		return Long.toString(currentId++);
+	}
+	
 	
 }
