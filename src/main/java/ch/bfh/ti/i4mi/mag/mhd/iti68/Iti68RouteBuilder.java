@@ -48,13 +48,13 @@ class Iti68RouteBuilder extends RouteBuilder {
         final String xds43Endpoint = String.format("xds-iti43://%s/xds/iti43" +
                 "?secure=%s", this.config.getIti43HostUrl(), this.config.isHttps() ? "true" : "false")
                 +
-                "&audit=false" +
+                "&audit=true" +
                 "&auditContext=#myAuditContext" +
                 "&inInterceptors=#soapResponseLogger" + 
                 "&inFaultInterceptors=#soapResponseLogger"+
                 "&outInterceptors=#soapRequestLogger" + 
                 "&outFaultInterceptors=#soapRequestLogger";
-        from("mhd-iti68:camel/xdsretrieve?audit=false").routeId("ddh-retrievedoc-adapter")
+        from("mhd-iti68:camel/xdsretrieve?audit=true&auditContext=#myAuditContext").routeId("ddh-retrievedoc-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 // translate, forward, translate back

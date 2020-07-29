@@ -49,14 +49,14 @@ class Iti93RouteBuilder extends RouteBuilder {
         final String xds44Endpoint = String.format("pixv3-iti44://%s" +
                 "?secure=%s", this.config.getIti44HostUrl(), this.config.isPixHttps() ? "true" : "false")
                 +
-                "&audit=false" +
+                "&audit=true" +
                 "&auditContext=#myAuditContext" +
                 "&inInterceptors=#soapResponseLogger" + 
                 "&inFaultInterceptors=#soapResponseLogger"+
                 "&outInterceptors=#soapRequestLogger" + 
                 "&outFaultInterceptors=#soapRequestLogger";
         
-        from("pmir-iti93:stub?audit=false").routeId("pmir-feed")
+        from("pmir-iti93:stub?audit=true&auditContext=#myAuditContext").routeId("pmir-feed")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 .bean(Iti93RequestConverter.class)

@@ -48,14 +48,14 @@ class Iti66RouteBuilder extends RouteBuilder {
         final String xds18Endpoint = String.format("xds-iti18://%s/xds/iti18" +
           "?secure=%s", this.config.getIti18HostUrl(), this.config.isHttps() ? "true" : "false")
         +
-                "&audit=false" +
+                "&audit=true" +
                 "&auditContext=#myAuditContext" +
                 "&inInterceptors=#soapResponseLogger" + 
                 "&inFaultInterceptors=#soapResponseLogger"+
                 "&outInterceptors=#soapRequestLogger" + 
                 "&outFaultInterceptors=#soapRequestLogger";
 
-        from("mhd-iti66:translation?audit=false").routeId("mdh-documentmanifest-adapter")
+        from("mhd-iti66:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentmanifest-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 .bean(Utils.class,"searchParameterToBody")

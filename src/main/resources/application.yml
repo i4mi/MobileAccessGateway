@@ -14,7 +14,9 @@ server:
     key-store-type: pkcs12
     key-alias: bfh1
     #key-password: password
-  port: 9091 # Application listening port
+  port: 9091 # Application listening port for HTTPS
+  http:
+    port: 9090 # Application listening port for HTTP. Remove line to disable.
 
 #ipf:
   # https://oehf.github.io/ipf-docs/docs/ihe/atna/
