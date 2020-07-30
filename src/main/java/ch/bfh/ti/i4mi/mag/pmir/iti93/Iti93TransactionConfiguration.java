@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.bfh.ti.i4mi.mag.pmir;
+package ch.bfh.ti.i4mi.mag.pmir.iti93;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+
 import org.openehealth.ipf.commons.ihe.fhir.FhirTransactionConfiguration;
 import org.openehealth.ipf.commons.ihe.fhir.FhirTransactionValidator;
 import org.openehealth.ipf.commons.ihe.fhir.audit.FhirQueryAuditDataset;

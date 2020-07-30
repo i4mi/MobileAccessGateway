@@ -14,33 +14,27 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.pmir;
+package ch.bfh.ti.i4mi.mag.pmir.iti93;
 
-import static ch.bfh.ti.i4mi.mag.pmir.PMIR.Interactions.ITI_93;
-
-import org.apache.camel.CamelContext;
+import org.apache.camel.spi.UriEndpoint;
 import org.openehealth.ipf.commons.ihe.fhir.audit.FhirQueryAuditDataset;
-import org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirComponent;
+import org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirConsumer;
+import org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirEndpoint;
 import org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirEndpointConfiguration;
 
 /**
- * Component for PMIR(ITI-93)
+ * PMIR Mobile Patient Identity Feed endpoint (ITI-93)
  *
  */
-public class Iti93Component extends FhirComponent<FhirQueryAuditDataset> {
+@UriEndpoint(scheme = "pmir-iti93", title = "ITI-93 PMIR", syntax = "pmir-iti93:host:port", consumerClass = FhirConsumer.class, label = "http")
+public class Iti93Endpoint extends FhirEndpoint<FhirQueryAuditDataset, Iti93Component> {
 
-
-    public Iti93Component() {
-        super(ITI_93);
-    }
-
-    public Iti93Component(CamelContext context) {
-        super(context, ITI_93);
+    public Iti93Endpoint(String uri, Iti93Component fhirComponent, FhirEndpointConfiguration<FhirQueryAuditDataset> config) {
+        super(uri, fhirComponent, config);
     }
 
     @Override
-    protected Iti93Endpoint doCreateEndpoint(String uri, FhirEndpointConfiguration<FhirQueryAuditDataset> config) {
-        return new Iti93Endpoint(uri, this, config);
+    protected String createEndpointUri() {
+        return "pmir-iti93:" + "not-implemented yet";
     }
-
 }

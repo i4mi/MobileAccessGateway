@@ -47,13 +47,16 @@ class Iti67RouteBuilder extends RouteBuilder {
     public void configure() throws Exception {
         log.debug("Iti67RouteBuilder configure");
         final String xds18Endpoint = String.format("xds-iti18://%s/xds/iti18" +
-                "?secure=%s", this.config.getHostUrl(), this.config.isHttps() ? "true" : "false")
+                "?secure=%s", this.config.getIti18HostUrl(), this.config.isHttps() ? "true" : "false")
                 +
+                "&audit=true" +
+                "&auditContext=#myAuditContext" +
+                "&sslContextParameters=#pixContext" +
                 "&inInterceptors=#soapResponseLogger" + 
                 "&inFaultInterceptors=#soapResponseLogger"+
                 "&outInterceptors=#soapRequestLogger" + 
                 "&outFaultInterceptors=#soapRequestLogger";
-        from("mhd-iti67:translation?audit=false").routeId("mdh-documentreference-adapter")
+        from("mhd-iti67:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentreference-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())                
                 .bean(Utils.class,"searchParameterToBody")

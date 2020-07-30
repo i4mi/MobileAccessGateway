@@ -62,14 +62,17 @@ class Iti65RouteBuilder extends RouteBuilder {
         
         
         final String xds41Endpoint = String.format("xds-iti41://%s/xds/iti41" +
-                "?secure=%s", this.config.getHostUrl41Http(), this.config.isHttps() ? "true" : "false")
+                "?secure=%s", this.config.getIti41HostUrl(), this.config.isHttps() ? "true" : "false")
               +
+                      "&audit=true" +
+                      "&auditContext=#myAuditContext" +
+                      "&sslContextParameters=#pixContext" +
                       "&inInterceptors=#soapResponseLogger" + 
                       "&inFaultInterceptors=#soapResponseLogger"+
                       "&outInterceptors=#soapRequestLogger" + 
                       "&outFaultInterceptors=#soapRequestLogger";
         
-        from("mhd-iti65:stub?audit=false&fhirContext=#fhirContext").routeId("mdh-providedocumentbundle")
+        from("mhd-iti65:stub?audit=true&auditContext=#myAuditContext&fhirContext=#fhirContext").routeId("mhd-providedocumentbundle")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 .process(itiRequestValidator())
@@ -84,6 +87,7 @@ class Iti65RouteBuilder extends RouteBuilder {
                 .process(translateToFhir(new Iti65ResponseConverter() , Response.class));
     }
 
+     /*
     private class Responder extends ExpressionAdapter {
 
         @Override
@@ -121,4 +125,5 @@ class Iti65RouteBuilder extends RouteBuilder {
             throw new IllegalArgumentException(request + " is not allowed here");
         }
     }
+    */
 }

@@ -17,6 +17,7 @@ package ch.bfh.ti.i4mi.mag.mhd.iti67;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -25,6 +26,8 @@ import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContentComponent;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
+import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceRelatesToComponent;
+import org.hl7.fhir.r4.model.DocumentReference.DocumentRelationshipType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.Identifier;
@@ -36,6 +39,8 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Address;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Association;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssociationType;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Author;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntry;
@@ -52,6 +57,11 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseQueryResponseConverter;
 
+/**
+ * ITI-67 from ITI-18 response converter
+ * @author alexander kreutz
+ *
+ */
 public class Iti67ResponseConverter extends BaseQueryResponseConverter {
 
 	public Iti67ResponseConverter(final Config config) {
@@ -62,18 +72,48 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
     public List<DocumentReference> translateToFhir(QueryResponse input, Map<String, Object> parameters) {
         ArrayList<DocumentReference> list = new ArrayList<DocumentReference>();
         if (input != null && Status.SUCCESS.equals(input.getStatus())) {
+        	
+        	// process relationship association
+        	Map<String, List<DocumentReferenceRelatesToComponent>> relatesToMapping = new HashMap<String, List<DocumentReferenceRelatesToComponent>>();
+        	for (Association association : input.getAssociations()) {
+        		
+                // Relationship type -> relatesTo.code code [1..1]
+                // relationship reference -> relatesTo.target Reference(DocumentReference)
+
+        		String source = association.getSourceUuid();
+        		String target = association.getTargetUuid();
+        		AssociationType type = association.getAssociationType();
+        		
+        		DocumentReferenceRelatesToComponent relatesTo = new DocumentReferenceRelatesToComponent();
+        		switch(type) {
+        		case APPEND:relatesTo.setCode(DocumentRelationshipType.APPENDS);break;
+        		case REPLACE:relatesTo.setCode(DocumentRelationshipType.REPLACES);break;
+        		case TRANSFORM:relatesTo.setCode(DocumentRelationshipType.TRANSFORMS);break;
+        		case SIGNS:relatesTo.setCode(DocumentRelationshipType.SIGNS);break;
+        		}
+        		relatesTo.setTarget(new Reference().setReference("urn:oid:"+target));
+        		
+        		if (!relatesToMapping.containsKey(source)) relatesToMapping.put(source, new ArrayList<DocumentReferenceRelatesToComponent>());
+        		relatesToMapping.get(source).add(relatesTo);
+        	}
+        	
+        	
             if (input.getDocumentEntries() != null) {
                 for (DocumentEntry documentEntry : input.getDocumentEntries()) {
                     DocumentReference documentReference = new DocumentReference();
 
-                    // FIXME String uuid = UUID.randomUUID().toString();
+                    
                     documentReference.setId(documentEntry.getEntryUuid()); // FIXME do we need to cache this id in
                                                                            // relation to the DocumentManifest itself
                                                                            // for
 
                     list.add(documentReference);
-                    // limitedMetadata -> meta.profile canonical [0..*] TODO
-                    
+                    // limitedMetadata -> meta.profile canonical [0..*] 
+                    if (documentEntry.isLimitedMetadata()) {
+                    	documentReference.getMeta().addProfile("http://ihe.net/fhir/StructureDefinition/IHE_MHD_Query_Comprehensive_DocumentReference");
+                    } else {
+                    	documentReference.getMeta().addProfile("http://ihe.net/fhir/StructureDefinition/IHE_MHD_Comprehensive_DocumentManifest");
+                    }
                     
                     // uniqueId -> masterIdentifier Identifier [0..1] [1..1]
                     if (documentEntry.getUniqueId() != null) {
@@ -139,10 +179,9 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                        documentReference.setAuthenticator((Reference) new Reference().setResource(practitioner));
                     }
                     
-                    // TODO: Relationship Association -> relatesTo [0..*]                   
-                    // TODO: Relationship type -> relatesTo.code code [1..1]
-                    // TODO: relationship reference -> relatesTo.target Reference(DocumentReference)
-                    // [1..1]
+                    // Relationship Association -> relatesTo [0..*]                   
+                    // [1..1]                    
+					documentReference.setRelatesTo(relatesToMapping.get(documentEntry.getEntryUuid()));
 
                     // title -> description string [0..1]
                     if (documentEntry.getTitle() != null) {

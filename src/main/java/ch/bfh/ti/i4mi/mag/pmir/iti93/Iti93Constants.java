@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.pmir;
+package ch.bfh.ti.i4mi.mag.pmir.iti93;
 
 import java.util.Arrays;
 import java.util.HashSet;
