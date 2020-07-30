@@ -1,5 +1,39 @@
 # General configuration of the IPF application.
 
+mag:
+  baseurl: https://localhost:9091
+  client-ssl:
+    key-store: 270.jks
+    key-store-password: a1b2c3
+    cert-alias: gateway
+  xds:
+    https: false
+    iti-18:
+      url: ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq
+    iti-43:
+      url: ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/ret
+    iti-41:
+      url: ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/prb
+    retrieve:
+      url: http://localhost:9091/camel/xdsretrieve
+  pix:
+    https: true
+    iti-45:
+      url: ehealthsuisse.ihe-europe.net:10443/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType
+    iti-44:
+      url: ehealthsuisse.ihe-europe.net:10443/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType
+    oids:
+      sender: 1.3.6.1.4.1.12559.11.1.2.2.5.7
+      receiver: 1.3.6.1.4.1.12559.11.1.2.2.5.11
+      query: 1.3.6.1.4.1.12559.11.1.2.2.5.7
+  audit:
+    audit-enabled: true 
+    audit-source-id: CCC_BFH_MAG
+    audit-enterprise-site-id: BFH
+    audit-repository-host: 147.135.232.177
+    audit-repository-port: 3001
+    audit-repostiory-transport: UDP        
+        
 # https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#core-properties
 spring:
   application:

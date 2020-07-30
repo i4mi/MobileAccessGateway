@@ -137,6 +137,7 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     }
     
     public Practitioner transformPractitioner(Person person) {
+    	if (person==null) return null;
     	Practitioner practitioner = new Practitioner();
     	Name name = person.getName();
     	if (name != null) {
@@ -240,7 +241,7 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
 		
 		if (!orgs.isEmpty() || !roles.isEmpty() || !specialities.isEmpty()) {
 			role = new PractitionerRole();                    			
-			role.setPractitioner((Reference) new Reference().setResource(containedPerson));
+			if (containedPerson != null) role.setPractitioner((Reference) new Reference().setResource(containedPerson));
 		}
 		
 		for (org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization org : orgs) {

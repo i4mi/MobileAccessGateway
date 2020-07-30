@@ -24,6 +24,8 @@ import org.openehealth.ipf.commons.audit.DefaultAuditContext;
 import org.openehealth.ipf.commons.audit.types.AuditSource;
 import org.openehealth.ipf.commons.ihe.ws.cxf.payload.InPayloadLoggerInterceptor;
 import org.openehealth.ipf.commons.ihe.ws.cxf.payload.OutPayloadLoggerInterceptor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -47,27 +49,32 @@ public class Config {
    /**
     * Use HTTPS for XDS ?
     */
-    private boolean https = false;
+	@Value("${mag.xds.https}")
+    private boolean https;// = false;
     
     /**
      * URL of ITI-18 endpoint (
      */
-    private String iti18HostUrl = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
+	@Value("${mag.xds.iti-18.url}")
+    private String iti18HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
     
     /**
      * URL of ITI-43 endpoint
      */
-    private String iti43HostUrl = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/ret"; // http
+	@Value("${mag.xds.iti-43.url}")
+    private String iti43HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/ret"; // http
     
     /**
      * URL of ITI-41 endpoint
      */
-    private String iti41HostUrl = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/prb"; // http
+	@Value("${mag.xds.iti-41.url}")
+    private String iti41HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/prb"; // http
     
     /**
      * Own full URL where clients can retrieve documents from 
      */
-    private String uriMagXdsRetrieve = "http://localhost:9091/camel/xdsretrieve";
+	@Value("${mag.xds.retrieve.url}")
+    private String uriMagXdsRetrieve;// = "https://localhost:9091/camel/xdsretrieve";
     
     //private String hostUrl45Http = "gazelle.interopsante.org/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType"; // http
     //private String hostUrl45Http = "gazelle.ihe.net/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType"; // http
@@ -80,51 +87,75 @@ public class Config {
     /**
      * Use HTTPS for PIX V3?
      */
-    private boolean pixHttps = true;
+	@Value("${mag.pix.https}")
+    private boolean pixHttps;// = true;
     
     /**
      * URL of ITI-45 endpoint
      */
-    private String iti45HostUrl = "ehealthsuisse.ihe-europe.net:10443/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType";
+	@Value("${mag.pix.iti-45.url}")
+    private String iti45HostUrl;// = "ehealthsuisse.ihe-europe.net:10443/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType";
     
     /**
      * URL of ITI-44 endpoint
      */
-    private String iti44HostUrl = iti45HostUrl;
+	@Value("${mag.pix.iti-44.url}")
+    private String iti44HostUrl;// = iti45HostUrl;
     
     /**
      * sender OID used when sending requests
      */
-    private String pixMySenderOid = "1.3.6.1.4.1.12559.11.1.2.2.5.7";
+	@Value("${mag.pix.oids.sender}")
+    private String pixMySenderOid;// = "1.3.6.1.4.1.12559.11.1.2.2.5.7";
     
     /**
      * receiver OID (of target system) used when sending requests
      */
-    private String pixReceiverOid = "1.3.6.1.4.1.12559.11.1.2.2.5.11";
+	@Value("${mag.pix.oids.receiver}")
+    private String pixReceiverOid;// = "1.3.6.1.4.1.12559.11.1.2.2.5.11";
     
     /**
      * OID for queries
      */
-    private String pixQueryOid = pixMySenderOid;
+	@Value("${mag.pix.oids.query}")
+    private String pixQueryOid;// = pixMySenderOid;
     
-    /**
+   /**
+    * baseurl of gateway
+    */
+	@Value("${mag.baseurl}")
+	private String baseurl;
+	 
+	/**
      * Own full URL of patient endpoint
-     */    
-    private String uriPatientEndpoint = "http://localhost:9091/fhir/Patient";
+     */
+    public String getUriPatientEndpoint() { return baseurl+"/fhir/Patient"; };
+   
     
     /**
      * Connection security : Use client certificate
      */
+    
+    @Value("${mag.client-ssl.key-store}")
+    private String keystore;
+    
+    @Value("${mag.client-ssl.key-store-password}")
+    private String keystorePassword;
+    
+    @Value("${mag.client-ssl.cert-alias}")
+    private String certAlias;
+    
+   
     @Bean(name = "pixContext")
     public SSLContextParameters getPixSSLContext() {
     	KeyStoreParameters ksp = new KeyStoreParameters();
     	// Keystore file may be found at src/main/resources
-    	ksp.setResource("270.jks"); 
-    	ksp.setPassword("a1b2c3");    	
+    	ksp.setResource(keystore); 
+    	ksp.setPassword(keystorePassword);    	
 
     	KeyManagersParameters kmp = new KeyManagersParameters();
     	kmp.setKeyStore(ksp);
-    	kmp.setKeyPassword("a1b2c3");   
+    	kmp.setKeyPassword(keystorePassword);   
     	
     	TrustManagersParameters tmp = new TrustManagersParameters();
     	tmp.setKeyStore(ksp);    	
@@ -132,22 +163,23 @@ public class Config {
     	SSLContextParameters scp = new SSLContextParameters();
     	scp.setKeyManagers(kmp);
     	scp.setTrustManagers(tmp);
-    	scp.setCertAlias("gateway");
+    	scp.setCertAlias(certAlias);
     	
     	return scp;
     }
-    
+       
     @Bean(name = "myAuditContext")
+    @ConfigurationProperties(prefix = "mag.audit")
     public DefaultAuditContext getAuditContext() {
     	DefaultAuditContext context = new DefaultAuditContext();    	
-    	context.setAuditEnabled(true);
-    	context.setAuditSourceId("MySource"); 
-        context.setAuditEnterpriseSiteId("MyEnterprise");
+    	/*context.setAuditEnabled(true);
+    	context.setAuditSourceId("CCC_BFH_MAG"); 
+        context.setAuditEnterpriseSiteId("BFH");
         
         context.setAuditRepositoryHost("147.135.232.177");
         context.setAuditRepositoryPort(3001);
         context.setAuditRepositoryTransport("UDP");        
-        
+        */
         //context.setAuditSource(AuditSource.of("code","system","display"));
         //context.setSendingApplication("MobileAccessGateway");
             	    	
