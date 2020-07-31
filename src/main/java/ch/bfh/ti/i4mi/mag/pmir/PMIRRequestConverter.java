@@ -1,5 +1,6 @@
 package ch.bfh.ti.i4mi.mag.pmir;
 
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Period;
@@ -7,6 +8,7 @@ import org.hl7.fhir.r4.model.Period;
 import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 import net.ihe.gazelle.hl7v3.datatypes.IVLTS;
 import net.ihe.gazelle.hl7v3.datatypes.IVXBTS;
+import net.ihe.gazelle.hl7v3.datatypes.TEL;
 import net.ihe.gazelle.hl7v3.datatypes.TS;
 
 /**
@@ -43,6 +45,17 @@ public class PMIRRequestConverter extends BaseRequestConverter {
 		TS result = new TS();
 		result.setValue(date.getValueAsString().replace("-",""));
 		return result;
+	}
+	
+	public static TEL transform(ContactPoint contactPoint) {
+        TEL telecom = new TEL();
+    			        		        	
+    	ContactPoint.ContactPointUse use = contactPoint.getUse();		        	
+    	if (use != null) telecom.setUse(use.toString());
+    	telecom.setValue(contactPoint.getValue());
+    	if (contactPoint.hasPeriod()) telecom.addUseablePeriod(transform(contactPoint.getPeriod()));
+    	
+    	return telecom;
 	}
 	  
 }

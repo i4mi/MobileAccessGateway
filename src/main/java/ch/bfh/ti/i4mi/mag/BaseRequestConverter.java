@@ -19,11 +19,13 @@ package ch.bfh.ti.i4mi.mag;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -31,6 +33,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
+import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import net.ihe.gazelle.hl7v3.datatypes.ST;
 
 /**
@@ -39,13 +42,17 @@ import net.ihe.gazelle.hl7v3.datatypes.ST;
  */
 public class BaseRequestConverter {
 
-	private static SchemeMapper schemeMapper = new SchemeMapper();
+	@Autowired
+	private SchemeMapper schemeMapper;// = new SchemeMapper();
+	
+	@Autowired
+	private PatientReferenceCreator patientReferenceCreator;
 
-	public static String getScheme(String system) {
+	public String getScheme(String system) {
 		return schemeMapper.getScheme(system);
 	}
 
-	public static Timestamp timestampFromDateParam(DateParam dateParam) {
+	public Timestamp timestampFromDateParam(DateParam dateParam) {
 		if (dateParam == null)
 			return null;
 		String dateString = dateParam.getValueAsString();
@@ -53,11 +60,11 @@ public class BaseRequestConverter {
 		return Timestamp.fromHL7(dateString);
 	}
 
-	public static Code codeFromToken(TokenParam param) {
+	public Code codeFromToken(TokenParam param) {
 		return new Code(param.getValue(), null, getScheme(param.getSystem()));
 	}
 
-	public static List<Code> codesFromTokens(TokenOrListParam params) {
+	public List<Code> codesFromTokens(TokenOrListParam params) {
 		if (params == null)
 			return null;
 		List<Code> codes = new ArrayList<Code>();
@@ -68,7 +75,7 @@ public class BaseRequestConverter {
 	}
 
 	// TODO is this the correct mapping for URIs?
-	public static List<String> urisFromTokens(TokenOrListParam params) {
+	public List<String> urisFromTokens(TokenOrListParam params) {
 		if (params == null)
 			return null;
 		List<String> result = new ArrayList<String>();
@@ -78,13 +85,18 @@ public class BaseRequestConverter {
 		return result;
 	}
 
-	public static ST ST(String text) {
+	public ST ST(String text) {
 		ST semanticsText = new ST();
 		semanticsText.addMixed(text);
 		return semanticsText;
 	}
 	
 	public Identifiable transformReference(String targetRef) {
+		if (targetRef == null) return null;
+		
+		Identifiable id = patientReferenceCreator.resolvePatientReference(targetRef);
+		if (id!=null) return id;
+		
 		MultiValueMap<String, String> vals = UriComponentsBuilder.fromUriString(targetRef).build().getQueryParams();
 		if (vals.containsKey("identifier")) {
 			String[] identifier = vals.getFirst("identifier").split("\\|");

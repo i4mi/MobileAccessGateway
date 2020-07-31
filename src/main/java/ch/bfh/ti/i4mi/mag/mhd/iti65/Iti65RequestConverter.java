@@ -487,7 +487,7 @@ public class Iti65RequestConverter {
 		entry.setLanguageCode(attachment.getLanguage());
 
         // size -> content.attachment.size integer [0..1] The size is calculated
-        entry.setSize((long) attachment.getSize());
+		if (attachment.hasSize()) entry.setSize((long) attachment.getSize());
         
         // on the data prior to base64 encoding, if the data is base64 encoded.
         // hash -> content.attachment.hash string [0..1]

@@ -50,8 +50,8 @@ class Iti83RouteBuilder extends RouteBuilder {
 		 final String xds45Endpoint = String.format("pixv3-iti45://%s" +
 	                "?secure=%s", this.config.getIti45HostUrl(), this.config.isPixHttps() ? "true" : "false")
 	                +
-	                "&sslContextParameters=#pixContext" +
-	                "&audit=true" +
+	                //"&sslContextParameters=#pixContext" +
+	                "&audit=false" +
 	                "&auditContext=#myAuditContext" +
 	                "&inInterceptors=#soapResponseLogger" + 
 	                "&inFaultInterceptors=#soapResponseLogger"+
