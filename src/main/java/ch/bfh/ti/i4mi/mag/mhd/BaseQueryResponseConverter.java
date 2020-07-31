@@ -51,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 
 /**
  * base query response converter XDS to MHD
@@ -59,12 +60,15 @@ import ch.bfh.ti.i4mi.mag.Config;
  */
 public abstract class BaseQueryResponseConverter extends BaseResponseConverter implements ToFhirTranslator<QueryResponse> {
 
-	private SchemeMapper schemeMapper = new SchemeMapper();
+	private SchemeMapper schemeMapper;
+	private PatientReferenceCreator patientReferenceCreator;
 	
 	protected final Config config;
 
     public BaseQueryResponseConverter(final Config config) {
         this.config = config;
+        schemeMapper = config.getSchemeMapper();
+        patientReferenceCreator = config.getPatientReferenceCreator();
     }
 	
     public String getSystem(String schemeName) {
@@ -214,7 +218,7 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	String baseUrl = config.getUriPatientEndpoint();
     	String system = patient.getAssigningAuthority().getUniversalId();
     	String value = patient.getId(); 
-		return new Reference().setReference(baseUrl+"?identifier=urn:oid:"+system+"|"+value);
+		return patientReferenceCreator.createPatientReference(system, value);
     }
     
     public CodeableConcept transform(Identifiable patient) {

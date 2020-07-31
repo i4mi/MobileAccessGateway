@@ -66,7 +66,7 @@ class Iti65RouteBuilder extends RouteBuilder {
               +
                       "&audit=true" +
                       "&auditContext=#myAuditContext" +
-                      "&sslContextParameters=#pixContext" +
+                //      "&sslContextParameters=#pixContext" +
                       "&inInterceptors=#soapResponseLogger" + 
                       "&inFaultInterceptors=#soapResponseLogger"+
                       "&outInterceptors=#soapRequestLogger" + 

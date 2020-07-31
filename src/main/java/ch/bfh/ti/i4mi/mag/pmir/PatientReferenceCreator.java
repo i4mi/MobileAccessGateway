@@ -17,10 +17,13 @@
 package ch.bfh.ti.i4mi.mag.pmir;
 
 import org.hl7.fhir.r4.model.Reference;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 
 /**
  * create a patient reference using the mobile health gateway base address 
@@ -30,7 +33,11 @@ import ch.bfh.ti.i4mi.mag.Config;
 public class PatientReferenceCreator {
 
 	@Autowired
-	Config config;
+	private Config config;
+	
+	@Autowired
+	private SchemeMapper schemeMapper;
+	
 	
 	/**
 	 * create patient reference from identifiable authority and value
@@ -40,7 +47,26 @@ public class PatientReferenceCreator {
 	 */
 	public Reference createPatientReference(String system, String value) {
 		Reference result = new Reference();
-		result.setReference(config.getUriPatientEndpoint()+"?identifier=urn:oid:"+system+"|"+value);		
+		//result.setReference(config.getUriPatientEndpoint()+"?identifier=urn:oid:"+system+"|"+value);		
+		result.setReference(config.getUriPatientEndpoint()+"/"+system+"-"+value);
 		return result;
+	}
+	
+	public Identifiable resolvePatientReference(String reference) {
+		if (reference.startsWith("Patient/") || reference.startsWith(config.getUriPatientEndpoint())) {
+			int start = reference.indexOf("Patient/")+"Patient/".length();
+			int end = reference.indexOf("?");
+			if (end<0) end = reference.length();
+			return resolvePatientId(reference.substring(start,end));			
+		} else if (reference.indexOf("/")<0) return resolvePatientId(reference);
+		return null;
+	}
+	
+	public Identifiable resolvePatientId(String fullId) {
+		int splitIdx = fullId.indexOf("-");
+		if (splitIdx>0) {
+			return new Identifiable(fullId.substring(splitIdx+1), new AssigningAuthority(schemeMapper.getScheme(fullId.substring(0,splitIdx))));
+		}
+		return null;
 	}
 }

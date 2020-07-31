@@ -13,7 +13,7 @@
           },
           "focus": [
             {
-              "reference": "Bundle/abc"
+              "reference": "Patient/123"
             }
           ],  
           "destination": [
@@ -24,26 +24,49 @@
         }
       },  
       {  
-        "fullUrl": "http://example.com/fhir/Bundle/abc",
-        "resource": { 
-          "resourceType": "Bundle",
-          "id": "abc",
-          "type": "history",
-          "entry": [
-            {
               "fullUrl": "http://example.com/fhir/Patient/123",
               "resource": {
                 "resourceType": "Patient",
                 "id": "123",
-                "active": false
+                "contained" : [
+                   {
+                     "resourceType" : "Organization",
+                     "id" : "1",
+                     "identifier" : [
+                       { "system" : "urn:oid:2.16.840.1.113883.3.72.5.9.1", "value" : "OHT" }
+                     ],
+                     "name" : "My Org"
+                   }
+                ],
+                "identifier" : [
+                  { "system" : "urn:oid:2.16.840.1.113883.3.72.5.9.1", "value" : "PIX" }
+                ],
+                "name" : [
+                  {
+                  "family" : "ALPHA",
+                  "given" : ["ALAN"]
+                  }
+                ],
+                "gender" : "male",
+	              "birthDate" : "1938-02-24",
+                "address" : [
+                  {
+                    "line" : "1_PINETREE",
+                    "city" : "WEBSTER",
+                    "state" : "MD",
+                    "postalCode" : "63119"
+                  }
+                ],
+                "managingOrganization" : {
+                  "reference" : "#1"
+                }	                
               },
               "request": {
                 "method": "POST"
-              }
-            }
-          ]
+              }        
+          
         }
-      }   
+
     ]
-  }
+ }
   

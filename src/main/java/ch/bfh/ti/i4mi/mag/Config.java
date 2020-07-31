@@ -22,9 +22,11 @@ import org.apache.camel.support.jsse.SSLContextParameters;
 import org.apache.camel.support.jsse.TrustManagersParameters;
 import org.openehealth.ipf.commons.audit.DefaultAuditContext;
 import org.openehealth.ipf.commons.audit.types.AuditSource;
+import org.openehealth.ipf.commons.ihe.ws.cxf.audit.AbstractAuditInterceptor;
 import org.openehealth.ipf.commons.ihe.ws.cxf.payload.InPayloadLoggerInterceptor;
 import org.openehealth.ipf.commons.ihe.ws.cxf.payload.OutPayloadLoggerInterceptor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -146,7 +148,11 @@ public class Config {
     private String certAlias;
     
    
-    @Bean(name = "pixContext")
+    @Bean(name = "sslContext")
+    @ConditionalOnProperty(
+    	    value="mag.client-ssl.enabled", 
+    	    havingValue = "true", 
+    	    matchIfMissing = false)
     public SSLContextParameters getPixSSLContext() {
     	KeyStoreParameters ksp = new KeyStoreParameters();
     	// Keystore file may be found at src/main/resources
