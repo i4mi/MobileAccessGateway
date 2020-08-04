@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
+import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -58,9 +59,10 @@ class Iti67RouteBuilder extends RouteBuilder {
                 "&outFaultInterceptors=#soapRequestLogger";
         from("mhd-iti67:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentreference-adapter")
                 // pass back errors to the endpoint
-                .errorHandler(noErrorHandler())                
-                .bean(Utils.class,"searchParameterToBody")
-                .bean(Iti67RequestConverter.class)
+                .errorHandler(noErrorHandler())
+                .process(AuthTokenConverter.addWsHeader())
+                .bean(Utils.class,"searchParameterToBody")                
+                .bean(Iti67RequestConverter.class)              
                 .to(xds18Endpoint)
                 .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class));
     }

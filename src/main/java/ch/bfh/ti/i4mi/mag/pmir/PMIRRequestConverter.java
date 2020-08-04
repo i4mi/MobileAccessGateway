@@ -1,13 +1,27 @@
 package ch.bfh.ti.i4mi.mag.pmir;
 
+import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.StringType;
 
 import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
+import net.ihe.gazelle.hl7v3.datatypes.AD;
+import net.ihe.gazelle.hl7v3.datatypes.AdxpCity;
+import net.ihe.gazelle.hl7v3.datatypes.AdxpCountry;
+import net.ihe.gazelle.hl7v3.datatypes.AdxpPostalCode;
+import net.ihe.gazelle.hl7v3.datatypes.AdxpState;
+import net.ihe.gazelle.hl7v3.datatypes.AdxpStreetAddressLine;
+import net.ihe.gazelle.hl7v3.datatypes.EnFamily;
+import net.ihe.gazelle.hl7v3.datatypes.EnGiven;
+import net.ihe.gazelle.hl7v3.datatypes.EnPrefix;
+import net.ihe.gazelle.hl7v3.datatypes.EnSuffix;
 import net.ihe.gazelle.hl7v3.datatypes.IVLTS;
 import net.ihe.gazelle.hl7v3.datatypes.IVXBTS;
+import net.ihe.gazelle.hl7v3.datatypes.PN;
 import net.ihe.gazelle.hl7v3.datatypes.TEL;
 import net.ihe.gazelle.hl7v3.datatypes.TS;
 
@@ -57,5 +71,28 @@ public class PMIRRequestConverter extends BaseRequestConverter {
     	
     	return telecom;
 	}
-	  
+	
+	
+	public static AD transform(Address address) {
+		AD addr = new AD();
+	
+		// TODO Missing: district, type, use
+		if (address.hasCity()) addr.addCity(element(AdxpCity.class, address.getCity()));
+		if (address.hasCountry()) addr.addCountry(element(AdxpCountry.class, address.getCountry()));
+		if (address.hasPostalCode()) addr.addPostalCode(element(AdxpPostalCode.class, address.getPostalCode()));
+		if (address.hasState()) addr.addState(element(AdxpState.class, address.getState()));
+		if (address.hasLine()) for (StringType line : address.getLine()) addr.addStreetAddressLine(element(AdxpStreetAddressLine.class, line.getValue()));
+		if (address.hasPeriod()) addr.addUseablePeriod(transform(address.getPeriod()));
+		return addr;
+	}
+	
+	public static PN transform(HumanName name) { 
+		PN nameElement = new PN();
+		if (name.hasFamily()) nameElement.addFamily(element(EnFamily.class, name.getFamily()));
+		for (StringType given : name.getGiven()) nameElement.addGiven(element(EnGiven.class, given.getValue()));
+		for (StringType prefix : name.getPrefix()) nameElement.addPrefix(element(EnPrefix.class, prefix.getValue()));
+		for (StringType suffix : name.getSuffix()) nameElement.addSuffix(element(EnSuffix.class, suffix.getValue()));
+		if (name.hasPeriod()) nameElement.addValidTime(transform(name.getPeriod()));		    		
+		return nameElement;
+	}
 }

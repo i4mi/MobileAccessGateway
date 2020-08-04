@@ -22,9 +22,12 @@ import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.support.ExpressionAdapter;
 import org.hl7.fhir.r4.model.Bundle;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.mhd.Utils;
+import ch.bfh.ti.i4mi.mag.pmir.iti83.Iti83ResponseConverter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -35,6 +38,9 @@ import lombok.extern.slf4j.Slf4j;
 class Iti93RouteBuilder extends RouteBuilder {
 
 	private final Config config;
+	
+	@Autowired
+	Iti93ResponseConverter converter;
 	
     public Iti93RouteBuilder(final Config config) {
         super();
@@ -57,12 +63,14 @@ class Iti93RouteBuilder extends RouteBuilder {
                 "&outInterceptors=#soapRequestLogger" + 
                 "&outFaultInterceptors=#soapRequestLogger";
         
-        from("pmir-iti93:stub?audit=true&auditContext=#myAuditContext").routeId("pmir-feed")
+        from("pmir-iti93:stub?audit=false&auditContext=#myAuditContext").routeId("pmir-feed")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
+                .process(Utils.keepBody())
                 .bean(Iti93RequestConverter.class)
                 .to(xds44Endpoint)
-                .process(translateToFhir(new Iti93ResponseConverter() , byte[].class));
+                .process(Utils.keptBodyToHeader())
+                .process(translateToFhir(converter , byte[].class));
                 
     }
 

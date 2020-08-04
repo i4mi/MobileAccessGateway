@@ -27,11 +27,13 @@ import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.codesystems.ContactPointUse;
 import org.openehealth.ipf.commons.ihe.fhir.translation.ToFhirTranslator;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Address;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
@@ -71,15 +73,30 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
         patientReferenceCreator = config.getPatientReferenceCreator();
     }
 	
+    /**
+     * XDS scheme name -> FHIR system
+     * @param schemeName
+     * @return
+     */
     public String getSystem(String schemeName) {
     	return schemeMapper.getSystem(schemeName);        
     }
 
+    /**
+     * XDS code -> FHIR CodeableConcept
+     * @param code
+     * @return
+     */
     public CodeableConcept transform(Code code) {
         return new CodeableConcept().addCoding(new Coding().setCode(code.getCode())
                 .setSystem(getSystem(code.getSchemeName())).setDisplay(code.getDisplayName()==null ? "" : code.getDisplayName().getValue()));
     }
 
+    /**
+     * XDS code list -> FHIR CodeableConcept
+     * @param codes
+     * @return
+     */
     public CodeableConcept transform(List<Code> codes) {
         CodeableConcept cc = new CodeableConcept();
         if (codes!=null) {
@@ -90,6 +107,11 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
         return cc; 
     }
     
+    /**
+     * XDS code list -> FHIR CodeableConcept list
+     * @param codes
+     * @return
+     */
     public List<CodeableConcept> transformMultiple(List<Code> codes) {
         List<CodeableConcept> ccList = new ArrayList<CodeableConcept>();
         if (codes!=null) {
@@ -100,6 +122,11 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
         return ccList; 
     }
     
+    /**
+     * XDS timestamp -> FHIR DateTime
+     * @param timestamp
+     * @return
+     */
     public DateTimeType transform(Timestamp timestamp) {
     	if (timestamp == null) return null;
     	Date date = Date.from(timestamp.getDateTime().toInstant());
@@ -117,6 +144,11 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	return new DateTimeType(date, fhirPrecision);
     }
     
+    /**
+     * XDS Timestamp -> FHIR Date
+     * @param timestamp
+     * @return
+     */
     public DateType transformToDate(Timestamp timestamp) {
     	if (timestamp == null) return null;
     	Date date = Date.from(timestamp.getDateTime().toInstant());
@@ -134,12 +166,22 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	return new DateType(date, fhirPrecision);
     }
     
+    /**
+     * XDS ReferenceId -> FHIR Reference
+     * @param ref
+     * @return
+     */
     public Reference transform(ReferenceId ref) {
     	String id = ref.getId();
     	CXiAssigningAuthority authority = ref.getAssigningAuthority();
-    	return new Reference().setReference(id);
+    	return new Reference().setIdentifier(new Identifier().setValue(id).setSystem(getSystem(authority.getUniversalId())));
     }
     
+    /**
+     * XDS Person -> FHIR Practitioner
+     * @param person
+     * @return
+     */
     public Practitioner transformPractitioner(Person person) {
     	if (person==null) return null;
     	Practitioner practitioner = new Practitioner();
@@ -147,11 +189,17 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	if (name != null) {
     	  practitioner.addName(transform(name));
     	}
+    	if (person.getId()!=null) practitioner.addIdentifier(transformToIdentifier(person.getId()));
     	    	
     	return practitioner;
     }
     
-    public Organization transformOrganization(org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization org) {
+    /**
+     * XDS Organization -> FHIR Organization
+     * @param org
+     * @return
+     */
+    public Organization transform(org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization org) {
     	Organization result = new Organization();
     	result.setName(org.getOrganizationName());
     	String id = org.getIdNumber();
@@ -160,25 +208,39 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	return result;
     }
     
+    /**
+     * XDS Telecom -> FHIR ContactPoint
+     * @param telecom
+     * @return
+     */
     public ContactPoint transform(Telecom telecom) {
     	ContactPoint result = new ContactPoint();
     	
     	String type = telecom.getType();
     	String use = telecom.getUse();
     	
-    	// TODO map type
-    	// TODO map use
-    	
-    	result.setSystem(ContactPointSystem.EMAIL);    	
-    	result.setValue(telecom.getEmail());
-    	
-    	result.setSystem(ContactPointSystem.PHONE);
-    	String phone = telecom.getUnformattedPhoneNumber();
-    	result.setValue(phone);
+    	// TODO is this mapping correct?
+    	if ("NET".equals(use) || "X.400".equals(type)) { 
+    	  result.setSystem(ContactPointSystem.EMAIL);    	
+    	  result.setValue(telecom.getEmail());    	  
+    	} else {    
+    	  if ("FX".equals(type)) result.setSystem(ContactPointSystem.FAX);
+    	  else if ("BP".equals(type)) result.setSystem(ContactPointSystem.PAGER);
+    	  else result.setSystem(ContactPointSystem.PHONE);
+    	  String phone = telecom.getUnformattedPhoneNumber();
+    	  result.setValue(phone);
+    	  if ("WPN".equals(use)) result.setUse(ContactPoint.ContactPointUse.WORK);
+    	  else if ("PRN".equals(use)) result.setUse(ContactPoint.ContactPointUse.HOME);
+    	}
     	    	
     	return result;
     }
     
+    /**
+     * XDS Name -> FHIR HumanName
+     * @param name
+     * @return
+     */
     public HumanName transform(Name name) {
     	HumanName result = new HumanName();
     	if (name.getPrefix() != null) result.addPrefix(name.getPrefix());
@@ -192,6 +254,11 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	return result;
     }
     
+    /**
+     * XDS Address -> FHIR Address
+     * @param address
+     * @return
+     */
     public org.hl7.fhir.r4.model.Address transform(Address address) {
     	org.hl7.fhir.r4.model.Address result = new org.hl7.fhir.r4.model.Address();
     	result.setCity(address.getCity());
@@ -206,6 +273,11 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	return result;
     }
     
+    /**
+     * XDS LocalizedString -> FHIR Narrative
+     * @param in
+     * @return
+     */
     public Narrative transformToNarrative(LocalizedString in) {
     	 if (in==null) return null;
          Narrative result = new Narrative();
@@ -214,6 +286,11 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
          return result;
     }
     
+    /**
+     * XDS Identifiable -> FHIR Patient Reference
+     * @param patient
+     * @return
+     */
     public Reference transformPatient(Identifiable patient) {    	
     	String baseUrl = config.getUriPatientEndpoint();
     	String system = patient.getAssigningAuthority().getUniversalId();
@@ -221,6 +298,11 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
 		return patientReferenceCreator.createPatientReference(system, value);
     }
     
+    /**
+     * XDS Identifiable -> FHIR CodeableConcept
+     * @param patient
+     * @return
+     */
     public CodeableConcept transform(Identifiable patient) {
         CodeableConcept result = new CodeableConcept();
         Coding coding = result.addCoding();
@@ -234,6 +316,29 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
 		return result;
     }
     
+    /**
+     * XDS Identifiable -> FHIR Identifier
+     * @param identifiable
+     * @return
+     */
+    public Identifier transformToIdentifier(Identifiable identifiable) {
+    	if (identifiable == null) return null;
+    	Identifier result = new Identifier();        
+    	AssigningAuthority assigningAuthority = identifiable.getAssigningAuthority();
+    	String value = identifiable.getId();
+    	if (assigningAuthority != null) {
+    	  String system = assigningAuthority.getUniversalId();    	     	
+    	  result.setSystem("urn:oid:"+system);
+        } 
+    	result.setValue(value);
+		return result;
+    }
+    
+    /**
+     * XDS Author -> FHIR Reference
+     * @param author
+     * @return
+     */
     public Reference transformAuthor(Author author) {
     	Person person = author.getAuthorPerson();
 		Practitioner containedPerson = transformPractitioner(person);
@@ -249,7 +354,7 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
 		}
 		
 		for (org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization org : orgs) {
-			role.setOrganization((Reference) new Reference().setResource(transformOrganization(org)));
+			role.setOrganization((Reference) new Reference().setResource(transform(org)));
 		}
 
 		for (Identifiable roleId : roles) {

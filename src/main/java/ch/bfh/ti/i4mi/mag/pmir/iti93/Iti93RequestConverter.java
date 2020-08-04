@@ -20,6 +20,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Organization.OrganizationContactComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.r4.model.Reference;
@@ -36,6 +37,7 @@ import net.ihe.gazelle.hl7v3.coctmt090003UV01.COCTMT090003UV01AssignedEntity;
 import net.ihe.gazelle.hl7v3.coctmt090003UV01.COCTMT090003UV01Organization;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03ContactParty;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03Organization;
+import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03Person;
 import net.ihe.gazelle.hl7v3.datatypes.AD;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpCity;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpCountry;
@@ -139,9 +141,9 @@ public class Iti93RequestConverter extends PMIRRequestConverter {
 		 
 		  PRPAIN201301UV02MFMIMT700701UV01ControlActProcess controlActProcess = new PRPAIN201301UV02MFMIMT700701UV01ControlActProcess();		  
 		  resultMsg.setControlActProcess(controlActProcess);
-		  controlActProcess.setClassCode(ActClassControlAct.CACT); // ???
-		  controlActProcess.setMoodCode(XActMoodIntentEvent.EVN); // ???
-		  controlActProcess.setCode(new CD("PRPA_TE201301UV02","2.16.840.1.113883.1.18", null)); // ???
+		  controlActProcess.setClassCode(ActClassControlAct.CACT); 
+		  controlActProcess.setMoodCode(XActMoodIntentEvent.EVN); 
+		  controlActProcess.setCode(new CD("PRPA_TE201301UV02","2.16.840.1.113883.1.18", null)); 
 				  
 		
 	    for (BundleEntryComponent entry : requestBundle.getEntry()) {	    	
@@ -183,14 +185,8 @@ public class Iti93RequestConverter extends PMIRRequestConverter {
 			    	patient.addId(new II(getScheme(id.getSystem()),id.getValue()));
 			    }
 		    	
-		    	for (HumanName name : in.getName()) {
-		    		PN nameElement = new PN();
-		    		if (name.hasFamily()) nameElement.addFamily(element(EnFamily.class, name.getFamily()));
-		    		for (StringType given : name.getGiven()) nameElement.addGiven(element(EnGiven.class, given.getValue()));
-		    		for (StringType prefix : name.getPrefix()) nameElement.addPrefix(element(EnPrefix.class, prefix.getValue()));
-		    		for (StringType suffix : name.getSuffix()) nameElement.addSuffix(element(EnSuffix.class, suffix.getValue()));
-		    		if (name.hasPeriod()) nameElement.addValidTime(transform(name.getPeriod()));		    		
-					patientPerson.addName(nameElement );	
+		    	for (HumanName name : in.getName()) {		    				    	
+					patientPerson.addName(transform(name));	
 		    	}
 		    	
 		    	
@@ -205,16 +201,7 @@ public class Iti93RequestConverter extends PMIRRequestConverter {
 		    	}
 		        
 		        for (Address address : in.getAddress()) {
-		        	AD addr = new AD();
-
-		        	// TODO Missing: district, type, use
-		        	if (address.hasCity()) addr.addCity(element(AdxpCity.class, address.getCity()));
-		        	if (address.hasCountry()) addr.addCountry(element(AdxpCountry.class, address.getCountry()));
-		        	if (address.hasPostalCode()) addr.addPostalCode(element(AdxpPostalCode.class, address.getPostalCode()));
-		        	if (address.hasState()) addr.addState(element(AdxpState.class, address.getState()));
-		        	if (address.hasLine()) for (StringType line : address.getLine()) addr.addStreetAddressLine(element(AdxpStreetAddressLine.class, line.getValue()));
-		        	if (address.hasPeriod()) addr.addUseablePeriod(transform(address.getPeriod()));
-					patientPerson.addAddr(addr);
+					patientPerson.addAddr(transform(address));
 		        }
 		    	
 		        for (ContactPoint contactPoint : in.getTelecom()) {                    
@@ -245,7 +232,19 @@ public class Iti93RequestConverter extends PMIRRequestConverter {
 				contactParty.setClassCode(RoleClassContact.CON);
                 for (ContactPoint contactPoint : managingOrg.getTelecom()) {
                 	contactParty.addTelecom(transform(contactPoint));
-				}				
+				}		
+                for (Address address : managingOrg.getAddress()) {
+                	contactParty.addAddr(transform(address));
+                }
+                if (managingOrg.hasContact()) {
+                	OrganizationContactComponent occ = managingOrg.getContactFirstRep();
+                	COCTMT150003UV03Person contactPerson = new COCTMT150003UV03Person();
+                	contactPerson.setClassCode(EntityClass.PSN);
+                	contactPerson.setDeterminerCode(EntityDeterminer.INSTANCE);
+                    if (occ.hasName()) contactPerson.setName(Collections.singletonList(transform(occ.getName())));                    
+    				contactParty.setContactPerson(contactPerson);	
+                }
+                
 				providerOrganization.setContactParty(Collections.singletonList(contactParty));
 				
 				MFMIMT700701UV01Custodian custodian = new MFMIMT700701UV01Custodian();
