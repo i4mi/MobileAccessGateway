@@ -311,7 +311,7 @@ public class Iti65RequestConverter {
 	}
 	
 	/**
-	 * FHIR Address 
+	 * FHIR Address -> XDS Address
 	 * @param address
 	 * @return
 	 */
@@ -344,11 +344,24 @@ public class Iti65RequestConverter {
 		return system;
 	}
 	
+	/**
+	 * FHIR Identifier -> XDS Identifiable
+	 * @param identifier
+	 * @return
+	 */
 	public Identifiable transform(Identifier identifier) {
 		String system = noPrefix(identifier.getSystem());			    	
 		return new Identifiable(identifier.getValue(), new AssigningAuthority(system));
 	}
 	
+	/**
+	 * FHIR Reference -> XDS Identifiable
+	 * Only for References to Patients or Encounters
+	 * Identifier is extracted from contained resource or from Reference URL
+	 * @param reference
+	 * @param container
+	 * @return
+	 */
 	public  Identifiable transformReferenceToIdentifiable(Reference reference, DomainResource container) {
 		if (reference.hasReference()) {
 			String targetRef = reference.getReference();		
@@ -375,6 +388,12 @@ public class Iti65RequestConverter {
 		throw new InvalidRequestException("Cannot resolve patient reference");
 	}
 	
+	/**
+	 * FHIR Reference to Patient -> XDS PatientInfo
+	 * @param ref
+	 * @param container
+	 * @return
+	 */
 	public PatientInfo transformReferenceToPatientInfo(Reference ref, DomainResource container) {
 		if (ref == null) return null;
 		if (!ref.hasReference()) return null;
@@ -415,6 +434,11 @@ public class Iti65RequestConverter {
 		return null;
 	}
 	
+	/**
+	 * FHIR Reference -> URI String
+	 * @param ref
+	 * @return
+	 */
 	private String transformUriFromReference(Reference ref) {
 		if (ref.hasIdentifier()) {
 			return ref.getIdentifier().getValue();
@@ -422,6 +446,11 @@ public class Iti65RequestConverter {
 		return noPrefix(ref.getReference());
 	}
 	
+	/**
+	 * ITI-65: process DocumentManifest resource from Bundle
+	 * @param manifest
+	 * @param submissionSet
+	 */
 	private  void processDocumentManifest(DocumentManifest manifest, SubmissionSet submissionSet) {
 		// masterIdentifier	SubmissionSet.uniqueId
 		Identifier masterIdentifier = manifest.getMasterIdentifier();
@@ -489,6 +518,11 @@ public class Iti65RequestConverter {
 		
 	}
 	
+	/**
+	 * ITI-65: process DocumentReference resource from Bundle
+	 * @param reference
+	 * @param entry
+	 */
 	private  void processDocumentReference(DocumentReference reference, DocumentEntry entry) {
 		
         entry.assignEntryUuid();
@@ -630,6 +664,12 @@ public class Iti65RequestConverter {
                   
 	}
 	
+	/**
+	 * search a referenced resource from a list of (contained) resources.
+	 * @param ref
+	 * @param contained
+	 * @return
+	 */
 	public Resource findResource(Reference ref, List<Resource> contained) {
 		for (Resource res : contained) {
 			if (res.getId().equals(ref.getReference())) return res;
@@ -637,6 +677,11 @@ public class Iti65RequestConverter {
 		return null;
 	}
 	
+	/**
+	 * FHIR HumanName -> XDS Name
+	 * @param name
+	 * @return
+	 */
 	public Name transform(HumanName name) {
 		Name targetName = new XpnName();
 		if (name.hasPrefix()) targetName.setPrefix(name.getPrefixAsSingleString());
@@ -657,6 +702,11 @@ public class Iti65RequestConverter {
 		return targetName;		
 	}
 	
+	/**
+	 * FHIR Practitioner -> XDS Person
+	 * @param practitioner
+	 * @return
+	 */
 	public Person transform(Practitioner practitioner) {
 		if (practitioner == null) return null;
 	   Person result = new Person();
@@ -665,6 +715,11 @@ public class Iti65RequestConverter {
 	   return result;
 	}
 	
+	/**
+	 * FHIR Patient -> XDS Person
+	 * @param patient
+	 * @return
+	 */
 	public Person transform(Patient patient) {
 		if (patient == null) return null;
 	   Person result = new Person();
@@ -673,6 +728,11 @@ public class Iti65RequestConverter {
 	   return result;
 	}
 	
+	/**
+	 * FHIR RelatedPerson -> XDS Person
+	 * @param related
+	 * @return
+	 */
 	public Person transform(RelatedPerson related) {
 		if (related == null) return null;
 	   Person result = new Person();
@@ -681,6 +741,11 @@ public class Iti65RequestConverter {
 	   return result;
 	}	
 	
+	/**
+	 * FHIR ContactPoint -> XDS Telecom
+	 * @param contactPoint
+	 * @return
+	 */
 	public Telecom transform(ContactPoint contactPoint) {
 		if (contactPoint == null) return null;
     	Telecom result = new Telecom();
@@ -699,6 +764,11 @@ public class Iti65RequestConverter {
     	return result;
     }
 	
+	/**
+	 * FHIR Organization -> XDS Organization
+	 * @param org
+	 * @return
+	 */
 	public org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization transform(Organization org) {
 		org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization result = new org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization();
     	result.setOrganizationName(org.getName());
@@ -710,6 +780,12 @@ public class Iti65RequestConverter {
     	return result;
     }
 	
+	/**
+	 * FHIR Reference to Author -> XDS Author
+	 * @param author
+	 * @param contained
+	 * @return
+	 */
 	public Author transformAuthor(Reference author, List<Resource> contained) {
 		if (author == null || author.getReference() == null) return null;
 		Resource authorObj = findResource(author, contained);
