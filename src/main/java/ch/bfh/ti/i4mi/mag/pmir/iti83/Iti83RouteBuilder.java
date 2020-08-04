@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -61,6 +62,7 @@ class Iti83RouteBuilder extends RouteBuilder {
 		from("pixm-iti83:translation?audit=true&auditContext=#myAuditContext").routeId("pixm-adapter")
 				// pass back errors to the endpoint
 				.errorHandler(noErrorHandler())
+				.process(AuthTokenConverter.addWsHeader())
 				.bean(Iti83RequestConverter.class)				
 				.to(xds45Endpoint)				
 				// translate, forward, translate back				

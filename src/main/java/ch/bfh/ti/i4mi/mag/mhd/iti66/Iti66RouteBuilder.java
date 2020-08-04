@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
+import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -59,6 +60,7 @@ class Iti66RouteBuilder extends RouteBuilder {
         from("mhd-iti66:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentmanifest-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
+                .process(AuthTokenConverter.addWsHeader())
                 .bean(Utils.class,"searchParameterToBody")
                 .bean(Iti66RequestConverter.class)                
                 .to(xds18Endpoint)
