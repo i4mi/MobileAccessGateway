@@ -36,17 +36,32 @@ public class SchemeMapper {
 		registerSchemeToSystem("2.16.840.1.113883.6.96", "http://snomed.info/sct");
 	}
 	
+	/**
+	 * add a scheme to system mapping
+	 * @param scheme
+	 * @param system
+	 */
 	public void registerSchemeToSystem(String scheme, String system) {
 		schemeToSystem.put(scheme, system);
 		systemToScheme.put(system, scheme);
 	}
 	
+	/**
+	 * scheme name -> system
+	 * @param scheme
+	 * @return
+	 */
 	public String getSystem(String scheme) {
 		String system = schemeToSystem.get(scheme);
 		if (system != null) return system;
 		return "urn:oid:"+scheme;		
 	}
 	
+	/**
+	 * system -> scheme name
+	 * @param system
+	 * @return
+	 */
 	public String getScheme(String system) {
 		String scheme = systemToScheme.get(system);
 		if (scheme != null) return scheme;

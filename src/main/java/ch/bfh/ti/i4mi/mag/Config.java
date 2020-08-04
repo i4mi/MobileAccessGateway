@@ -37,6 +37,7 @@ import lombok.Data;
 
 /**
  * Configuration for MobileHealthGateway
+ * see application.yml
  *
  */
 @Configuration
@@ -134,10 +135,7 @@ public class Config {
     public String getUriPatientEndpoint() { return baseurl+"/fhir/Patient"; };
    
     
-    /**
-     * Connection security : Use client certificate
-     */
-    
+   
     @Value("${mag.client-ssl.key-store}")
     private String keystore;
     
@@ -148,6 +146,9 @@ public class Config {
     private String certAlias;
     
    
+    /**
+     * Connection security : Use client certificate
+     */    
     @Bean(name = "sslContext")
     @ConditionalOnProperty(
     	    value="mag.client-ssl.enabled", 

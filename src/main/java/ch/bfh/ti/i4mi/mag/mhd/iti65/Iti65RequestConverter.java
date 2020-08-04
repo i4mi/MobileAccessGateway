@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DocumentManifest;
@@ -39,20 +40,27 @@ import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceRelatesToComponent;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentRelationshipType;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.ListResource;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Association;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssociationType;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Author;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Document;
@@ -61,7 +69,11 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.LocalizedString;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Name;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.PatientInfo;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Person;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Recipient;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.ReferenceId;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.SubmissionSet;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Telecom;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.XpnName;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.ProvideAndRegisterDocumentSet;
@@ -192,6 +204,11 @@ public class Iti65RequestConverter {
 		return new LocalizedString(string);
 	}
 	
+	/**
+	 * FHIR CodeableConcept -> XDS Code
+	 * @param cc
+	 * @return
+	 */
 	public  Code transformCodeableConcept(CodeableConcept cc) {
 		if (cc == null) return null;
 		if (!cc.hasCoding()) return null;
@@ -199,6 +216,11 @@ public class Iti65RequestConverter {
 		return new Code(coding.getCode(), localizedString(coding.getDisplay()), schemeMapper.getScheme(coding.getSystem()));
 	}
 	
+	/**
+	 * FHIR CodeableConcept list -> XDS code list
+	 * @param ccs
+	 * @param target
+	 */
 	public  void transformCodeableConcepts(List<CodeableConcept> ccs, List<Code> target) {
 		if (ccs == null || ccs.isEmpty()) return;
 		for (CodeableConcept cc : ccs) {
@@ -207,6 +229,11 @@ public class Iti65RequestConverter {
 		}
 	}
 	
+	/**
+	 * FHIR DateType -> XDS Timestamp
+	 * @param date
+	 * @return
+	 */
 	public  Timestamp timestampFromDate(DateType date) {
     	if (date == null) return null; 
     	String dateString = date.asStringValue();
@@ -215,6 +242,11 @@ public class Iti65RequestConverter {
     	return Timestamp.fromHL7(dateString);
     }
 	
+	/**
+	 * FHIR DateTimeType -> XDS Timestamp
+	 * @param date
+	 * @return
+	 */
 	public  Timestamp timestampFromDate(DateTimeType date) {
     	if (date == null) return null; 
     	String dateString = date.asStringValue();
@@ -223,6 +255,11 @@ public class Iti65RequestConverter {
     	return Timestamp.fromHL7(dateString);
     }
 	
+	/**
+	 * FHIR InstantType -> XDS Timestamp
+	 * @param date
+	 * @return
+	 */
 	public  Timestamp timestampFromDate(InstantType date) {
     	if (date == null) return null; 
     	String dateString = date.asStringValue();
@@ -231,20 +268,67 @@ public class Iti65RequestConverter {
     	return Timestamp.fromHL7(dateString);
     }
 	
+	/**
+	 * FHIR Coding -> XDS Code
+	 * @param coding
+	 * @return
+	 */
 	public  Code transform(Coding coding) {
 		if (coding==null) return null;
 		return new Code(coding.getCode(), localizedString(coding.getDisplay()), schemeMapper.getScheme(coding.getSystem()));
 	}
 	
+	/**
+	 * FHIR CodeableConcept -> XDS Code
+	 * @param cc
+	 * @return
+	 */
 	public  Code transform(CodeableConcept cc) {
 		if (cc==null) return null;
 		Coding coding = cc.getCodingFirstRep();
 		return transform(coding);
 	}
 	
+	/**
+	 * FHIR CodeableConcept list -> XDS code
+	 * @param ccs
+	 * @return
+	 */
 	public  Code transform(List<CodeableConcept> ccs) {
 		if (ccs==null || ccs.isEmpty()) return null;
 		return transform(ccs.get(0));
+	}
+	
+	/**
+	 * FHIR CodeableConcept -> XDS Identifiable
+	 * @param cc
+	 * @return
+	 */
+	public Identifiable transformToIdentifiable(CodeableConcept cc) {
+		Code code = transform(cc);
+		String system = code.getSchemeName();			    	
+		return new Identifiable(code.getCode(), new AssigningAuthority(system));
+	}
+	
+	/**
+	 * FHIR Address 
+	 * @param address
+	 * @return
+	 */
+	public org.openehealth.ipf.commons.ihe.xds.core.metadata.Address transform(Address address) {
+		org.openehealth.ipf.commons.ihe.xds.core.metadata.Address targetAddress = new org.openehealth.ipf.commons.ihe.xds.core.metadata.Address();
+		    
+		targetAddress.setCity(address.getCity());
+		targetAddress.setCountry(address.getCountry());
+		targetAddress.setStateOrProvince(address.getState());
+		targetAddress.setZipOrPostalCode(address.getPostalCode());
+		String streetAddress = null; 
+		for (StringType street : address.getLine()) {
+		  	if (streetAddress == null) streetAddress = street.getValue();
+		   	else streetAddress += "\n"+street.getValue();
+		}
+		targetAddress.setStreetAddress(streetAddress);
+		return targetAddress;
 	}
 	
 	/**
@@ -271,7 +355,11 @@ public class Iti65RequestConverter {
 			List<Resource> resources = container.getContained();		
 			for (Resource resource : resources) {			
 				if (targetRef.equals(resource.getId())) {
-					return transform(((Patient) resource).getIdentifierFirstRep());					
+					if (resource instanceof Patient) {
+					  return transform(((Patient) resource).getIdentifierFirstRep());
+					} else if (resource instanceof Encounter) {
+						return transform(((Encounter) resource).getIdentifierFirstRep());
+					}
 				}
 			}
 			MultiValueMap<String, String> vals = UriComponentsBuilder.fromUriString(targetRef).build().getQueryParams();
@@ -309,41 +397,12 @@ public class Iti65RequestConverter {
 					}
 				}
 				
-				for (HumanName name : patient.getName()) {
-					Name targetName = new XpnName();
-					if (name.hasPrefix()) targetName.setPrefix(name.getPrefixAsSingleString());
-					if (name.hasSuffix()) targetName.setSuffix(name.getSuffixAsSingleString());
-					targetName.setFamilyName(name.getFamily());
-					List<StringType> given = name.getGiven();
-					if (given != null && !given.isEmpty()) {
-					   targetName.setGivenName(given.get(0).getValue());
-					   if (given.size()>1) {						   
-					       StringBuffer restOfName = new StringBuffer();
-					       for (int part=1;part<given.size();part++) {					    	   
-					           if (part > 1) restOfName.append(" ");
-					    	   restOfName.append(given.get(part).getValue());					    	   
-					       }
-						   targetName.setSecondAndFurtherGivenNames(restOfName.toString());
-					   }
-					}
-					patientInfo.getNames().add(targetName);	
+				for (HumanName name : patient.getName()) {					
+					patientInfo.getNames().add(transform(name));	
 				}
 				
-				for (Address address : patient.getAddress()) {
-				    org.openehealth.ipf.commons.ihe.xds.core.metadata.Address targetAddress = new org.openehealth.ipf.commons.ihe.xds.core.metadata.Address();
-				    
-				    targetAddress.setCity(address.getCity());
-				    targetAddress.setCountry(address.getCountry());
-				    targetAddress.setStateOrProvince(address.getState());
-				    targetAddress.setZipOrPostalCode(address.getPostalCode());
-				    String streetAddress = null; 
-				    for (StringType street : address.getLine()) {
-				    	if (streetAddress == null) streetAddress = street.getValue();
-				    	else streetAddress += "\n"+street.getValue();
-				    }
-				    targetAddress.setStreetAddress(streetAddress);
-				    
-				    patientInfo.getAddresses().add(targetAddress);
+				for (Address address : patient.getAddress()) {				    
+				    patientInfo.getAddresses().add(transform(address));
 				}
 				
 				for (Identifier id : patient.getIdentifier()) {
@@ -371,10 +430,7 @@ public class Iti65RequestConverter {
 		
 		submissionSet.assignEntryUuid();
 		manifest.setId(submissionSet.getEntryUuid());
-		// TODO
-		//manifest.getIdentifier();
-		//submissionSet.setEntryUuid(entryUuid);
-		
+				
 		CodeableConcept type = manifest.getType();
 		submissionSet.setContentTypeCode(transformCodeableConcept(type));
 		
@@ -385,14 +441,44 @@ public class Iti65RequestConverter {
 		Reference ref = manifest.getSubject();
 		submissionSet.setPatientId(transformReferenceToIdentifiable(ref, manifest));
 		
-		// TODO Author
-		//List<Reference> authors = manifest.getAuthor();
-		//Author author = new Author();		
-		//submissionSet.setAuthor(author);
-		   				  
-		 // TODO recipient	SubmissionSet.intendedRecipient
-		//List<Reference> recipients = manifest.getRecipient();
-		//submissionSet.set
+		// Author
+		if (manifest.hasAuthor()) {
+			Reference author = manifest.getAuthorFirstRep();
+			submissionSet.setAuthor(transformAuthor(author, manifest.getContained()));
+		}
+				   				 
+		 // recipient	SubmissionSet.intendedRecipient		
+		for (Reference recipientRef : manifest.getRecipient()) {
+			Resource res = findResource(recipientRef, manifest.getContained());
+			
+			if (res instanceof Practitioner) {
+				Recipient recipient = new Recipient();
+				recipient.setPerson(transform((Practitioner) res));
+				recipient.setTelecom(transform(((Practitioner) res).getTelecomFirstRep()));
+				submissionSet.getIntendedRecipients().add(recipient);
+			} else if (res instanceof Organization) {
+				Recipient recipient = new Recipient();
+				recipient.setOrganization(transform((Organization) res));
+				recipient.setTelecom(transform(((Organization) res).getTelecomFirstRep()));
+				submissionSet.getIntendedRecipients().add(recipient);
+			} else if (res instanceof PractitionerRole) {
+				Recipient recipient = new Recipient();
+				PractitionerRole role = (PractitionerRole) res;
+				recipient.setOrganization(transform((Organization) findResource(role.getOrganization(), manifest.getContained())));
+				recipient.setPerson(transform((Practitioner) findResource(role.getPractitioner(), manifest.getContained())));
+				recipient.setTelecom(transform(role.getTelecomFirstRep()));
+				submissionSet.getIntendedRecipients().add(recipient);
+			} else if (res instanceof Patient) {
+				Recipient recipient = new Recipient();
+				recipient.setPerson(transform((Patient) res));
+				recipient.setTelecom(transform(((Patient) res).getTelecomFirstRep()));
+			} else if (res instanceof RelatedPerson) {
+				Recipient recipient = new Recipient();
+				recipient.setPerson(transform((RelatedPerson) res));
+				recipient.setTelecom(transform(((RelatedPerson) res).getTelecomFirstRep()));
+			}								
+						
+		}
 		
 		// source	SubmissionSet.sourceId
 		String source = noPrefix(manifest.getSource());		
@@ -404,26 +490,13 @@ public class Iti65RequestConverter {
 	}
 	
 	private  void processDocumentReference(DocumentReference reference, DocumentEntry entry) {
-		 // FIXME String uuid = UUID.randomUUID().toString();
-		//entry.setEntryUuid(reference.getId());
+		
         entry.assignEntryUuid();
         reference.setId(entry.getEntryUuid());
         
-        // limitedMetadata -> meta.profile canonical [0..*] TODO
-        // uniqueId -> masterIdentifier Identifier [0..1] [1..1]
-        //if (documentEntry.getUniqueId() != null) {
-        //    documentReference.setMasterIdentifier(
-        //            (new Identifier().setValue("urn:oid:" + documentEntry.getUniqueId())));
-        //}
+        // limitedMetadata -> meta.profile canonical [0..*] 
+        // No action
 
-        // entryUUID -> identifier Identifier [0..*]
-        // When the DocumentReference.identifier carries the entryUUID then the
-        // DocumentReference.identifier. use shall be ‘official’
-        //if (documentEntry.getEntryUuid() != null) {
-        //    documentReference.addIdentifier((new Identifier().setSystem("urn:ietf:rfc:3986")
-        //            .setValue("urn:uuid:" + documentEntry.getEntryUuid())).setUse(IdentifierUse.OFFICIAL));
-        //}
-        
         
         // availabilityStatus -> status code {DocumentReferenceStatus} [1..1]
         // approved -> status=current
@@ -433,7 +506,7 @@ public class Iti65RequestConverter {
 		switch (status) {
 		case CURRENT:entry.setAvailabilityStatus(AvailabilityStatus.APPROVED);break;
 		case SUPERSEDED:entry.setAvailabilityStatus(AvailabilityStatus.DEPRECATED);break;
-		default: // TODO throw error
+		default: throw new InvalidRequestException("Unknown document status");
 		}
 		
 		// contentTypeCode -> type CodeableConcept [0..1]
@@ -452,20 +525,26 @@ public class Iti65RequestConverter {
         // creationTime -> date instant [0..1]     
 		entry.setCreationTime(timestampFromDate(reference.getDateElement()));
 
-        // TODO: authorPerson, authorInstitution, authorPerson, authorRole,
+        // authorPerson, authorInstitution, authorPerson, authorRole,
         // authorSpeciality, authorTelecommunication -> author Reference(Practitioner|
-        // PractitionerRole| Organization| Device| Patient| RelatedPerson) [0..*]                   
-        //if (documentEntry.getAuthors() != null) {
-        //}
-        // TODO: legalAuthenticator -> authenticator Note 1
-        // Reference(Practitioner|Practition erRole|Organization [0..1]
-        //Person person = documentEntry.getLegalAuthenticator();
-        //if (person != null) {
-        //   Practitioner practitioner = transformPractitioner(person);
-        //   documentReference.addContained(practitioner);
-        //   documentReference.setAuthenticator(new Reference().setReference(practitioner.getId()));
-        //}
-              
+        // PractitionerRole| Organization| Device| Patient| RelatedPerson) [0..*]   		
+		for (Reference authorRef : reference.getAuthor()) {
+		   entry.getAuthors().add(transformAuthor(authorRef, reference.getContained()));
+		}
+		
+        // legalAuthenticator -> authenticator Note 1
+		Reference authenticatorRef = reference.getAuthenticator();
+		if (authenticatorRef!=null) {
+			 Resource authenticator = findResource(authenticatorRef, reference.getContained());
+			 if (authenticator instanceof Practitioner) {
+				 entry.setLegalAuthenticator(transform((Practitioner) authenticator));	
+			 } else if (authenticator instanceof PractitionerRole) {
+				 Practitioner practitioner = (Practitioner) findResource(((PractitionerRole) authenticator).getPractitioner(), reference.getContained());
+				 if (practitioner != null) entry.setLegalAuthenticator(transform((Practitioner) authenticator));
+			 } 
+			 // TODO What shall be done with an Organization authenticator?
+		}
+		             
         // title -> description string [0..1]
 		String title = reference.getDescription();
 		if (title != null) entry.setTitle(localizedString(title));
@@ -478,9 +557,9 @@ public class Iti65RequestConverter {
       
         // mimeType -> content.attachment.contentType [1..1] code [0..1]
 		DocumentReferenceContentComponent content = reference.getContentFirstRep();		
-		if (content==null) throw new NullPointerException(); // TODO throw error
+		if (content==null) throw new InvalidRequestException("Missing content field in DocumentReference");
 		Attachment attachment = content.getAttachment();
-		if (attachment==null) throw new NullPointerException(); // TODO throw error
+		if (attachment==null) throw new InvalidRequestException("Missing attachment field in DocumentReference");
 		entry.setMimeType(attachment.getContentType());
 		       
         // languageCode -> content.attachment.language code [0..1]
@@ -511,14 +590,16 @@ public class Iti65RequestConverter {
         // TODO: referenceIdList -> context.encounter Reference(Encounter) [0..*] When
         // referenceIdList contains an encounter, and a FHIR Encounter is available, it
         // may be referenced.
-        //List<ReferenceId> refIds = documentEntry.getReferenceIdList();
-        //if (refIds!=null) {
-        //	for (ReferenceId refId : refIds) {
-        //		if (ReferenceId.ID_TYPE_ENCOUNTER_ID.equals(refId.getIdTypeCode())) {
-        //			context.addEncounter(transform(refId));
-        //		}
-        //	}
-        //}
+        // Currently not mapped
+        /*for (Reference encounterRef : context.getEncounter()) {
+        	ReferenceId referenceId = new ReferenceId();
+        	Identifiable id = transformReferenceToIdentifiable(encounterRef, reference);
+        	if (id != null) {
+        	  referenceId.setIdTypeCode(ReferenceId.ID_TYPE_ENCOUNTER_ID);        	
+        	  referenceId.setId(id.getId());
+        	  //referenceId.setAssigningAuthority(new CXiAid.getAssigningAuthority().getUniversalId());
+			  entry.getReferenceIdList().add(referenceId );
+        }*/
         
         // eventCodeList -> context.event CodeableConcept [0..*]       
         List<CodeableConcept> events = context.getEvent();
@@ -548,6 +629,112 @@ public class Iti65RequestConverter {
         }
                   
 	}
+	
+	public Resource findResource(Reference ref, List<Resource> contained) {
+		for (Resource res : contained) {
+			if (res.getId().equals(ref.getReference())) return res;
+		}
+		return null;
+	}
+	
+	public Name transform(HumanName name) {
+		Name targetName = new XpnName();
+		if (name.hasPrefix()) targetName.setPrefix(name.getPrefixAsSingleString());
+		if (name.hasSuffix()) targetName.setSuffix(name.getSuffixAsSingleString());
+		targetName.setFamilyName(name.getFamily());
+		List<StringType> given = name.getGiven();
+		if (given != null && !given.isEmpty()) {
+		   targetName.setGivenName(given.get(0).getValue());
+		   if (given.size()>1) {						   
+		       StringBuffer restOfName = new StringBuffer();
+		       for (int part=1;part<given.size();part++) {					    	   
+		           if (part > 1) restOfName.append(" ");
+		    	   restOfName.append(given.get(part).getValue());					    	   
+		       }
+			   targetName.setSecondAndFurtherGivenNames(restOfName.toString());
+		   }
+		}
+		return targetName;		
+	}
+	
+	public Person transform(Practitioner practitioner) {
+		if (practitioner == null) return null;
+	   Person result = new Person();
+	   if (practitioner.hasName()) result.setName(transform(practitioner.getNameFirstRep()));
+	   result.setId(transform(practitioner.getIdentifierFirstRep()));
+	   return result;
+	}
+	
+	public Person transform(Patient patient) {
+		if (patient == null) return null;
+	   Person result = new Person();
+	   result.setId(transform(patient.getIdentifierFirstRep()));
+	   if (patient.hasName()) result.setName(transform(patient.getNameFirstRep()));	   
+	   return result;
+	}
+	
+	public Person transform(RelatedPerson related) {
+		if (related == null) return null;
+	   Person result = new Person();
+	   result.setId(transform(related.getIdentifierFirstRep()));
+	   if (related.hasName()) result.setName(transform(related.getNameFirstRep()));	   
+	   return result;
+	}	
+	
+	public Telecom transform(ContactPoint contactPoint) {
+		if (contactPoint == null) return null;
+    	Telecom result = new Telecom();
+    	
+    	if (contactPoint.getSystem().equals(ContactPointSystem.EMAIL)) {
+    		result.setEmail(contactPoint.getValue());   
+    		result.setUse("NET");
+    		result.setType("Internet");
+    	} else if (contactPoint.getSystem().equals(ContactPointSystem.PHONE)) {
+    		result.setUnformattedPhoneNumber(contactPoint.getValue());    
+    		if (contactPoint.getUse().equals(ContactPoint.ContactPointUse.WORK)) result.setUse("WPN");
+    		else result.setUse("PRN");
+    		result.setType("PH");
+    	}
+    	    	
+    	return result;
+    }
+	
+	public org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization transform(Organization org) {
+		org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization result = new org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization();
+    	result.setOrganizationName(org.getName());
+    	Identifier identifier = org.getIdentifierFirstRep();
+    	if (identifier != null) {
+    		result.setIdNumber(identifier.getValue());
+    		result.setAssigningAuthority(new AssigningAuthority(noPrefix(identifier.getSystem())));
+    	}    	
+    	return result;
+    }
+	
+	public Author transformAuthor(Reference author, List<Resource> contained) {
+		if (author == null || author.getReference() == null) return null;
+		Resource authorObj = findResource(author, contained);
+		
+		if (authorObj instanceof Practitioner) {
+			Practitioner practitioner = (Practitioner) authorObj;
+			Author result = new Author();
+			result.setAuthorPerson(transform((Practitioner) authorObj));
+			for (ContactPoint contactPoint : practitioner.getTelecom()) result.getAuthorTelecom().add(transform(contactPoint));
+			return result;
+		} else if (authorObj instanceof PractitionerRole) { 
+			Author result = new Author();
+			PractitionerRole role = (PractitionerRole) authorObj;
+			Practitioner practitioner = (Practitioner) findResource(role.getPractitioner(), contained);
+			if (practitioner != null) result.setAuthorPerson(transform(practitioner));
+		    Organization org = (Organization) findResource(role.getOrganization(), contained);
+		    if (org != null) result.getAuthorInstitution().add(transform(org));
+		    for (CodeableConcept code : role.getCode()) result.getAuthorRole().add(transformToIdentifiable(code));
+		    for (CodeableConcept speciality : role.getSpecialty()) result.getAuthorSpecialty().add(transformToIdentifiable(speciality));
+		    for (ContactPoint contactPoint : role.getTelecom()) result.getAuthorTelecom().add(transform(contactPoint));
+		    return result;
+		}
+		
+    	return null;
+    }
 	
 	
 }
