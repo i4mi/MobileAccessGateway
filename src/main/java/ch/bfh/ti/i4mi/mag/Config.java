@@ -79,6 +79,9 @@ public class Config {
 	@Value("${mag.xds.retrieve.url}")
     private String uriMagXdsRetrieve;// = "https://localhost:9091/camel/xdsretrieve";
     
+	@Value("${mag.xds.retrieve.repositoryUniqueId}")
+	private String repositoryUniqueId;
+	
     //private String hostUrl45Http = "gazelle.interopsante.org/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType"; // http
     //private String hostUrl45Http = "gazelle.ihe.net/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType"; // http
     

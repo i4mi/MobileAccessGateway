@@ -86,7 +86,7 @@ class Iti65RouteBuilder extends RouteBuilder {
                 .to(xds41Endpoint)
                 .convertBodyTo(Response.class)
                 .process(Utils.keptBodyToHeader())
-                .process(translateToFhir(new Iti65ResponseConverter() , Response.class));
+                .process(translateToFhir(new Iti65ResponseConverter(config) , Response.class));
     }
 
      /*

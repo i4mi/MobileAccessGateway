@@ -36,6 +36,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.Severity;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
 
@@ -46,6 +47,12 @@ import ch.bfh.ti.i4mi.mag.mhd.Utils;
  */
 public class Iti65ResponseConverter extends BaseResponseConverter implements ToFhirTranslator<Response> { 
 
+	private Config config;
+	
+	public Iti65ResponseConverter(final Config config) {
+		this.config = config;
+	}
+	
 	/**
 	 * convert ITI-41 response to ITI-65 response 
 	 */
@@ -62,6 +69,8 @@ public class Iti65ResponseConverter extends BaseResponseConverter implements ToF
 	                    .setStatus("201 Created")
 	                    .setLastModified(new Date());
 	            if (requestEntry.getResource() instanceof Binary) {
+	              response.setLocation(config.getUriMagXdsRetrieve() + "?uniqueId=" + requestEntry.getId()
+                     + "&repositoryUniqueId=" + config.getRepositoryUniqueId());
 	              // TODO repositoryUniqueId not known
 	            } else {
 	              response.setLocation("urn:uuid:"+requestEntry.getId());

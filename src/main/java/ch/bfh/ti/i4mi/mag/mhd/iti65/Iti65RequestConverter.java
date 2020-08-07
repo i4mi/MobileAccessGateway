@@ -62,6 +62,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.Association;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssociationType;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Author;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.CXiAssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Document;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntry;
@@ -183,7 +184,8 @@ public class Iti65RequestConverter {
 	                Resource binaryContent = resources.get(contentURL);
 	                if (binaryContent instanceof Binary) {
 	                	Binary binary = (Binary) binaryContent;	                	
-	                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(binary.getData(),binary.getContentType())));	            
+	                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(binary.getData(),binary.getContentType())));
+	                	binary.setId(documentReference.getId()); // Change for response url
                     }
                 }
                 
@@ -320,6 +322,7 @@ public class Iti65RequestConverter {
 		    
 		targetAddress.setCity(address.getCity());
 		targetAddress.setCountry(address.getCountry());
+		targetAddress.setCountyParishCode(address.getDistrict());
 		targetAddress.setStateOrProvince(address.getState());
 		targetAddress.setZipOrPostalCode(address.getPostalCode());
 		String streetAddress = null; 
@@ -328,6 +331,8 @@ public class Iti65RequestConverter {
 		   	else streetAddress += "\n"+street.getValue();
 		}
 		targetAddress.setStreetAddress(streetAddress);
+				
+		
 		return targetAddress;
 	}
 	
@@ -385,7 +390,7 @@ public class Iti65RequestConverter {
 		} else if (reference.hasIdentifier()) {					
 	        return transform(reference.getIdentifier());
 		} 
-		throw new InvalidRequestException("Cannot resolve patient reference");
+		throw new InvalidRequestException("Cannot resolve reference");
 	}
 	
 	/**
@@ -575,8 +580,7 @@ public class Iti65RequestConverter {
 			 } else if (authenticator instanceof PractitionerRole) {
 				 Practitioner practitioner = (Practitioner) findResource(((PractitionerRole) authenticator).getPractitioner(), reference.getContained());
 				 if (practitioner != null) entry.setLegalAuthenticator(transform((Practitioner) authenticator));
-			 } 
-			 // TODO What shall be done with an Organization authenticator?
+			 } else throw new InvalidRequestException("No authenticator of type Organization supported.");			
 		}
 		             
         // title -> description string [0..1]
@@ -611,9 +615,11 @@ public class Iti65RequestConverter {
         String comments = attachment.getTitle();
         if (comments!=null) entry.setComments(localizedString(comments));       
 
-        // TcreationTime -> content.attachment.creation dateTime [0..1]
-        // TODO is this a duplicate?
-        //entry.setCreationTime(timestampFromDate(attachment.getCreationElement()));
+        // creationTime -> content.attachment.creation dateTime [0..1]
+        if (attachment.hasCreation()) {
+        	if (entry.getCreationTime() == null) entry.setCreationTime(timestampFromDate(attachment.getCreationElement()));
+        	else if (!timestampFromDate(attachment.getCreationElement()).equals(entry.getCreationTime())) throw new InvalidRequestException("DocumentReference.date does not match attachment.creation element");
+        }        
 
         // formatCode -> content.format Coding [0..1]
         Coding coding = content.getFormat();
@@ -621,9 +627,23 @@ public class Iti65RequestConverter {
 
         DocumentReferenceContextComponent context = reference.getContext();
        
-        // TODO: referenceIdList -> context.encounter Reference(Encounter) [0..*] When
+        // referenceIdList -> context.encounter Reference(Encounter) [0..*] When
         // referenceIdList contains an encounter, and a FHIR Encounter is available, it
         // may be referenced.
+        // We do not support this
+        //
+        // Instead: referenceIdList -> related.identifier
+        for (Reference ref : context.getRelated()) {
+        	Identifiable refId = transformReferenceToIdentifiable(ref, reference);
+        	if (refId != null) {
+        		ReferenceId referenceId = new ReferenceId();
+        		//referenceId.setAssigningAuthority(new CXiAssigningAuthority(namespaceId, universalId, universalIdType).getAssigningAuthority());        	
+          	    referenceId.setId(refId.getId());
+        		entry.getReferenceIdList().add(referenceId);        	
+        	}
+        }
+                
+        
         // Currently not mapped
         /*for (Reference encounterRef : context.getEncounter()) {
         	ReferenceId referenceId = new ReferenceId();
@@ -750,16 +770,28 @@ public class Iti65RequestConverter {
 		if (contactPoint == null) return null;
     	Telecom result = new Telecom();
     	
-    	if (contactPoint.getSystem().equals(ContactPointSystem.EMAIL)) {
+    	if (contactPoint.getSystem().equals(ContactPointSystem.EMAIL) || contactPoint.getSystem().equals(ContactPointSystem.URL)) {
     		result.setEmail(contactPoint.getValue());   
     		result.setUse("NET");
     		result.setType("Internet");
-    	} else if (contactPoint.getSystem().equals(ContactPointSystem.PHONE)) {
-    		result.setUnformattedPhoneNumber(contactPoint.getValue());    
-    		if (contactPoint.getUse().equals(ContactPoint.ContactPointUse.WORK)) result.setUse("WPN");
-    		else result.setUse("PRN");
-    		result.setType("PH");
-    	}
+    	} else {
+    		result.setUnformattedPhoneNumber(contactPoint.getValue());
+    		if (contactPoint.hasSystem())
+    		switch (contactPoint.getSystem()) {
+	    		case SMS:
+	    		case PHONE:result.setType("PH");break;
+	    		case FAX:result.setType("FX");break;
+	    		case PAGER:result.setType("BP");break;    		
+    		}
+    		
+    		if (contactPoint.hasUse())
+    		switch (contactPoint.getUse()) {
+	    		case HOME: result.setUse("PRN");break;
+	    		case WORK: result.setUse("WPN");break;
+	    		case MOBILE: result.setType("CP");break;    		
+    		}
+    		
+    	} 
     	    	
     	return result;
     }

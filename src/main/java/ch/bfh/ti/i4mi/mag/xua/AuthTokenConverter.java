@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ch.bfh.ti.i4mi.mag.xua;
 
 import java.io.StringReader;
@@ -23,56 +39,49 @@ import static org.openehealth.ipf.platform.camel.ihe.ws.AbstractWsEndpoint.*;
 
 public class AuthTokenConverter {
 
-	public static String convert( String token) {
+	public static String convert(String token) {
 		if (token != null && token.startsWith("IHE-SAML ")) {
 			String base64Token = token.substring("IHE-SAML ".length());
 			byte[] decoded = Base64.getDecoder().decode(base64Token);
-			return new String(decoded);			
+			return new String(decoded);
 		}
 		return null;
 	}
-	
+
 	public static Processor addWsHeader() {
-        return exchange -> {
-        	
-        	Map<String, List<String>> httpHeaders = (Map<String, List<String>>) exchange.getIn().getHeader("FhirHttpHeaders");
-        	for (Map.Entry<String, List<String>> entry : httpHeaders.entrySet()) {
-        		System.out.println("XXX: "+entry.getKey()+" = "+(entry.getValue()!=null ? entry.getValue().toString(): "null"));
-        	}
-        	
-        	if (httpHeaders != null) {
-        	List<String> header = httpHeaders.get("Authorization");
-        	System.out.println("CHECK HEADER");
-        	if (header != null) {
-        		System.out.println("CHECK HEADER1");
-        		String converted = convert(header.get(0)); 
-        	System.out.println("FOUND:"+converted);
-        	
-        	List<SoapHeader> soapHeaders = CastUtils.cast((List<?>) exchange.getIn().getHeader(Header.HEADER_LIST));
-            SoapHeader newHeader;
-     
-            if(soapHeaders == null){     
-                soapHeaders = new ArrayList<SoapHeader>();
-            }
-             
-            //try {
-                newHeader = new SoapHeader(new QName("soapHeader"), StaxUtils.read(new StringReader(converted)).getDocumentElement());
-                newHeader.setDirection(Direction.DIRECTION_OUT);
-     
-                soapHeaders.add(newHeader);
-     
-                exchange.getMessage().setHeader(OUTGOING_SOAP_HEADERS, soapHeaders);
-     
-            //} catch (Exception e) {
-                //log error
-            //}
-        	}
-        	
-        	
-        	}
-        	/*javax.xml.namespace.QName headerName = new javax.xml.namespace.QName("http://schemas.xmlsoap.org/ws/2002/07/secext", "Security");
-			new Header(headerName, "simple contents", new JAXBDataBinding(String.class));
-			exchange.getMessage().getHeader(OUTGOING_SOAP_HEADERS);*/        	     	        
-        };
-    }
+		return exchange -> {
+
+			Map<String, List<String>> httpHeaders = (Map<String, List<String>>) exchange.getIn().getHeader("FhirHttpHeaders");
+
+			String converted = null;
+
+			if (httpHeaders != null) {
+				List<String> header = httpHeaders.get("Authorization");
+				if (header != null) {
+					converted = convert(header.get(0));
+				}
+			} else {
+				Object authHeader = exchange.getIn().getHeader("Authorization");
+				if (authHeader != null)
+					converted = convert(authHeader.toString());
+			}
+			if (converted != null) {
+				List<SoapHeader> soapHeaders = CastUtils.cast((List<?>) exchange.getIn().getHeader(Header.HEADER_LIST));
+				SoapHeader newHeader;
+
+				if (soapHeaders == null) {
+					soapHeaders = new ArrayList<SoapHeader>();
+				}
+
+				newHeader = new SoapHeader(new QName("soapHeader"), StaxUtils.read(new StringReader(converted)).getDocumentElement());
+				newHeader.setDirection(Direction.DIRECTION_OUT);
+
+				soapHeaders.add(newHeader);
+
+				exchange.getMessage().setHeader(OUTGOING_SOAP_HEADERS, soapHeaders);
+
+			}
+
+		};
+	}
 }
