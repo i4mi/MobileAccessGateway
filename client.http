@@ -1,7 +1,7 @@
 ### RESTClient VSCode scripts
 ### Note ipf with a spring boot version has as default a fhir prefix, the ipf-tutorials-fhir is without the fhir prefix, iti-65 needs the camel servlet (different prefix camel)
 
-### @host = http://localhost:9091/fhir
+### @host = http://localhost:9090/fhir
 
 @host = http://test.ahdis.ch/fhir
 
