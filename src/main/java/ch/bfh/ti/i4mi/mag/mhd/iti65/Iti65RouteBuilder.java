@@ -38,6 +38,7 @@ import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
+import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -66,7 +67,7 @@ class Iti65RouteBuilder extends RouteBuilder {
               +
                       "&audit=true" +
                       "&auditContext=#myAuditContext" +
-                      "&sslContextParameters=#pixContext" +
+                //      "&sslContextParameters=#pixContext" +
                       "&inInterceptors=#soapResponseLogger" + 
                       "&inFaultInterceptors=#soapResponseLogger"+
                       "&outInterceptors=#soapRequestLogger" + 
@@ -76,6 +77,7 @@ class Iti65RouteBuilder extends RouteBuilder {
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 .process(itiRequestValidator())
+                .process(AuthTokenConverter.addWsHeader())
                 // translate, forward, translate back
                 .process(Utils.keepBody())
                 .bean(Iti65RequestConverter.class)

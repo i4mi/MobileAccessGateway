@@ -25,7 +25,7 @@ import org.springframework.context.annotation.ComponentScan;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Main class of the IPF application.
+ * Main class of the IPF MobileAccessGateway application.
  *
  * @author Oliver Egger
  */

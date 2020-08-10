@@ -39,10 +39,19 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
  */
 public class BaseResponseConverter {
 
+	/** 
+	 * XDS error response -> FHIR error response
+	 * @param input
+	 */
 	public void processError(Response input) {		
 		throw new InvalidRequestException("Retrieved error response", processErrorAsOutcome(input));
 	}
 	
+	/**
+	 * XDS error response -> FHIR OperationOutcome
+	 * @param input
+	 * @return
+	 */
 	public OperationOutcome processErrorAsOutcome(Response input) {
 		OperationOutcome outcome = new OperationOutcome();
 		

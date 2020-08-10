@@ -119,7 +119,7 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                     
                     // intendedRecipient -> recipient Reference(Patient| Practitioner| PractitionerRole| RelatedPerson| Organization) [0..*]
                     List<Recipient> recipients = submissionSet.getIntendedRecipients();
-                    for (Recipient recipient : recipients) {
+                    for (Recipient recipient : recipients) {                    	
                     	// TODO Ist this patient or practitioner or related person
                     }
                     

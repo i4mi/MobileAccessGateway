@@ -70,7 +70,7 @@ public class Iti83RequestConverter extends BaseRequestConverter {
 		  PRPAIN201309UV02Type resultMsg = new PRPAIN201309UV02Type();
 		  resultMsg.setITSVersion("XML_1.0");
 		  //String UUID.randomUUID().toString();
-		  resultMsg.setId(new II(config.getPixQueryOid(), uniqueId())); // "1.3.6.1.4.1.12559.11.1.2.2.5.7.1"
+		  resultMsg.setId(new II(config.getPixQueryOid(), uniqueId())); 
 		  resultMsg.setCreationTime(new TS(Timestamp.now().toHL7())); // Now
 		  resultMsg.setProcessingCode(new CS("T", null ,null));
 		  resultMsg.setProcessingModeCode(new CS("T", null, null));
@@ -99,13 +99,13 @@ public class Iti83RequestConverter extends BaseRequestConverter {
 		 
 		  PRPAIN201309UV02QUQIMT021001UV01ControlActProcess controlActProcess = new PRPAIN201309UV02QUQIMT021001UV01ControlActProcess();
 		  resultMsg.setControlActProcess(controlActProcess);
-		  controlActProcess.setClassCode(ActClassControlAct.CACT); // ???
-		  controlActProcess.setMoodCode(XActMoodIntentEvent.EVN); // ???
-		  controlActProcess.setCode(new CD("PRPA_TE201309UV02","2.16.840.1.113883.1.18", null)); // ???
+		  controlActProcess.setClassCode(ActClassControlAct.CACT); 
+		  controlActProcess.setMoodCode(XActMoodIntentEvent.EVN);
+		  controlActProcess.setCode(new CD("PRPA_TE201309UV02","2.16.840.1.113883.1.18", null)); 
 		  
 		  PRPAMT201307UV02QueryByParameter queryByParameter = new PRPAMT201307UV02QueryByParameter();
 		  controlActProcess.setQueryByParameter(queryByParameter);
-		  queryByParameter.setQueryId(new II(config.getPixQueryOid(), uniqueId()));//"1.3.6.1.4.1.12559.11.1.2.2.5.7.2"
+		  queryByParameter.setQueryId(new II(config.getPixQueryOid(), uniqueId()));
 		  queryByParameter.setStatusCode(new CS("new", null, null));
 		  queryByParameter.setResponsePriorityCode(new CS("I", null, null));
 		  

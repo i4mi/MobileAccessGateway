@@ -70,12 +70,20 @@ public class Utils {
             return searchParameter;        
     }
     
+    /**
+     * keep current message body
+     * @return
+     */
     public static Processor keepBody() {
         return exchange -> {
         	exchange.setProperty(KEPT_BODY, exchange.getIn().getBody());        	        
         };
     }
     
+    /**
+     * move previously stored message body to "KeptBody" property
+     * @return
+     */
     public static Processor keptBodyToHeader() {
         return exchange -> {
         	exchange.getMessage().setHeader(KEPT_BODY, exchange.getProperty(KEPT_BODY));        	        
