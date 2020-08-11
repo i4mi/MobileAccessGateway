@@ -85,7 +85,7 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
         		AssociationType type = association.getAssociationType();
         		
         		DocumentReferenceRelatesToComponent relatesTo = new DocumentReferenceRelatesToComponent();
-        		switch(type) {
+        		if (type!=null) switch(type) {
         		case APPEND:relatesTo.setCode(DocumentRelationshipType.APPENDS);break;
         		case REPLACE:relatesTo.setCode(DocumentRelationshipType.REPLACES);break;
         		case TRANSFORM:relatesTo.setCode(DocumentRelationshipType.TRANSFORMS);break;
@@ -245,15 +245,14 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     DocumentReferenceContextComponent context = new DocumentReferenceContextComponent();
                     documentReference.setContext(context);
 
-                    // TODO: referenceIdList -> context.encounter Reference(Encounter) [0..*] When
+                    // referenceIdList -> context.encounter Reference(Encounter) [0..*] When
                     // referenceIdList contains an encounter, and a FHIR Encounter is available, it
                     // may be referenced.
+                    // Map to context.related
                     List<ReferenceId> refIds = documentEntry.getReferenceIdList();
                     if (refIds!=null) {
                     	for (ReferenceId refId : refIds) {
-                    		if (ReferenceId.ID_TYPE_ENCOUNTER_ID.equals(refId.getIdTypeCode())) {
-                    			context.addEncounter(transform(refId));
-                    		}
+                    		context.getRelated().add(transform(refId));                    		                    		
                     	}
                     }
                     

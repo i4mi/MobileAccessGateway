@@ -26,7 +26,10 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Name;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Person;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.ReferenceId;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.XcnName;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.QueryRegistry;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindDocumentsByReferenceIdQuery;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindDocumentsQuery;
@@ -163,9 +166,16 @@ public class Iti67RequestConverter extends BaseRequestConverter {
             StringParam authorGivenName = searchParameter.getAuthorGivenName();
             StringParam authorFamilyName = searchParameter.getAuthorFamilyName();
             if (authorGivenName != null || authorFamilyName != null) {
-	            String author = (authorGivenName != null ? authorGivenName.getValue() : "%")+" "+(authorFamilyName != null ? authorFamilyName.getValue() : "%");
-	            List<String> authorPersons = Collections.singletonList(author);
-	            query.setAuthorPersons(authorPersons);
+            	Person person = new Person();
+            	
+            	XcnName name = new XcnName();
+				if (authorFamilyName != null) name.setFamilyName(authorFamilyName.getValue());
+				if (authorGivenName != null)  name.setGivenName(authorGivenName.getValue());
+            	person.setName(name);
+	            //String author = (authorGivenName != null ? authorGivenName.getValue() : "%")+" "+(authorFamilyName != null ? authorFamilyName.getValue() : "%");
+	            List<Person> authorPersons = Collections.singletonList(person);
+	            query.setTypedAuthorPersons(authorPersons);
+	            
             }
 
             final QueryRegistry queryRegistry = new QueryRegistry(query);

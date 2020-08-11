@@ -1,7 +1,26 @@
+/*
+ * Copyright 2015 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ch.bfh.ti.i4mi.mag.pmir.iti93;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
@@ -13,6 +32,9 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Patient.LinkType;
+import org.hl7.fhir.r4.model.Patient.PatientLinkComponent;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -42,6 +64,10 @@ import net.ihe.gazelle.hl7v3.datatypes.TS;
 import net.ihe.gazelle.hl7v3.mccimt000100UV01.MCCIMT000100UV01Device;
 import net.ihe.gazelle.hl7v3.mccimt000100UV01.MCCIMT000100UV01Receiver;
 import net.ihe.gazelle.hl7v3.mccimt000100UV01.MCCIMT000100UV01Sender;
+import net.ihe.gazelle.hl7v3.mfmimt700701UV01.MFMIMT700701UV01PriorRegisteredRole;
+import net.ihe.gazelle.hl7v3.mfmimt700701UV01.MFMIMT700701UV01PriorRegistration;
+import net.ihe.gazelle.hl7v3.mfmimt700701UV01.MFMIMT700701UV01ReplacementOf;
+import net.ihe.gazelle.hl7v3.mfmimt700701UV01.MFMIMT700701UV01Subject3;
 import net.ihe.gazelle.hl7v3.prpain201301UV02.PRPAIN201301UV02MFMIMT700701UV01ControlActProcess;
 import net.ihe.gazelle.hl7v3.prpain201301UV02.PRPAIN201301UV02MFMIMT700701UV01RegistrationEvent;
 import net.ihe.gazelle.hl7v3.prpain201301UV02.PRPAIN201301UV02MFMIMT700701UV01Subject1;
@@ -52,6 +78,11 @@ import net.ihe.gazelle.hl7v3.prpain201302UV02.PRPAIN201302UV02MFMIMT700701UV01Re
 import net.ihe.gazelle.hl7v3.prpain201302UV02.PRPAIN201302UV02MFMIMT700701UV01Subject1;
 import net.ihe.gazelle.hl7v3.prpain201302UV02.PRPAIN201302UV02MFMIMT700701UV01Subject2;
 import net.ihe.gazelle.hl7v3.prpain201302UV02.PRPAIN201302UV02Type;
+import net.ihe.gazelle.hl7v3.prpain201304UV02.PRPAIN201304UV02MFMIMT700701UV01ControlActProcess;
+import net.ihe.gazelle.hl7v3.prpain201304UV02.PRPAIN201304UV02MFMIMT700701UV01RegistrationEvent;
+import net.ihe.gazelle.hl7v3.prpain201304UV02.PRPAIN201304UV02MFMIMT700701UV01Subject1;
+import net.ihe.gazelle.hl7v3.prpain201304UV02.PRPAIN201304UV02MFMIMT700701UV01Subject2;
+import net.ihe.gazelle.hl7v3.prpain201304UV02.PRPAIN201304UV02Type;
 import net.ihe.gazelle.hl7v3.prpamt201301UV02.PRPAMT201301UV02Patient;
 import net.ihe.gazelle.hl7v3.prpamt201301UV02.PRPAMT201301UV02Person;
 import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02Patient;
@@ -59,6 +90,8 @@ import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02PatientId;
 import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02PatientPatientPerson;
 import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02PatientStatusCode;
 import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02Person;
+import net.ihe.gazelle.hl7v3.prpamt201303UV02.PRPAMT201303UV02Patient;
+import net.ihe.gazelle.hl7v3.prpamt201303UV02.PRPAMT201303UV02Person;
 import net.ihe.gazelle.hl7v3.voc.ActClass;
 import net.ihe.gazelle.hl7v3.voc.ActClassControlAct;
 import net.ihe.gazelle.hl7v3.voc.ActMood;
@@ -69,28 +102,19 @@ import net.ihe.gazelle.hl7v3.voc.ParticipationTargetSubject;
 import net.ihe.gazelle.hl7v3.voc.XActMoodIntentEvent;
 import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
-public class Iti93MergeRequestConverter extends PMIRRequestConverter {
+public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 
-	public String iti93ToIti44Converter(@Body Bundle requestBundle) throws JAXBException {
-		if (requestBundle.getType() != BundleType.MESSAGE) throw new InvalidRequestException("Bundle type must be message");
-		
-		BundleEntryComponent headerComponent = requestBundle.getEntryFirstRep();
-		if (headerComponent == null) throw new InvalidRequestException("First bundle entry must be MessageHeader.");
-		Resource headerResource = headerComponent.getResource();
-		if (headerResource==null || !(headerResource instanceof MessageHeader)) throw new InvalidRequestException("First bundle entry must be MessageHeader.");
-		MessageHeader header = (MessageHeader) headerResource;
-		
-		if (!("urn:ihe:iti:pmir:2019:patient-feed".equals(header.getEventUriType().getValue()))) throw new InvalidRequestException("Wrong eventUri");
-		
+	
+	public String doMerge(MessageHeader header, Map<String, BundleEntryComponent> entriesByReference) throws JAXBException {
 				
-		PRPAIN201302UV02Type resultMsg = new PRPAIN201302UV02Type();
+		 PRPAIN201304UV02Type resultMsg = new PRPAIN201304UV02Type();
 		  resultMsg.setITSVersion("XML_1.0");
 		  //String UUID.randomUUID().toString();
 		  resultMsg.setId(new II("1.3.6.1.4.1.12559.11.1.2.2.5.7.1", "351"));
 		  resultMsg.setCreationTime(new TS(Timestamp.now().toHL7())); // Now
 		  resultMsg.setProcessingCode(new CS("T", null ,null));
 		  resultMsg.setProcessingModeCode(new CS("T", null, null));
-		  resultMsg.setInteractionId(new II("2.16.840.1.113883.1.18", "PRPA_IN201301UV02"));
+		  resultMsg.setInteractionId(new II("2.16.840.1.113883.1.18", "PRPA_IN201304UV02Type"));
 		  resultMsg.setAcceptAckCode(new CS("AL", null, null));
 		
 		  MCCIMT000100UV01Receiver receiver = new MCCIMT000100UV01Receiver();
@@ -113,45 +137,91 @@ public class Iti93MergeRequestConverter extends PMIRRequestConverter {
 		  senderDevice.setDeterminerCode(EntityDeterminer.INSTANCE);
 		  senderDevice.setId(Collections.singletonList(new II("1.3.6.1.4.1.12559.11.1.2.2.5.7", null)));
 		 		  
-		  PRPAIN201302UV02MFMIMT700701UV01ControlActProcess controlActProcess = new PRPAIN201302UV02MFMIMT700701UV01ControlActProcess();
+		  PRPAIN201304UV02MFMIMT700701UV01ControlActProcess controlActProcess = new PRPAIN201304UV02MFMIMT700701UV01ControlActProcess();
 		  resultMsg.setControlActProcess(controlActProcess);
 		  controlActProcess.setClassCode(ActClassControlAct.CACT); // ???
 		  controlActProcess.setMoodCode(XActMoodIntentEvent.EVN); // ???
-		  controlActProcess.setCode(new CD("PRPA_TE201301UV02","2.16.840.1.113883.1.18", null)); // ???
+		  controlActProcess.setCode(new CD("PRPA_TE201304UV02","2.16.840.1.113883.1.18", null)); // ???
 		
 		  
 		  
 		  
 		
-	    for (BundleEntryComponent entry : requestBundle.getEntry()) {	    	
-	    	if (entry.getResource() instanceof Patient) {
+		  for (Reference ref : header.getFocus()) {
+			  BundleEntryComponent entry = entriesByReference.get(ref.getReference());
+
 	    		HTTPVerb method = entry.getRequest().getMethod();
 		    	if (method == null) throw new InvalidRequestException("HTTP verb missing in Bundle for Patient resource.");
 		    			    			    	
-		    	Patient in = (Patient) entry.getResource();
+		    	Patient basePatient = (Patient) entry.getResource();
+		    	Patient in = null;
+		    	List<Patient> replaced = new ArrayList<Patient>();
+		    	
+		    	for (PatientLinkComponent linked : basePatient.getLink()) {		    		
+		    		if (linked.getType().equals(LinkType.REPLACEDBY)) {
+		    			Reference other = linked.getOther();	
+		    			Patient otherPatient = findPatient(other, entriesByReference, basePatient);
+		    			in = otherPatient;
+		    			replaced.add(basePatient);
+		    		} else if (linked.getType().equals(LinkType.REPLACES)) {
+		    			Reference other = linked.getOther();	
+		    			Patient otherPatient = findPatient(other, entriesByReference, basePatient);
+		    			in = basePatient;
+		    			replaced.add(otherPatient);
+		    		}
+		    	}
+		    	
+		    	if (in==null || replaced.isEmpty()) throw new InvalidRequestException("Cannot determine Patients to merge");
 		    			    		    			    	
-		    	PRPAIN201302UV02MFMIMT700701UV01Subject1 subject = new PRPAIN201302UV02MFMIMT700701UV01Subject1();
+		    	PRPAIN201304UV02MFMIMT700701UV01Subject1 subject = new PRPAIN201304UV02MFMIMT700701UV01Subject1();
 			  controlActProcess.addSubject(subject);
 			  subject.setTypeCode("SUBJ");
 			  subject.setContextConductionInd(false); // ???
 			  			  
-			  PRPAIN201302UV02MFMIMT700701UV01RegistrationEvent registrationEvent = new PRPAIN201302UV02MFMIMT700701UV01RegistrationEvent();
+			  PRPAIN201304UV02MFMIMT700701UV01RegistrationEvent registrationEvent = new PRPAIN201304UV02MFMIMT700701UV01RegistrationEvent();
 			  subject.setRegistrationEvent(registrationEvent);
 			  registrationEvent.setClassCode(ActClass.REG);
 			  registrationEvent.setMoodCode(ActMood.EVN);
 			  registrationEvent.setStatusCode(new CS("active",null,null)); // ???
+			  
+			  List<MFMIMT700701UV01ReplacementOf> replacementOfList = new ArrayList<MFMIMT700701UV01ReplacementOf>();
+			  registrationEvent.setReplacementOf(replacementOfList);
+			  
+			  for (Patient replacedPatient : replaced) {
+			    MFMIMT700701UV01ReplacementOf replacementOf = new MFMIMT700701UV01ReplacementOf();
+			    MFMIMT700701UV01PriorRegistration priorRegistration = new MFMIMT700701UV01PriorRegistration();
+			    replacementOf.setPriorRegistration(priorRegistration );
+			    replacementOf.setTypeCode("RPLC");
+			    priorRegistration.setClassCode(ActClass.REG);
+			    priorRegistration.setMoodCode(ActMood.EVN);
+			    
+			    MFMIMT700701UV01Subject3 subject1 = new MFMIMT700701UV01Subject3();
+				priorRegistration.setSubject1(subject1 );
+			    subject1.setTypeCode(ParticipationTargetSubject.SBJ);
+
+			    MFMIMT700701UV01PriorRegisteredRole priorRegisteredRole = new MFMIMT700701UV01PriorRegisteredRole();
+				subject1.setPriorRegisteredRole(priorRegisteredRole );
+				priorRegisteredRole.setClassCode("PAT");
+				
+				for (Identifier id : replacedPatient.getIdentifier()) {
+					priorRegisteredRole.addId(patientIdentifier(id));
+			    }								
+			    
+			    replacementOfList.add(replacementOf);
+			  }
+			  
 			  			  
-			  PRPAIN201302UV02MFMIMT700701UV01Subject2 subject1 = new PRPAIN201302UV02MFMIMT700701UV01Subject2();			  
+			  PRPAIN201304UV02MFMIMT700701UV01Subject2 subject1 = new PRPAIN201304UV02MFMIMT700701UV01Subject2();			  
 			  registrationEvent.setSubject1(subject1);
 			  subject1.setTypeCode(ParticipationTargetSubject.SBJ);
 			  			  
-			  PRPAMT201302UV02Patient patient = new PRPAMT201302UV02Patient();
+			  PRPAMT201303UV02Patient patient = new PRPAMT201303UV02Patient();
 			  subject1.setPatient(patient);
 			  			  
 			  PRPAMT201302UV02PatientStatusCode statusCode = new PRPAMT201302UV02PatientStatusCode("active", null, null);
 			  patient.setStatusCode(statusCode); //???
 			  			  
-			  PRPAMT201302UV02PatientPatientPerson patientPerson = new PRPAMT201302UV02PatientPatientPerson();
+			  PRPAMT201303UV02Person patientPerson = new PRPAMT201303UV02Person();
 			  patient.setPatientPerson(patientPerson );
 		    	
 			  // TODO How is the correct mapping done?
@@ -206,10 +276,10 @@ public class Iti93MergeRequestConverter extends PMIRRequestConverter {
 		        }
 		        		        		    	
 	    	}
-	    }
+	   
 	    
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();	    
-	    HL7V3Transformer.marshallMessage(PRPAIN201302UV02Type.class, out, resultMsg);
+	    HL7V3Transformer.marshallMessage(PRPAIN201304UV02Type.class, out, resultMsg);
 	    System.out.println("POST CONVERT");
 	    String outArray = new String(out.toByteArray()); 
 	    System.out.println(outArray);

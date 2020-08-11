@@ -12,6 +12,7 @@ import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 import net.ihe.gazelle.hl7v3.datatypes.AD;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpCity;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpCountry;
+import net.ihe.gazelle.hl7v3.datatypes.AdxpCounty;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpPostalCode;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpState;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpStreetAddressLine;
@@ -76,13 +77,24 @@ public class PMIRRequestConverter extends BaseRequestConverter {
 	public static AD transform(Address address) {
 		AD addr = new AD();
 	
-		// TODO Missing: district, type, use
+		// TODO Missing: type, use
 		if (address.hasCity()) addr.addCity(element(AdxpCity.class, address.getCity()));
 		if (address.hasCountry()) addr.addCountry(element(AdxpCountry.class, address.getCountry()));
+		if (address.hasDistrict()) addr.addCounty(element(AdxpCounty.class, address.getDistrict()));
 		if (address.hasPostalCode()) addr.addPostalCode(element(AdxpPostalCode.class, address.getPostalCode()));
 		if (address.hasState()) addr.addState(element(AdxpState.class, address.getState()));
 		if (address.hasLine()) for (StringType line : address.getLine()) addr.addStreetAddressLine(element(AdxpStreetAddressLine.class, line.getValue()));
 		if (address.hasPeriod()) addr.addUseablePeriod(transform(address.getPeriod()));
+		if (address.hasUse()) {
+			switch(address.getUse()) {		
+				case HOME:addr.setUse("H");break;
+				case WORK:addr.setUse("WP");break;
+				case TEMP:addr.setUse("TMP");break;
+				case OLD:addr.setUse("OLD");break;
+		    }
+		}
+		
+
 		return addr;
 	}
 	

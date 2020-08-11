@@ -33,12 +33,12 @@ import lombok.Getter;
 public class PMIR implements IntegrationProfile {
 
     @AllArgsConstructor
-    public enum Interactions implements FhirInteractionId<FhirQueryAuditDataset> {
+    public enum Interactions implements FhirInteractionId<Iti93AuditDataset> {
 
         ITI_93(ITI_93_CONFIG);
 
         @Getter
-        FhirTransactionConfiguration<FhirQueryAuditDataset> fhirTransactionConfiguration;
+        FhirTransactionConfiguration<Iti93AuditDataset> fhirTransactionConfiguration;
     }
 
     @Override

@@ -200,6 +200,7 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
      * @return
      */
     public Organization transform(org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization org) {
+    	if (org == null) return null;
     	Organization result = new Organization();
     	result.setName(org.getOrganizationName());
     	String id = org.getIdNumber();
@@ -218,19 +219,21 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	
     	String type = telecom.getType();
     	String use = telecom.getUse();
-    	
-    	// TODO is this mapping correct?
+    	    	
     	if ("NET".equals(use) || "X.400".equals(type)) { 
     	  result.setSystem(ContactPointSystem.EMAIL);    	
     	  result.setValue(telecom.getEmail());    	  
     	} else {    
-    	  if ("FX".equals(type)) result.setSystem(ContactPointSystem.FAX);
-    	  else if ("BP".equals(type)) result.setSystem(ContactPointSystem.PAGER);
-    	  else result.setSystem(ContactPointSystem.PHONE);
     	  String phone = telecom.getUnformattedPhoneNumber();
     	  result.setValue(phone);
     	  if ("WPN".equals(use)) result.setUse(ContactPoint.ContactPointUse.WORK);
     	  else if ("PRN".equals(use)) result.setUse(ContactPoint.ContactPointUse.HOME);
+    	  
+    	  if ("FX".equals(type)) result.setSystem(ContactPointSystem.FAX);
+    	  else if ("BP".equals(type)) result.setSystem(ContactPointSystem.PAGER);
+    	  else if ("CP".equals(type)) { result.setSystem(ContactPointSystem.PHONE);result.setUse(ContactPoint.ContactPointUse.MOBILE); }
+    	  else result.setSystem(ContactPointSystem.PHONE);
+
     	}
     	    	
     	return result;
@@ -263,6 +266,7 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	org.hl7.fhir.r4.model.Address result = new org.hl7.fhir.r4.model.Address();
     	result.setCity(address.getCity());
     	result.setCountry(address.getCountry());
+    	result.setDistrict(address.getCountyParishCode());
     	result.setState(address.getStateOrProvince());
     	result.setPostalCode(address.getZipOrPostalCode());
     	String street = address.getStreetAddress();

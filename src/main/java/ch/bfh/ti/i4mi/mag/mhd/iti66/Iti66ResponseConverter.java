@@ -20,18 +20,24 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DocumentManifest;
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Author;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.LocalizedString;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Person;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Recipient;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.SubmissionSet;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Telecom;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.query.AdhocQueryResponse;
@@ -119,8 +125,24 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                     
                     // intendedRecipient -> recipient Reference(Patient| Practitioner| PractitionerRole| RelatedPerson| Organization) [0..*]
                     List<Recipient> recipients = submissionSet.getIntendedRecipients();
-                    for (Recipient recipient : recipients) {                    	
-                    	// TODO Ist this patient or practitioner or related person
+                    for (Recipient recipient : recipients) { 
+                    	Organization org = recipient.getOrganization();
+                    	Person person = recipient.getPerson();                    	
+                    	ContactPoint contact = transform(recipient.getTelecom());
+                    	var organization = transform(org);
+                    	Practitioner practitioner = transformPractitioner(person);
+                    	if (organization != null && practitioner == null) {
+                    		if (contact != null) organization.addTelecom(contact);
+                    		documentManifest.addRecipient().setResource(organization);
+                    	} else if (organization != null && practitioner != null) {
+                    		PractitionerRole role = new PractitionerRole();
+                    		role.setPractitioner((Reference) new Reference().setResource(practitioner));
+                    		role.setOrganization((Reference) new Reference().setResource(organization));
+                    		if (contact != null) role.addTelecom(contact);
+                    		documentManifest.addRecipient().setResource(role);
+                    	} else if (organization == null && practitioner != null) {                    		
+                    		// May be a patient, related person or practitioner
+                    	}                    	
                     }
                     
                     // sourceId -> source uri [0..1] [1..1]
