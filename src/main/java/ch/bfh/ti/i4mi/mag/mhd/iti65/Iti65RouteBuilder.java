@@ -28,7 +28,7 @@ import org.apache.camel.support.ExpressionAdapter;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentManifest;
-import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.DocumentReference; 
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Resource;
 import org.openehealth.ipf.commons.ihe.xds.core.ebxml.ebxml30.ProvideAndRegisterDocumentSetRequestType;

@@ -189,7 +189,8 @@ public class Iti65RequestConverter {
 	                if (binaryContent instanceof Binary) {
 	                	Binary binary = (Binary) binaryContent;	                	
 	                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(binary.getData(),binary.getContentType())));
-	                	binary.setId(documentReference.getId()); // Change for response url
+	                	Identifier masterIdentifier = documentReference.getMasterIdentifier();
+	                    binary.setUserData("masterIdentifier", noPrefix(masterIdentifier.getValue()));	                	
                     }
                 }
                 
@@ -541,6 +542,9 @@ public class Iti65RequestConverter {
         entry.assignEntryUuid();
         reference.setId(entry.getEntryUuid());
         
+        Identifier masterIdentifier = reference.getMasterIdentifier();
+        entry.setUniqueId(noPrefix(masterIdentifier.getValue()));
+               
         // limitedMetadata -> meta.profile canonical [0..*] 
         // No action
 
