@@ -87,6 +87,7 @@ import com.sun.istack.ByteArrayDataSource;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
+import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -103,6 +104,9 @@ public class Iti65RequestConverter {
 	public void setSchemeMapper(SchemeMapper schemeMapper) {
 		this.schemeMapper = schemeMapper;
 	}
+	
+	@Autowired
+	private PatientReferenceCreator patientRefCreator;
 	
 	/**
 	 * convert ITI-65 to ITI-41 request
@@ -380,6 +384,10 @@ public class Iti65RequestConverter {
 					}
 				}
 			}
+			
+			Identifiable result = patientRefCreator.resolvePatientReference(reference.getReference());
+			if (result != null) return result;
+			
 			MultiValueMap<String, String> vals = UriComponentsBuilder.fromUriString(targetRef).build().getQueryParams();
 			if (vals.containsKey("identifier")) {
 				String[] identifier = vals.getFirst("identifier").split("\\|");
@@ -572,8 +580,9 @@ public class Iti65RequestConverter {
 		}
 		
         // legalAuthenticator -> authenticator Note 1
-		Reference authenticatorRef = reference.getAuthenticator();
-		if (authenticatorRef!=null) {
+		
+		if (reference.hasAuthenticator()) {
+			 Reference authenticatorRef = reference.getAuthenticator();
 			 Resource authenticator = findResource(authenticatorRef, reference.getContained());
 			 if (authenticator instanceof Practitioner) {
 				 entry.setLegalAuthenticator(transform((Practitioner) authenticator));	
