@@ -27,9 +27,9 @@ import org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirEndpointConfiguratio
  *
  */
 @UriEndpoint(scheme = "pmir-iti93", title = "ITI-93 PMIR", syntax = "pmir-iti93:host:port", consumerClass = FhirConsumer.class, label = "http")
-public class Iti93Endpoint extends FhirEndpoint<FhirQueryAuditDataset, Iti93Component> {
+public class Iti93Endpoint extends FhirEndpoint<Iti93AuditDataset, Iti93Component> {
 
-    public Iti93Endpoint(String uri, Iti93Component fhirComponent, FhirEndpointConfiguration<FhirQueryAuditDataset> config) {
+    public Iti93Endpoint(String uri, Iti93Component fhirComponent, FhirEndpointConfiguration<Iti93AuditDataset> config) {
         super(uri, fhirComponent, config);
     }
 

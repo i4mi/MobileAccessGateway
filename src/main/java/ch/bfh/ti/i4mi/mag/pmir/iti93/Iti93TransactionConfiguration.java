@@ -25,15 +25,15 @@ import org.openehealth.ipf.commons.ihe.fhir.audit.FhirQueryAuditDataset;
  * Standard Configuration for Iti93Component. Lazy-loading of results is by default not supported.
  *
  */
-public class Iti93TransactionConfiguration extends FhirTransactionConfiguration<FhirQueryAuditDataset> {
+public class Iti93TransactionConfiguration extends FhirTransactionConfiguration<Iti93AuditDataset> {
 
     public Iti93TransactionConfiguration() {
-        super(
+        super( 
                 "pmir-iti93",
                 "PMIR Mobile Patient Identity Feed",
                 false,
-                null,
-                null,
+                new Iti93AuditStrategy(false),
+                new Iti93AuditStrategy(true),
                 FhirVersionEnum.R4,
                 new Iti93ResourceProvider(),        // Consumer side. accept $ihe-pix operation
                 null,

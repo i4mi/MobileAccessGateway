@@ -104,7 +104,7 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 		  resultMsg.setControlActProcess(controlActProcess);
 		  controlActProcess.setClassCode(ActClassControlAct.CACT); 
 		  controlActProcess.setMoodCode(XActMoodIntentEvent.EVN); 
-		  controlActProcess.setCode(new CD("PRPA_TE201301UV02","2.16.840.1.113883.1.18", null)); 
+		  controlActProcess.setCode(new CD("PRPA_TE201301UV02",null,"2.16.840.1.113883.1.18")); 
 		
 		  for (Reference ref : header.getFocus()) {
 			  BundleEntryComponent entry = entriesByReference.get(ref.getReference());
@@ -216,7 +216,12 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 				COCTMT090003UV01AssignedEntity assignedEntity = new COCTMT090003UV01AssignedEntity();
 				custodian.setAssignedEntity(assignedEntity);
 				assignedEntity.setClassCode(RoleClassAssignedEntity.ASSIGNED);
-				assignedEntity.setId(orgIds);
+				
+				List<II> custIds = new ArrayList<II>();			        			       
+			    custIds.add(new II(getScheme(config.getPixMySenderOid()), null));
+				
+				assignedEntity.setId(custIds);
+				//assignedEntity.setId(orgIds);
 				
 				COCTMT090003UV01Organization assignedOrganization = new COCTMT090003UV01Organization();
 				assignedEntity.setAssignedOrganization(assignedOrganization );
@@ -261,7 +266,9 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 	}
 	
 	public II patientIdentifier(Identifier id) {
-		return new II(getScheme(id.getSystem()),id.getValue());
+		String assigner = null;
+		if (id.hasAssigner()) assigner = id.getAssigner().getDisplay();
+		return new II(getScheme(id.getSystem()),id.getValue(), assigner);
 	}
 	
 	public PRPAMT201302UV02PatientId patientIdentifierUpd(Identifier id) {

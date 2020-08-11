@@ -53,7 +53,7 @@ public class PatientReferenceCreator {
 	}
 	
 	public Identifiable resolvePatientReference(String reference) {
-		if (reference.startsWith("Patient/") || reference.startsWith(config.getUriPatientEndpoint())) {
+		if (reference.indexOf("Patient/") >= 0) {
 			int start = reference.indexOf("Patient/")+"Patient/".length();
 			int end = reference.indexOf("?");
 			if (end<0) end = reference.length();

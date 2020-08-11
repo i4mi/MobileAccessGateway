@@ -27,7 +27,7 @@ import org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirEndpointConfiguratio
  * Component for PMIR(ITI-93)
  *
  */
-public class Iti93Component extends FhirComponent<FhirQueryAuditDataset> {
+public class Iti93Component extends FhirComponent<Iti93AuditDataset> {
 
 
     public Iti93Component() {
@@ -39,7 +39,7 @@ public class Iti93Component extends FhirComponent<FhirQueryAuditDataset> {
     }
 
     @Override
-    protected Iti93Endpoint doCreateEndpoint(String uri, FhirEndpointConfiguration<FhirQueryAuditDataset> config) {
+    protected Iti93Endpoint doCreateEndpoint(String uri, FhirEndpointConfiguration<Iti93AuditDataset> config) {
         return new Iti93Endpoint(uri, this, config);
     }
 
