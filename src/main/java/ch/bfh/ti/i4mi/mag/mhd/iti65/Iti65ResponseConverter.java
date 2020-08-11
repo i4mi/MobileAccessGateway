@@ -24,6 +24,8 @@ import java.util.Map;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.DocumentManifest;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
@@ -69,11 +71,15 @@ public class Iti65ResponseConverter extends BaseResponseConverter implements ToF
 	                    .setStatus("201 Created")
 	                    .setLastModified(new Date());
 	            if (requestEntry.getResource() instanceof Binary) {
-	              response.setLocation(config.getUriMagXdsRetrieve() + "?uniqueId=" + requestEntry.getId()
-                     + "&repositoryUniqueId=" + config.getRepositoryUniqueId());
-	              // TODO repositoryUniqueId not known
-	            } else {
-	              response.setLocation("urn:uuid:"+requestEntry.getId());
+	              String uniqueId = (String) requestEntry.getResource().getUserData("masterIdentifier");
+	              response.setLocation(config.getUriMagXdsRetrieve() + "?uniqueId=" + uniqueId
+                     + "&repositoryUniqueId=" + config.getRepositoryUniqueId());	            
+	            } else if (requestEntry.getResource() instanceof DocumentManifest) {
+	            	String id = config.getSchemeMapper().getScheme(((DocumentManifest) requestEntry.getResource()).getMasterIdentifier().getValue());
+	            	response.setLocation("DocumentManifest/"+id);
+	            } else if (requestEntry.getResource() instanceof DocumentReference) {
+	            	String id = config.getSchemeMapper().getScheme(((DocumentReference) requestEntry.getResource()).getMasterIdentifier().getValue());
+	            	response.setLocation("DocumentReference/"+id);	              
 	            }
 	            responseBundle.addEntry()
 	                    .setResponse(response);

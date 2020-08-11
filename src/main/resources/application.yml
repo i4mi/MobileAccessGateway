@@ -16,7 +16,7 @@ mag:
     iti-41:
       url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/rep/prb
     retrieve:
-      url: http://localhost:9091/camel/xdsretrieve
+      url: https://localhost:9091/camel/xdsretrieve
       repositoryUniqueId: 1.1.4567332.1.2
   pix:
     https: true
