@@ -1,5 +1,9 @@
 package ch.bfh.ti.i4mi.mag.pmir.iti93;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hl7.fhir.r4.model.Identifier;
 import org.openehealth.ipf.commons.ihe.fhir.audit.FhirAuditDataset;
 
 import lombok.Getter;
@@ -9,7 +13,13 @@ public class Iti93AuditDataset extends FhirAuditDataset {
 
     // Document manifest unique ID
     @Getter @Setter
-    private String documentManifestUuid;
+    private String eventUri;
+    
+    @Getter @Setter
+    private String messageHeaderId;
+    
+    @Getter
+    private List<Identifier> patients = new ArrayList<Identifier>();
 
     public Iti93AuditDataset() {
         super(true);

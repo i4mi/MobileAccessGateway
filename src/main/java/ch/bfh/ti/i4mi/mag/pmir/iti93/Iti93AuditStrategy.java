@@ -1,42 +1,33 @@
 package ch.bfh.ti.i4mi.mag.pmir.iti93;
 
-import java.util.Collections;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.DocumentManifest;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.MessageHeader;
+import org.hl7.fhir.r4.model.MessageHeader.ResponseType;
+import org.hl7.fhir.r4.model.Patient;
 import org.openehealth.ipf.commons.audit.AuditContext;
 import org.openehealth.ipf.commons.audit.codes.EventActionCode;
 import org.openehealth.ipf.commons.audit.codes.EventOutcomeIndicator;
+import org.openehealth.ipf.commons.audit.codes.ParticipantObjectDataLifeCycle;
 import org.openehealth.ipf.commons.audit.codes.ParticipantObjectIdTypeCode;
+import org.openehealth.ipf.commons.audit.codes.ParticipantObjectTypeCode;
 import org.openehealth.ipf.commons.audit.codes.ParticipantObjectTypeCodeRole;
-import org.openehealth.ipf.commons.audit.event.BaseAuditMessageBuilder;
 import org.openehealth.ipf.commons.audit.event.PatientRecordBuilder;
 import org.openehealth.ipf.commons.audit.model.AuditMessage;
 import org.openehealth.ipf.commons.audit.types.EventType;
 import org.openehealth.ipf.commons.audit.types.PurposeOfUse;
-import org.openehealth.ipf.commons.ihe.core.atna.event.PHIImportBuilder;
-import org.openehealth.ipf.commons.ihe.fhir.audit.FhirAuditStrategy;
-import org.openehealth.ipf.commons.ihe.fhir.audit.codes.FhirEventTypeCode;
-import org.openehealth.ipf.commons.ihe.fhir.support.OperationOutcomeOperations;
-
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.DocumentManifest;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.openehealth.ipf.commons.audit.AuditContext;
-import org.openehealth.ipf.commons.audit.codes.EventOutcomeIndicator;
 import org.openehealth.ipf.commons.ihe.fhir.audit.FhirAuditStrategy;
 import org.openehealth.ipf.commons.ihe.fhir.support.OperationOutcomeOperations;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Iti93AuditStrategy extends FhirAuditStrategy<Iti93AuditDataset> {
 
+	//private String endpoint = "https://localhost:9091/fhir/$process-message";
+	
     public Iti93AuditStrategy(boolean serverSide) {
-        super(serverSide, OperationOutcomeOperations.INSTANCE);
+        super(serverSide, OperationOutcomeOperations.INSTANCE);        
     }
 
     @Override
@@ -49,27 +40,28 @@ public class Iti93AuditStrategy extends FhirAuditStrategy<Iti93AuditDataset> {
         var dataset = super.enrichAuditDatasetFromRequest(auditDataset, request, parameters);
         var bundle = (Bundle) request;
         //
-        var documentManifest = bundle.getEntry().stream()
+        var messageHeader = bundle.getEntry().stream()
                 .map(Bundle.BundleEntryComponent::getResource)
-                .filter(DocumentManifest.class::isInstance)
-                .map(DocumentManifest.class::cast)
-                .findFirst().orElseThrow(() -> new RuntimeException("ITI-65 bundle must contain DocumentManifest"));
+                .filter(MessageHeader.class::isInstance)
+                .map(MessageHeader.class::cast)
+                .findFirst().orElseThrow(() -> new RuntimeException("ITI-93 bundle must contain MessageHeader"));
 
+        dataset.setEventUri(messageHeader.getEventUriType().asStringValue());
+        dataset.setMessageHeaderId(messageHeader.getId());
         
-        //dataset.enrichDatasetFromDocumentManifest(documentManifest);
+        bundle.getEntry().stream()
+        .map(Bundle.BundleEntryComponent::getResource)
+        .filter(Patient.class::isInstance)
+        .map(Patient.class::cast)
+        .forEach(patient -> { 
+        	dataset.getPatients().add(patient.getIdentifierFirstRep());
+         });
+        
         return dataset;
     }
 
     @Override
-    public boolean enrichAuditDatasetFromResponse(Iti93AuditDataset auditDataset, Object response, AuditContext auditContext) {
-        var bundle = (Bundle) response;
-        // Extract DocumentManifest (UU)IDs from the response bundle for auditing
-        bundle.getEntry().stream()
-                .map(Bundle.BundleEntryComponent::getResponse)
-                .filter(Objects::nonNull)
-                .filter(r -> r.getLocation() != null && r.getLocation().startsWith("DocumentManifest"))
-                .findFirst()
-                .ifPresent(r -> auditDataset.setDocumentManifestUuid(r.getLocation()));
+    public boolean enrichAuditDatasetFromResponse(Iti93AuditDataset auditDataset, Object response, AuditContext auditContext) {     
         return super.enrichAuditDatasetFromResponse(auditDataset, response, auditContext);
     }
 
@@ -80,16 +72,21 @@ public class Iti93AuditStrategy extends FhirAuditStrategy<Iti93AuditDataset> {
      */
     @Override
     protected EventOutcomeIndicator getEventOutcomeCodeFromResource(IBaseResource resource) {
+    	if (! (resource instanceof Bundle)) return super.getEventOutcomeCodeFromResource(resource);
         var bundle = (Bundle) resource;
-        var responseStatus = bundle.getEntry().stream()
-                .map(Bundle.BundleEntryComponent::getResponse)
-                .map(Bundle.BundleEntryResponseComponent::getStatus)
-                .collect(Collectors.toSet());
+        
+        var messageHeader = bundle.getEntry().stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .filter(MessageHeader.class::isInstance)
+                .map(MessageHeader.class::cast)
+                .findFirst().orElseThrow(() -> new RuntimeException("ITI-93 bundle must contain MessageHeader"));
 
-        if (responseStatus.stream().anyMatch(s -> s.startsWith("4") || s.startsWith("5"))) {
-            return EventOutcomeIndicator.MajorFailure;
-        }
-        return EventOutcomeIndicator.Success;
+        ResponseType result = messageHeader.getResponse().getCode();
+        if (result == null) return EventOutcomeIndicator.MajorFailure;
+        if (result.equals(ResponseType.OK)) return EventOutcomeIndicator.Success;
+        if (result.equals(ResponseType.TRANSIENTERROR)) return EventOutcomeIndicator.MinorFailure;
+        return EventOutcomeIndicator.MajorFailure;
+        
     }
     
     @Override
@@ -99,19 +96,25 @@ public class Iti93AuditStrategy extends FhirAuditStrategy<Iti93AuditDataset> {
 		EventOutcomeIndicator outcome = auditDataset.getEventOutcomeIndicator();
 		PurposeOfUse purposesOfUse = null;
 		PatientRecordBuilder builder = new PatientRecordBuilder(outcome, action, eventType, purposesOfUse);
-    	//builder.addSourceActiveParticipant(userId, altUserId, userName, networkId, isRequestor);
-    	//builder.addDestinationActiveParticipant(userId, altUserId, userName, networkAccessPointId, userIsRequestor);
-    	//builder.addParticipantObjectIdentification(objectIDTypeCode, objectName, objectQuery, objectDetails, objectID, objectTypeCode, objectTypeCodeRole, objectDataLifeCycle, objectSensitivity);
-    	// Message identity
-    	//builder.addParticipantObjectIdentification(objectIDTypeCode, objectName, objectQuery, objectDetails, objectID, objectTypeCode, objectTypeCodeRole, objectDataLifeCycle, objectSensitivity);
-    	return builder.getMessages();
-        /*return new PHIImportBuilder<>(auditContext, auditDataset, FhirEventTypeCode.ProvideDocumentBundle)
-                .setPatient(auditDataset.getPatientId())
-                .addImportedEntity(
-                        auditDataset.getDocumentManifestUuid(),
-                        ParticipantObjectIdTypeCode.XdsMetadata,
-                        ParticipantObjectTypeCodeRole.Job,
-                        Collections.emptyList())
-                .getMessages();*/
+		builder.setAuditSource(auditContext);
+    	builder.addSourceActiveParticipant(auditDataset.getSourceUserId(), null, auditDataset.getSourceUserName(), auditDataset.getRemoteAddress(), true);
+    	builder.addDestinationActiveParticipant(auditDataset.getDestinationUserId(), null, null, auditDataset.getLocalAddress(), false);
+    	
+		for (Identifier id : auditDataset.getPatients()) {
+			builder.addPatientParticipantObject(id.getValue(), null, null, null);	
+		}
+				
+		builder.addParticipantObjectIdentification(
+                ParticipantObjectIdTypeCode.NodeID,
+                auditDataset.getEventUri(),
+                null,
+                null,
+                auditDataset.getMessageHeaderId(),
+                ParticipantObjectTypeCode.Other,
+                ParticipantObjectTypeCodeRole.Resource,
+                ParticipantObjectDataLifeCycle.Origination,
+                null);
+		    	
+    	return builder.getMessages();      
     }
 }
