@@ -103,7 +103,7 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     DocumentReference documentReference = new DocumentReference();
 
                     
-                    documentReference.setId(documentEntry.getEntryUuid()); // FIXME do we need to cache this id in
+                    documentReference.setId(documentEntry.getUniqueId()); // FIXME do we need to cache this id in
                                                                            // relation to the DocumentManifest itself
                                                                            // for
 

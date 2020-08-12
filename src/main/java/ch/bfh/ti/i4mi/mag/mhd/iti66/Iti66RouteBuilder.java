@@ -19,6 +19,7 @@ package ch.bfh.ti.i4mi.mag.mhd.iti66;
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.openehealth.ipf.commons.ihe.fhir.Constants;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.springframework.stereotype.Component;
 
@@ -60,9 +61,12 @@ class Iti66RouteBuilder extends RouteBuilder {
         from("mhd-iti66:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentmanifest-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(AuthTokenConverter.addWsHeader())
-                .bean(Utils.class,"searchParameterToBody")
-                .bean(Iti66RequestConverter.class)                
+                .process(AuthTokenConverter.addWsHeader()).choice()
+                .when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())
+                    .bean(Utils.class,"searchParameterToBody")
+                    .bean(Iti66RequestConverter.class).endChoice()
+                .when(header("FhirHttpUri").isNotNull())
+                    .bean(IdRequestConverter.class).endChoice().end()
                 .to(xds18Endpoint)
                 .bean(Iti66ResponseBugfix.class)
                 .process(translateToFhir(new Iti66ResponseConverter(config) , QueryResponse.class));
