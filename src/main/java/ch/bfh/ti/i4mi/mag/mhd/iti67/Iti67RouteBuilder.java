@@ -17,9 +17,9 @@
 package ch.bfh.ti.i4mi.mag.mhd.iti67;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
-import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelValidators.itiRequestValidator;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.openehealth.ipf.commons.ihe.fhir.Constants;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 class Iti67RouteBuilder extends RouteBuilder {
-    
+
     private final Config config;
 
     public Iti67RouteBuilder(final Config config) {
@@ -60,10 +60,13 @@ class Iti67RouteBuilder extends RouteBuilder {
         from("mhd-iti67:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentreference-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(AuthTokenConverter.addWsHeader())
-                .bean(Utils.class,"searchParameterToBody")                
-                .bean(Iti67RequestConverter.class)              
-                .to(xds18Endpoint)
-                .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class));
+                .process(AuthTokenConverter.addWsHeader()).choice()
+               .when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())
+                   .bean(Utils.class,"searchParameterToBody")                
+                   .bean(Iti67RequestConverter.class).endChoice()
+               .when(header("FhirHttpUri").isNotNull())
+                   .bean(IdRequestConverter.class).endChoice().end()
+               .to(xds18Endpoint)
+               .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class));
     }
 }

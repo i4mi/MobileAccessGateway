@@ -69,7 +69,7 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                 for (SubmissionSet submissionSet : input.getSubmissionSets()) {
                     DocumentManifest documentManifest = new DocumentManifest();
                     
-                    documentManifest.setId(submissionSet.getEntryUuid());  
+                    documentManifest.setId(submissionSet.getUniqueId());  
                     
                     list.add(documentManifest);
                     // limitedMetadata -> meta.profile canonical [0..*]       
