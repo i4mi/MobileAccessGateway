@@ -1,7 +1,7 @@
 # General configuration of the IPF application.
 
 mag:
-  baseurl: https://localhost:9091
+  baseurl: http://test.ahdis.ch
   client-ssl:
     enabled: true
     key-store: 270.jks
@@ -16,7 +16,7 @@ mag:
     iti-41:
       url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/rep/prb
     retrieve:
-      url: https://localhost:9091/camel/xdsretrieve
+      url: http://test.ahdis.ch/camel/xdsretrieve
       repositoryUniqueId: 1.1.4567332.1.2
   pix:
     https: true

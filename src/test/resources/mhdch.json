@@ -39,7 +39,7 @@
           }
         ],
         "masterIdentifier": {
-          "value": "urn:oid:1.3.6.1.4.1.12559.11.13.2.6.3000.2"
+          "value": "urn:oid:1.3.6.1.4.1.12559.11.13.2.6.3000.3"
         },
         "identifier": [
           {
@@ -58,7 +58,7 @@
           ]
         },
         "subject": {
-          "reference": "http://test.ahdis.ch/fhir/Patient/1.3.6.1.4.1.21367.2017.2.5.83-MAG-001"
+          "reference": "http://test.ahdis.ch/fhir/Patient/1.3.6.1.4.1.21367.2017.2.5.83-MAG-002"
         },
         "created": "2020-06-29T12:01:30+00:00",
         "source": "urn:oid:1.3.6.1.4.1.12559.11.13.2.5",
@@ -112,7 +112,7 @@
           }
         ],
         "masterIdentifier": {
-          "value": "urn:oid:1.3.6.1.4.1.12559.11.13.2.1.3000.2"
+          "value": "urn:oid:1.3.6.1.4.1.12559.11.13.2.1.3000.3"
         },
         "identifier": [
           {
@@ -143,10 +143,10 @@
           }
         ],
         "subject": {
-          "reference": "http://test.ahdis.ch/fhir/Patient/1.3.6.1.4.1.21367.2017.2.5.83-MAG-001"
+          "reference": "http://test.ahdis.ch/fhir/Patient/1.3.6.1.4.1.21367.2017.2.5.83-MAG-002"
         },
-        "date": "2020-06-29T11:58:00+00:00",
-        "description": "2-7-MedicationCard",
+        "date": "2020-08-13T11:58:00+00:00",
+        "description": "2-7-MedicationCard (2tes Mal)",
         "securityLabel": [
           {
             "coding": [
@@ -164,7 +164,7 @@
               "contentType": "text/xml",
               "language": "de-CH",
               "url": "urn:uuid:d8d1fe44-07e9-4a84-985f-fde97d77d54b",
-              "creation": "2020-06-29T11:58:00+00:00"
+              "creation": "2020-08-13T11:58:00+00:00"
             },
             "format": {
               "system": "urn:oid:1.3.6.1.4.1.19376.1.2.3",
