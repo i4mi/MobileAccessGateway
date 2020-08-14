@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
@@ -195,6 +196,23 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     }
     
     /**
+     * XDS Person -> FHIR Patient
+     * @param person
+     * @return
+     */
+    public Patient transformPatient(Person person) {
+    	if (person==null) return null;
+    	Patient patient = new Patient();
+    	Name name = person.getName();
+    	if (name != null) {
+    		patient.addName(transform(name));
+    	}
+    	if (person.getId()!=null) patient.addIdentifier(transformToIdentifier(person.getId()));
+    	    	
+    	return patient;
+    }
+    
+    /**
      * XDS Organization -> FHIR Organization
      * @param org
      * @return
@@ -338,6 +356,15 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
 		return result;
     }
     
+    private boolean isPatientAuthor(Author author) {
+    	if (author == null) return false;
+    	if (author.getAuthorRole()==null) return false;
+    	for (Identifiable roles : author.getAuthorRole()) {
+    		if ("PAT".equals(roles.getId()) && "2.16.756.5.30.1.127.3.10.1.41".equals(roles.getAssigningAuthority().getUniversalId())) return true;
+    		if ("REP".equals(roles.getId()) && "2.16.756.5.30.1.127.3.10.1.41".equals(roles.getAssigningAuthority().getUniversalId())) return true;
+    	}
+    	return false;
+    }
     /**
      * XDS Author -> FHIR Reference
      * @param author
@@ -345,6 +372,16 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
      */
     public Reference transformAuthor(Author author) {
     	Person person = author.getAuthorPerson();
+    	
+    	if (isPatientAuthor(author)) {
+    		Patient patient = transformPatient(person);
+    		Reference result = new Reference();
+    		List<Telecom> telecoms = author.getAuthorTelecom();    		
+    		for (Telecom telecom : telecoms) patient.addTelecom(transform(telecom));
+    		result.setResource(patient);
+    		return result;
+    	}
+    	
 		Practitioner containedPerson = transformPractitioner(person);
 		PractitionerRole role = null;
 	

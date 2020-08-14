@@ -1,6 +1,8 @@
 package ch.bfh.ti.i4mi.mag.pmir;
 
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -16,6 +18,7 @@ import net.ihe.gazelle.hl7v3.datatypes.AdxpCounty;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpPostalCode;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpState;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpStreetAddressLine;
+import net.ihe.gazelle.hl7v3.datatypes.CE;
 import net.ihe.gazelle.hl7v3.datatypes.EnFamily;
 import net.ihe.gazelle.hl7v3.datatypes.EnGiven;
 import net.ihe.gazelle.hl7v3.datatypes.EnPrefix;
@@ -106,5 +109,11 @@ public class PMIRRequestConverter extends BaseRequestConverter {
 		for (StringType suffix : name.getSuffix()) nameElement.addSuffix(element(EnSuffix.class, suffix.getValue()));
 		if (name.hasPeriod()) nameElement.addValidTime(transform(name.getPeriod()));		    		
 		return nameElement;
+	}
+	
+	public static CE transform(CodeableConcept cc) {
+		if (cc == null || !cc.hasCoding()) return null;
+		Coding coding = cc.getCodingFirstRep();
+		return new CE(coding.getCode(), coding.getDisplay(), coding.getSystem());
 	}
 }

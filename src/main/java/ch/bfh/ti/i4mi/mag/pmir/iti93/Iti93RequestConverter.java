@@ -110,9 +110,19 @@ import net.ihe.gazelle.hl7v3.voc.RoleClassContact;
 import net.ihe.gazelle.hl7v3.voc.XActMoodIntentEvent;
 import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
+/**
+ * ITI-93 to ITI-44 request converter
+ * @author alexander kreutz
+ *
+ */
 public class Iti93RequestConverter extends Iti93MergeRequestConverter {
 
-
+    /**
+     * convert ITI-93 to ITI-44 request
+     * @param requestBundle
+     * @return
+     * @throws JAXBException
+     */
 	public String iti93ToIti44Converter(@Body Bundle requestBundle) throws JAXBException {
 		if (requestBundle.getType() != BundleType.MESSAGE) throw new InvalidRequestException("Bundle type must be message");
 		

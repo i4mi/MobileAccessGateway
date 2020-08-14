@@ -49,12 +49,20 @@ import net.ihe.gazelle.hl7v3.mccimt000200UV01.MCCIMT000200UV01AcknowledgementDet
 import net.ihe.gazelle.hl7v3.prpain201310UV02.PRPAIN201310UV02MFMIMT700711UV01ControlActProcess;
 import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
+/**
+ * ITI-93 from ITI-44 response converter
+ * @author alexander kreutz
+ *
+ */
 @Component
 public class Iti93ResponseConverter implements ToFhirTranslator<byte[]> {
 
 	@Autowired
 	private Config config;
 	
+	/**
+	 * translate ITI-44 response to ITI-93 response
+	 */
 	public Bundle translateToFhir(byte[] input, Map<String, Object> parameters)  {
 		try {
 			

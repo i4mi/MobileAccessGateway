@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ch.bfh.ti.i4mi.mag.pmir.iti93;
 
 import java.io.ByteArrayOutputStream;
@@ -15,6 +31,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -31,10 +48,12 @@ import net.ihe.gazelle.hl7v3.coctmt090003UV01.COCTMT090003UV01Organization;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03ContactParty;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03Organization;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03Person;
+import net.ihe.gazelle.hl7v3.datatypes.BL;
 import net.ihe.gazelle.hl7v3.datatypes.CD;
 import net.ihe.gazelle.hl7v3.datatypes.CE;
 import net.ihe.gazelle.hl7v3.datatypes.CS;
 import net.ihe.gazelle.hl7v3.datatypes.II;
+import net.ihe.gazelle.hl7v3.datatypes.INT;
 import net.ihe.gazelle.hl7v3.datatypes.ON;
 import net.ihe.gazelle.hl7v3.datatypes.TS;
 import net.ihe.gazelle.hl7v3.mccimt000100UV01.MCCIMT000100UV01Device;
@@ -46,6 +65,7 @@ import net.ihe.gazelle.hl7v3.prpain201301UV02.PRPAIN201301UV02MFMIMT700701UV01Re
 import net.ihe.gazelle.hl7v3.prpain201301UV02.PRPAIN201301UV02MFMIMT700701UV01Subject1;
 import net.ihe.gazelle.hl7v3.prpain201301UV02.PRPAIN201301UV02MFMIMT700701UV01Subject2;
 import net.ihe.gazelle.hl7v3.prpain201301UV02.PRPAIN201301UV02Type;
+import net.ihe.gazelle.hl7v3.prpamt201301UV02.PRPAMT201301UV02LanguageCommunication;
 import net.ihe.gazelle.hl7v3.prpamt201301UV02.PRPAMT201301UV02Patient;
 import net.ihe.gazelle.hl7v3.prpamt201301UV02.PRPAMT201301UV02Person;
 import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02PatientId;
@@ -64,11 +84,23 @@ import net.ihe.gazelle.hl7v3.voc.RoleClassContact;
 import net.ihe.gazelle.hl7v3.voc.XActMoodIntentEvent;
 import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
+/**
+ * ITI-93 Patient Feed (add a new patient)
+ * @author alexander kreutz
+ *
+ */
 public class Iti93AddRequestConverter extends PMIRRequestConverter {
 
 	@Autowired
 	protected Config config;
 	
+	/**
+	 * add a new patient
+	 * @param header
+	 * @param entriesByReference
+	 * @return
+	 * @throws JAXBException
+	 */
 	public String doCreate(MessageHeader header, Map<String, BundleEntryComponent> entriesByReference) throws JAXBException {
 		PRPAIN201301UV02Type resultMsg = new PRPAIN201301UV02Type();		
 		  resultMsg.setITSVersion("XML_1.0");
@@ -176,6 +208,29 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 		        	orgIds.add(new II(getScheme(id.getSystem()), null));
 		        }
 		        
+		        if (in.hasDeceasedBooleanType()) {
+		          patientPerson.setDeceasedInd(new BL(in.getDeceasedBooleanType().getValue()));
+		        }
+		        if (in.hasDeceasedDateTimeType()) {
+		        	patientPerson.setDeceasedTime(transform(in.getDeceasedDateTimeType()));
+		        }
+		        if (in.hasMultipleBirthBooleanType()) {
+		        	patientPerson.setMultipleBirthInd(new BL(in.getMultipleBirthBooleanType().getValue()));
+		        }
+		        if (in.hasMultipleBirthIntegerType()) {
+		        	patientPerson.setMultipleBirthOrderNumber(new INT(in.getMultipleBirthIntegerType().getValue()));
+		        }
+		        if (in.hasMaritalStatus()) {
+		        	patientPerson.setMaritalStatusCode(transform(in.getMaritalStatus()));
+		        }
+		        if (in.hasCommunication()) {
+		        	for (PatientCommunicationComponent pcc : in.getCommunication()) {		        		
+		        		PRPAMT201301UV02LanguageCommunication languageCommunication = new PRPAMT201301UV02LanguageCommunication();
+		        		languageCommunication.setLanguageCode(transform(pcc.getLanguage()));
+		        		if (pcc.hasPreferred()) languageCommunication.setPreferenceInd(new BL(pcc.getPreferred()));
+						patientPerson.addLanguageCommunication(languageCommunication);
+		        	}
+		        }
 		        
 		        COCTMT150003UV03Organization providerOrganization = new COCTMT150003UV03Organization();
 				patient.setProviderOrganization(providerOrganization);
@@ -218,7 +273,7 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 				assignedEntity.setClassCode(RoleClassAssignedEntity.ASSIGNED);
 				
 				List<II> custIds = new ArrayList<II>();			        			       
-			    custIds.add(new II(getScheme(config.getPixMySenderOid()), null));
+			    custIds.add(new II(getScheme("1.3.6.1.4.1.21367.2017.2.5.83"), null));
 				
 				assignedEntity.setId(custIds);
 				//assignedEntity.setId(orgIds);
