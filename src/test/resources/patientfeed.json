@@ -42,24 +42,25 @@
                    }
                 ],
                 "identifier" : [
-                  { "system" : "urn:oid:1.3.6.1.4.1.21367.2017.2.7.109", "value" : "PATIENT1", "assigner" : { "display" : "My Org" } }
+                  {
+                    "system" : "urn:oid:1.3.6.1.4.1.21367.2017.2.7.109",
+                    "value" : "localpid"
+                  },
+                  {
+                    "system" : "urn:oid:1.3.6.1.4.1.21367.2017.2.5.83",
+                    "value" : "MAG-002"
+                  }
                 ],
                 "name" : [
                   {
-                  "family" : "ALPHA",
-                  "given" : ["ALAN"]
+                    "family" : "Muster",
+                    "given" : [
+                      "Franz"
+                    ]
                   }
                 ],
                 "gender" : "male",
-	              "birthDate" : "1938-02-24",
-                "address" : [
-                  {
-                    "line" : "1_PINETREE",
-                    "city" : "WEBSTER",
-                    "state" : "MD",
-                    "postalCode" : "63119"
-                  }
-                ],
+                "birthDate" : "1995-01-27",
                 "managingOrganization" : {
                   "reference" : "#1"
                 }	                

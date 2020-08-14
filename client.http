@@ -5,63 +5,48 @@
 
 ### @host = http://test.ahdis.ch/fhir
 
-
 GET {{host}}/metadata HTTP/1.1
 Accept: application/fhir+json
 
 
-### ITI-65 Provide Document Bundle mock call
+### ITI-65 Provide Document Bundle
 POST {{host}}/ HTTP/1.1
 Accept: application/fhir+json
 Content-Type: application/fhir+json
 
 < ./src/test/resources/mhdch.json
 
-### ITI-66 Find Document Manifests
-GET {{host}}/DocumentManifest?status=current&patient.identifier=urn:oid:1.3.6.1.4.1.21367.13.20.2000|IHEGREEN-2601 HTTP/1.1
-Accept: application/fhir+json
-Content-Type: application/fhir+json
-
-### ITI-67 Find Document References PMP
-GET {{host}}/DocumentReference?status=current&patient.identifier=urn:oid:2.999.756.42.2|12345678 HTTP/1.1
-Accept: application/fhir+json
-Content-Type: application/fhir+json
-
-### ITI-67 Find Document References XDSTools7 ahdis
-GET {{host}}/DocumentReference?status=current&patient.identifier=urn:oid:1.3.6.1.4.1.21367.13.20.1000|IHERED-2595 HTTP/1.1
-Accept: application/fhir+json
-Content-Type: application/fhir+json
-
-### ITI-67 Find Document References XDSTools7 ahdis
-GET {{host}}/DocumentReference?status=current&patient.identifier=urn:oid:1.3.6.1.4.1.21367.13.20.3000|IHEBLUE-2611 HTTP/1.1
-Accept: application/fhir+json
-Content-Type: application/fhir+json
-
-### ITI-67 Find Document References XDSTools7 ahdis
-GET {{host}}/DocumentReference/1.3.6.1.4.1.12559.11.13.2.1.3000.2 HTTP/1.1
-Accept: application/fhir+json
-Content-Type: application/fhir+json
-
 ### ITI-66 Find Document Manifest XDSTools7 ahdis
-GET {{host}}/DocumentManifest?status=current&patient.identifier=urn:oid:1.3.6.1.4.1.21367.13.20.3000|IHEBLUE-2611 HTTP/1.1
+GET {{host}}/DocumentManifest?status=current&patient.identifier=urn:oid:1.3.6.1.4.1.21367.2017.2.5.83|MAG-002 HTTP/1.1
 Accept: application/fhir+json
 Content-Type: application/fhir+json
 
-### ITI-66 Find Document Manifest XDSTools7 ahdis
-GET {{host}}/DocumentManifest?status=current&patient.identifier=urn:oid:1.3.6.1.4.1.21367.2017.2.5.83|MAG-001 HTTP/1.1
+### Find Document Manifest XDSTools7 ahdis
+GET {{host}}/DocumentManifest/1.3.6.1.4.1.12559.11.13.2.6.3000 HTTP/1.1
 Accept: application/fhir+json
 Content-Type: application/fhir+json
+
+### ITI-67 Find Document References XDSTools7 ahdis
+GET {{host}}/DocumentReference?status=current&patient.identifier=urn:oid:1.3.6.1.4.1.21367.2017.2.5.83|MAG-002 HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json
+
+### Document References XDSTools7 ahdis
+GET {{host}}/DocumentReference/2.25.194845134685217374679299436971670498973 HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json
+
 
 ### ITI-68 Retrieve Document call
-GET http://localhost:9090/camel/xdsretrieve?uniqueId=1.3.6.1.4.1.12559.11.13.2.1.3000.1&repositoryUniqueId=1.1.4567332.1.2
+GET http://localhost:9090/camel/xdsretrieve?uniqueId=2.25.194845134685217374679299436971670498973&repositoryUniqueId=1.1.4567332.1.2
 Accept: application/fhir+jsonn
 
-### ITI-83 pixm mock call
-GET {{host}}/Patient/$ihe-pix?sourceIdentifier=urn:oid:1.2.3.4|0815&targetSystem=urn:oid:1.2.3.4.6 HTTP/1.1
+### ITI-83 pixm call to https://ehealthsuisse.ihe-europe.net/PatientManager/patient/allPatients.seam?date=ANY|1597321706550|1597321706550&testData=false
+GET {{host}}/Patient/$ihe-pix?sourceIdentifier=urn:oid:1.3.6.1.4.1.21367.2017.2.7.109|localpid&targetSystem=urn:oid:1.3.6.1.4.1.21367.2017.2.5.83 HTTP/1.1
 Accept: application/fhir+json
 Content-Type: application/fhir+json
 
-### ITI-93 PRIM patient identity feed
+### ITI-93 PRIM patient identity feed for PatientManager
 POST {{host}}/$process-message HTTP/1.1
 Accept: application/fhir+json
 Content-Type: application/fhir+json
