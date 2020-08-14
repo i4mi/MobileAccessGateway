@@ -10,9 +10,9 @@ mag:
   xds:
     https: true
     iti-18:
-      url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/reg/sq
+      url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/reg/sq    
     iti-43:
-      url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/rep/ret
+      url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/rep/ret     
     iti-41:
       url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/rep/prb
     retrieve:
@@ -50,9 +50,12 @@ server:
   ssl:
     key-store: classpath:271.p12
     key-store-password: a1b2c3
-    key-store-type: pkcs12
-    key-alias: bfh1
     #key-password: password
+    key-store-type: pkcs12
+    key-alias: bfh1        
+    #client-auth: need
+    #trust-store: classpath:270.jks
+    #trust-store-password: a1b2c3        
   port: 9091 # Application listening port for HTTPS
   http:
     port: 9090 # Application listening port for HTTP. Remove line to disable.
