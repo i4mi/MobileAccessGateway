@@ -650,7 +650,7 @@ public class Iti65RequestConverter {
         	Identifiable refId = transformReferenceToIdentifiable(ref, reference);
         	if (refId != null) {
         		ReferenceId referenceId = new ReferenceId();
-        		//referenceId.setAssigningAuthority(new CXiAssigningAuthority(namespaceId, universalId, universalIdType).getAssigningAuthority());        	
+        		referenceId.setAssigningAuthority(new CXiAssigningAuthority(null, refId.getAssigningAuthority().getUniversalId(), refId.getAssigningAuthority().getUniversalIdType()));        	
           	    referenceId.setId(refId.getId());
         		entry.getReferenceIdList().add(referenceId);        	
         	}
@@ -840,6 +840,14 @@ public class Iti65RequestConverter {
 			Author result = new Author();
 			result.setAuthorPerson(transform((Practitioner) authorObj));
 			for (ContactPoint contactPoint : practitioner.getTelecom()) result.getAuthorTelecom().add(transform(contactPoint));
+			result.getAuthorRole().add(new Identifiable("HCP", new AssigningAuthority("2.16.756.5.30.1.127.3.10.1.41")));
+			return result;
+		} else if (authorObj instanceof Patient) {
+			Patient patient = (Patient) authorObj;
+			Author result = new Author();
+			result.setAuthorPerson(transform(patient));
+			for (ContactPoint contactPoint : patient.getTelecom()) result.getAuthorTelecom().add(transform(contactPoint));
+			result.getAuthorRole().add(new Identifiable("PAT", new AssigningAuthority("2.16.756.5.30.1.127.3.10.1.41")));
 			return result;
 		} else if (authorObj instanceof PractitionerRole) { 
 			Author result = new Author();
@@ -852,9 +860,9 @@ public class Iti65RequestConverter {
 		    for (CodeableConcept speciality : role.getSpecialty()) result.getAuthorSpecialty().add(transformToIdentifiable(speciality));
 		    for (ContactPoint contactPoint : role.getTelecom()) result.getAuthorTelecom().add(transform(contactPoint));
 		    return result;
-		}
+		} else throw new InvalidRequestException("Author role not supported.");
 		
-    	return null;
+    	//return null;
     }
 	
 	

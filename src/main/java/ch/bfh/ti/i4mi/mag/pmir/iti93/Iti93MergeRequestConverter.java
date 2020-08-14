@@ -33,6 +33,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.LinkType;
+import org.hl7.fhir.r4.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.r4.model.Patient.PatientLinkComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -50,6 +51,7 @@ import net.ihe.gazelle.hl7v3.datatypes.AdxpCountry;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpPostalCode;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpState;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpStreetAddressLine;
+import net.ihe.gazelle.hl7v3.datatypes.BL;
 import net.ihe.gazelle.hl7v3.datatypes.CD;
 import net.ihe.gazelle.hl7v3.datatypes.CE;
 import net.ihe.gazelle.hl7v3.datatypes.CS;
@@ -58,6 +60,7 @@ import net.ihe.gazelle.hl7v3.datatypes.EnGiven;
 import net.ihe.gazelle.hl7v3.datatypes.EnPrefix;
 import net.ihe.gazelle.hl7v3.datatypes.EnSuffix;
 import net.ihe.gazelle.hl7v3.datatypes.II;
+import net.ihe.gazelle.hl7v3.datatypes.INT;
 import net.ihe.gazelle.hl7v3.datatypes.PN;
 import net.ihe.gazelle.hl7v3.datatypes.TEL;
 import net.ihe.gazelle.hl7v3.datatypes.TS;
@@ -83,6 +86,7 @@ import net.ihe.gazelle.hl7v3.prpain201304UV02.PRPAIN201304UV02MFMIMT700701UV01Re
 import net.ihe.gazelle.hl7v3.prpain201304UV02.PRPAIN201304UV02MFMIMT700701UV01Subject1;
 import net.ihe.gazelle.hl7v3.prpain201304UV02.PRPAIN201304UV02MFMIMT700701UV01Subject2;
 import net.ihe.gazelle.hl7v3.prpain201304UV02.PRPAIN201304UV02Type;
+import net.ihe.gazelle.hl7v3.prpamt201301UV02.PRPAMT201301UV02LanguageCommunication;
 import net.ihe.gazelle.hl7v3.prpamt201301UV02.PRPAMT201301UV02Patient;
 import net.ihe.gazelle.hl7v3.prpamt201301UV02.PRPAMT201301UV02Person;
 import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02Patient;
@@ -90,6 +94,7 @@ import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02PatientId;
 import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02PatientPatientPerson;
 import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02PatientStatusCode;
 import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02Person;
+import net.ihe.gazelle.hl7v3.prpamt201303UV02.PRPAMT201303UV02LanguageCommunication;
 import net.ihe.gazelle.hl7v3.prpamt201303UV02.PRPAMT201303UV02Patient;
 import net.ihe.gazelle.hl7v3.prpamt201303UV02.PRPAMT201303UV02Person;
 import net.ihe.gazelle.hl7v3.voc.ActClass;
@@ -102,9 +107,21 @@ import net.ihe.gazelle.hl7v3.voc.ParticipationTargetSubject;
 import net.ihe.gazelle.hl7v3.voc.XActMoodIntentEvent;
 import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
+/**
+ * ITI-93 Patient Feed : Merge Request
+ * @author alexander
+ *
+ */
 public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 
 	
+	/**
+	 * merge request for ITI-93 transaction
+	 * @param header
+	 * @param entriesByReference
+	 * @return
+	 * @throws JAXBException
+	 */
 	public String doMerge(MessageHeader header, Map<String, BundleEntryComponent> entriesByReference) throws JAXBException {
 				
 		 PRPAIN201304UV02Type resultMsg = new PRPAIN201304UV02Type();
@@ -274,7 +291,31 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 		        	
 					patientPerson.addTelecom(telecom);
 		        }
-		        		        		    	
+		        
+		        if (in.hasDeceasedBooleanType()) {
+		          patientPerson.setDeceasedInd(new BL(in.getDeceasedBooleanType().getValue()));
+		        }
+		        if (in.hasDeceasedDateTimeType()) {
+		        	patientPerson.setDeceasedTime(transform(in.getDeceasedDateTimeType()));
+		        }
+		        if (in.hasMultipleBirthBooleanType()) {
+		        	patientPerson.setMultipleBirthInd(new BL(in.getMultipleBirthBooleanType().getValue()));
+		        }
+		        if (in.hasMultipleBirthIntegerType()) {
+		        	patientPerson.setMultipleBirthOrderNumber(new INT(in.getMultipleBirthIntegerType().getValue()));
+		        }
+		        if (in.hasMaritalStatus()) {
+		        	patientPerson.setMaritalStatusCode(transform(in.getMaritalStatus()));
+		        }
+		        if (in.hasCommunication()) {
+		        	for (PatientCommunicationComponent pcc : in.getCommunication()) {		        		
+		        		PRPAMT201303UV02LanguageCommunication languageCommunication = new PRPAMT201303UV02LanguageCommunication();
+		        		languageCommunication.setLanguageCode(transform(pcc.getLanguage()));
+		        		if (pcc.hasPreferred()) languageCommunication.setPreferenceInd(new BL(pcc.getPreferred()));
+						patientPerson.addLanguageCommunication(languageCommunication);
+		        	}
+		        }
+	        		        		    	
 	    	}
 	   
 	    
