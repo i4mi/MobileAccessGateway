@@ -31,6 +31,7 @@ import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MessageHeader;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.LinkType;
 import org.hl7.fhir.r4.model.Patient.PatientCommunicationComponent;
@@ -45,6 +46,8 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ch.bfh.ti.i4mi.mag.pmir.PMIRRequestConverter;
+import net.ihe.gazelle.hl7v3.coctmt090003UV01.COCTMT090003UV01AssignedEntity;
+import net.ihe.gazelle.hl7v3.coctmt090003UV01.COCTMT090003UV01Organization;
 import net.ihe.gazelle.hl7v3.datatypes.AD;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpCity;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpCountry;
@@ -61,12 +64,14 @@ import net.ihe.gazelle.hl7v3.datatypes.EnPrefix;
 import net.ihe.gazelle.hl7v3.datatypes.EnSuffix;
 import net.ihe.gazelle.hl7v3.datatypes.II;
 import net.ihe.gazelle.hl7v3.datatypes.INT;
+import net.ihe.gazelle.hl7v3.datatypes.ON;
 import net.ihe.gazelle.hl7v3.datatypes.PN;
 import net.ihe.gazelle.hl7v3.datatypes.TEL;
 import net.ihe.gazelle.hl7v3.datatypes.TS;
 import net.ihe.gazelle.hl7v3.mccimt000100UV01.MCCIMT000100UV01Device;
 import net.ihe.gazelle.hl7v3.mccimt000100UV01.MCCIMT000100UV01Receiver;
 import net.ihe.gazelle.hl7v3.mccimt000100UV01.MCCIMT000100UV01Sender;
+import net.ihe.gazelle.hl7v3.mfmimt700701UV01.MFMIMT700701UV01Custodian;
 import net.ihe.gazelle.hl7v3.mfmimt700701UV01.MFMIMT700701UV01PriorRegisteredRole;
 import net.ihe.gazelle.hl7v3.mfmimt700701UV01.MFMIMT700701UV01PriorRegistration;
 import net.ihe.gazelle.hl7v3.mfmimt700701UV01.MFMIMT700701UV01ReplacementOf;
@@ -101,9 +106,13 @@ import net.ihe.gazelle.hl7v3.voc.ActClass;
 import net.ihe.gazelle.hl7v3.voc.ActClassControlAct;
 import net.ihe.gazelle.hl7v3.voc.ActMood;
 import net.ihe.gazelle.hl7v3.voc.CommunicationFunctionType;
+import net.ihe.gazelle.hl7v3.voc.EntityClass;
 import net.ihe.gazelle.hl7v3.voc.EntityClassDevice;
+import net.ihe.gazelle.hl7v3.voc.EntityClassOrganization;
 import net.ihe.gazelle.hl7v3.voc.EntityDeterminer;
 import net.ihe.gazelle.hl7v3.voc.ParticipationTargetSubject;
+import net.ihe.gazelle.hl7v3.voc.ParticipationType;
+import net.ihe.gazelle.hl7v3.voc.RoleClassAssignedEntity;
 import net.ihe.gazelle.hl7v3.voc.XActMoodIntentEvent;
 import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
@@ -131,7 +140,7 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 		  resultMsg.setCreationTime(new TS(Timestamp.now().toHL7())); // Now
 		  resultMsg.setProcessingCode(new CS("T", null ,null));
 		  resultMsg.setProcessingModeCode(new CS("T", null, null));
-		  resultMsg.setInteractionId(new II("2.16.840.1.113883.1.18", "PRPA_IN201304UV02Type"));
+		  resultMsg.setInteractionId(new II("2.16.840.1.113883.1.18", "PRPA_IN201304UV02"));
 		  resultMsg.setAcceptAckCode(new CS("AL", null, null));
 		
 		  MCCIMT000100UV01Receiver receiver = new MCCIMT000100UV01Receiver();
@@ -164,14 +173,15 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 		  
 		  
 		
-		  for (Reference ref : header.getFocus()) {
-			  BundleEntryComponent entry = entriesByReference.get(ref.getReference());
+		  for (BundleEntryComponent entry : entriesByReference.values()) {
+			  //BundleEntryComponent entry = entriesByReference.get(ref.getReference());
 
 	    		HTTPVerb method = entry.getRequest().getMethod();
 		    	if (method == null) throw new InvalidRequestException("HTTP verb missing in Bundle for Patient resource.");
 		    			    			    	
 		    	Patient basePatient = (Patient) entry.getResource();
 		    	Patient in = null;
+		    	
 		    	List<Patient> replaced = new ArrayList<Patient>();
 		    	
 		    	for (PatientLinkComponent linked : basePatient.getLink()) {		    		
@@ -211,7 +221,7 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 			    replacementOf.setTypeCode("RPLC");
 			    priorRegistration.setClassCode(ActClass.REG);
 			    priorRegistration.setMoodCode(ActMood.EVN);
-			    
+			    priorRegistration.setStatusCode(new CS("obsolete", null,null));
 			    MFMIMT700701UV01Subject3 subject1 = new MFMIMT700701UV01Subject3();
 				priorRegistration.setSubject1(subject1 );
 			    subject1.setTypeCode(ParticipationTargetSubject.SBJ);
@@ -233,14 +243,19 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 			  subject1.setTypeCode(ParticipationTargetSubject.SBJ);
 			  			  
 			  PRPAMT201303UV02Patient patient = new PRPAMT201303UV02Patient();
+			  patient.setClassCode("PAT");
 			  subject1.setPatient(patient);
 			  			  
 			  PRPAMT201302UV02PatientStatusCode statusCode = new PRPAMT201302UV02PatientStatusCode("active", null, null);
 			  patient.setStatusCode(statusCode); //???
 			  			  
 			  PRPAMT201303UV02Person patientPerson = new PRPAMT201303UV02Person();
+			  patientPerson.setClassCode(EntityClass.PSN);
+			  patientPerson.setDeterminerCode(EntityDeterminer.INSTANCE);
 			  patient.setPatientPerson(patientPerson );
-		    	
+			  Organization managingOrg = getManagingOrganization(in, basePatient.getContained());
+			  if (managingOrg==null) managingOrg = getManagingOrganization(basePatient, basePatient.getContained());
+			  if (managingOrg==null)  throw new InvalidRequestException("Cannot determine managingOrganization");
 			  // TODO How is the correct mapping done?
 			    for (Identifier id : in.getIdentifier()) {
 			    	PRPAMT201302UV02PatientId patientId = new PRPAMT201302UV02PatientId(getScheme(id.getSystem()),id.getValue());
@@ -267,7 +282,7 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 			        case UNKNOWN:patientPerson.setAdministrativeGenderCode(new CE("U","Unknown","2.16.840.1.113883.12.1"));break;
 			        }
 		    	}
-		        
+		        if (in.hasAddress()) patientPerson.setAddr(new ArrayList<AD>());
 		        for (Address address : in.getAddress()) {
 		        	AD addr = new AD();
 
@@ -315,7 +330,30 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 						patientPerson.addLanguageCommunication(languageCommunication);
 		        	}
 		        }
-	        		        		    	
+	        		
+		    	MFMIMT700701UV01Custodian custodian = new MFMIMT700701UV01Custodian();
+				registrationEvent.setCustodian(custodian );
+				custodian.setTypeCode(ParticipationType.CST);
+				
+				COCTMT090003UV01AssignedEntity assignedEntity = new COCTMT090003UV01AssignedEntity();
+				custodian.setAssignedEntity(assignedEntity);
+				assignedEntity.setClassCode(RoleClassAssignedEntity.ASSIGNED);
+				
+				List<II> custIds = new ArrayList<II>();			        			       
+			    custIds.add(new II(getScheme("1.3.6.1.4.1.21367.2017.2.5.83"), null));
+				
+				assignedEntity.setId(custIds);
+				//assignedEntity.setId(orgIds);
+				
+				COCTMT090003UV01Organization assignedOrganization = new COCTMT090003UV01Organization();
+				assignedEntity.setAssignedOrganization(assignedOrganization );
+				assignedOrganization.setClassCode(EntityClassOrganization.ORG);
+				assignedOrganization.setDeterminerCode(EntityDeterminer.INSTANCE);
+				if (managingOrg.hasName()) {	
+					ON name = new ON();
+					name.setMixed(Collections.singletonList(managingOrg.getName()));
+				  assignedOrganization.setName(Collections.singletonList(name));
+				}
 	    	}
 	   
 	    

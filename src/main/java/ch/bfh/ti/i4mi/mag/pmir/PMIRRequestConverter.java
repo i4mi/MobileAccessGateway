@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.HumanName.NameUse;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
 
@@ -103,11 +104,16 @@ public class PMIRRequestConverter extends BaseRequestConverter {
 	
 	public static PN transform(HumanName name) { 
 		PN nameElement = new PN();
-		if (name.hasFamily()) nameElement.addFamily(element(EnFamily.class, name.getFamily()));
+		if (name.hasFamily()) {
+			EnFamily family = element(EnFamily.class, name.getFamily());
+			if (name.hasUse() && name.getUse().equals(NameUse.MAIDEN)) family.setQualifier("BR");
+			nameElement.addFamily(family);
+		}
 		for (StringType given : name.getGiven()) nameElement.addGiven(element(EnGiven.class, given.getValue()));
 		for (StringType prefix : name.getPrefix()) nameElement.addPrefix(element(EnPrefix.class, prefix.getValue()));
 		for (StringType suffix : name.getSuffix()) nameElement.addSuffix(element(EnSuffix.class, suffix.getValue()));
-		if (name.hasPeriod()) nameElement.addValidTime(transform(name.getPeriod()));		    		
+		if (name.hasPeriod()) nameElement.addValidTime(transform(name.getPeriod()));	
+		
 		return nameElement;
 	}
 	

@@ -30,7 +30,7 @@ import ch.bfh.ti.i4mi.mag.mhd.Utils;
 import ch.bfh.ti.i4mi.mag.pmir.iti83.Iti83ResponseConverter;
 import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
-
+ 
 /**
  * 
  */

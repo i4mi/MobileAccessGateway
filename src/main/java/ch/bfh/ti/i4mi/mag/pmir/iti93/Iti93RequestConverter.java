@@ -134,17 +134,23 @@ public class Iti93RequestConverter extends Iti93MergeRequestConverter {
 		
 		if (!("urn:ihe:iti:pmir:2019:patient-feed".equals(header.getEventUriType().getValue()))) throw new InvalidRequestException("Wrong eventUri");
 		
+		// use nested bundle
+		if (requestBundle.getEntry().size()>1 && requestBundle.getEntry().get(1).getResource() instanceof Bundle) {
+			requestBundle = (Bundle) requestBundle.getEntry().get(1).getResource();
+			if (requestBundle.getType() != BundleType.HISTORY) throw new InvalidRequestException("Nested bundle type must be history");
+		}
+		BundleEntryComponent firstEntry = null;
 		Map<String, BundleEntryComponent> entriesByReference = new HashMap<String, BundleEntryComponent>();
 		for (BundleEntryComponent entry : requestBundle.getEntry()) {	    	
 	    	if (entry.getResource() instanceof Patient) {
 	    		System.out.println("REG:"+entry.getResource().getIdElement().getIdPart());
 	    		entriesByReference.put("Patient/"+entry.getResource().getIdElement().getIdPart(), entry);
+	    		if (firstEntry == null) firstEntry = entry;
 	    	}
 		}
 			
-		Reference ref = header.getFocusFirstRep();
-		BundleEntryComponent entry = entriesByReference.get(ref.getReference());
-		System.out.println(ref.getReference()+" found="+entry);
+		
+		BundleEntryComponent entry = firstEntry;		
 		HTTPVerb method = entry.getRequest().getMethod();
 		if (method == null) throw new InvalidRequestException("HTTP verb missing in Bundle for Patient resource.");
 		
