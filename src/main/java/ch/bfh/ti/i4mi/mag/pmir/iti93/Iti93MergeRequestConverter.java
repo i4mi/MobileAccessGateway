@@ -262,14 +262,8 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 					patient.addId(patientId );
 			    }
 		    	
-		    	for (HumanName name : in.getName()) {
-		    		PN nameElement = new PN();
-		    		if (name.hasFamily()) nameElement.addFamily(element(EnFamily.class, name.getFamily()));
-		    		for (StringType given : name.getGiven()) nameElement.addGiven(element(EnGiven.class, given.getValue()));
-		    		for (StringType prefix : name.getPrefix()) nameElement.addPrefix(element(EnPrefix.class, prefix.getValue()));
-		    		for (StringType suffix : name.getSuffix()) nameElement.addSuffix(element(EnSuffix.class, suffix.getValue()));
-		    		if (name.hasPeriod()) nameElement.addValidTime(transform(name.getPeriod()));		    		
-					patientPerson.addName(nameElement );	
+		    	for (HumanName name : in.getName()) {		    				    	
+					patientPerson.addName(transform(name));	
 		    	}
 		    	
 		    	
@@ -284,27 +278,11 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 		    	}
 		        if (in.hasAddress()) patientPerson.setAddr(new ArrayList<AD>());
 		        for (Address address : in.getAddress()) {
-		        	AD addr = new AD();
-
-		        	// TODO Missing: district, type, use
-		        	if (address.hasCity()) addr.addCity(element(AdxpCity.class, address.getCity()));
-		        	if (address.hasCountry()) addr.addCountry(element(AdxpCountry.class, address.getCountry()));
-		        	if (address.hasPostalCode()) addr.addPostalCode(element(AdxpPostalCode.class, address.getPostalCode()));
-		        	if (address.hasState()) addr.addState(element(AdxpState.class, address.getState()));
-		        	if (address.hasLine()) for (StringType line : address.getLine()) addr.addStreetAddressLine(element(AdxpStreetAddressLine.class, line.getValue()));
-		        	if (address.hasPeriod()) addr.addUseablePeriod(transform(address.getPeriod()));
-					patientPerson.addAddr(addr);
+					patientPerson.addAddr(transform(address));
 		        }
 		    	
-		        for (ContactPoint contactPoint : in.getTelecom()) {
-                    TEL telecom = new TEL();
-		        			        		        	
-		        	ContactPoint.ContactPointUse use = contactPoint.getUse();		        	
-		        	if (use != null) telecom.setUse(use.toString());
-		        	telecom.setValue(contactPoint.getValue());
-		        	if (contactPoint.hasPeriod()) telecom.addUseablePeriod(transform(contactPoint.getPeriod()));
-		        	
-					patientPerson.addTelecom(telecom);
+		        for (ContactPoint contactPoint : in.getTelecom()) {                    
+					patientPerson.addTelecom(transform(contactPoint));
 		        }
 		        
 		        if (in.hasDeceasedBooleanType()) {

@@ -286,7 +286,12 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 				COCTMT090003UV01AssignedEntity assignedEntity = new COCTMT090003UV01AssignedEntity();
 				custodian.setAssignedEntity(assignedEntity);
 				assignedEntity.setClassCode(RoleClassAssignedEntity.ASSIGNED);
-				assignedEntity.setId(orgIds);
+				
+				List<II> custIds = new ArrayList<II>();			        			       
+			    custIds.add(new II(getScheme("1.3.6.1.4.1.21367.2017.2.5.83"), null));
+				
+				assignedEntity.setId(custIds);
+				//assignedEntity.setId(orgIds);								
 				
 				COCTMT090003UV01Organization assignedOrganization = new COCTMT090003UV01Organization();
 				assignedEntity.setAssignedOrganization(assignedOrganization );
