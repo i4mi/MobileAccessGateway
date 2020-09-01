@@ -41,6 +41,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import net.ihe.gazelle.hl7v3.coctmt090003UV01.COCTMT090003UV01AssignedEntity;
 import net.ihe.gazelle.hl7v3.coctmt090003UV01.COCTMT090003UV01Organization;
+import net.ihe.gazelle.hl7v3.coctmt150002UV01.COCTMT150002UV01Organization;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03ContactParty;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03Organization;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03Person;
@@ -70,6 +71,8 @@ import net.ihe.gazelle.hl7v3.prpamt201301UV02.PRPAMT201301UV02LanguageCommunicat
 import net.ihe.gazelle.hl7v3.prpamt201301UV02.PRPAMT201301UV02Patient;
 import net.ihe.gazelle.hl7v3.prpamt201301UV02.PRPAMT201301UV02Person;
 import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02LanguageCommunication;
+import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02OtherIDs;
+import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02OtherIDsId;
 import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02Patient;
 import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02PatientId;
 import net.ihe.gazelle.hl7v3.prpamt201302UV02.PRPAMT201302UV02PatientPatientPerson;
@@ -99,7 +102,7 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 		  resultMsg.setCreationTime(new TS(Timestamp.now().toHL7())); // Now
 		  resultMsg.setProcessingCode(new CS("T", null ,null));
 		  resultMsg.setProcessingModeCode(new CS("T", null, null));
-		  resultMsg.setInteractionId(new II("2.16.840.1.113883.1.18", "PRPA_IN201302UV02Type"));
+		  resultMsg.setInteractionId(new II("2.16.840.1.113883.1.18", "PRPA_IN201302UV02"));
 		  resultMsg.setAcceptAckCode(new CS("AL", null, null));
 		
 		  MCCIMT000100UV01Receiver receiver = new MCCIMT000100UV01Receiver();
@@ -128,8 +131,8 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 		  controlActProcess.setMoodCode(XActMoodIntentEvent.EVN); 
 		  controlActProcess.setCode(new CD("PRPA_TE201302UV02","2.16.840.1.113883.1.18", null)); 
 		
-		  for (Reference ref : header.getFocus()) {
-			  BundleEntryComponent entry = entriesByReference.get(ref.getReference());
+		  for (BundleEntryComponent entry : entriesByReference.values()) {
+			  //BundleEntryComponent entry = entriesByReference.get(ref.getReference());
 		  	    	
 	    	if (entry.getResource() instanceof Patient) {
 	    		HTTPVerb method = entry.getRequest().getMethod();
@@ -165,12 +168,31 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 			  patient.setPatientPerson(patientPerson);
 			  patientPerson.setClassCode(EntityClass.PSN);
 			  patientPerson.setDeterminerCode(EntityDeterminer.INSTANCE);
-		    	
+			  patientPerson.setAsOtherIDs(new ArrayList());
 			  // TODO How is the correct mapping done?
 			    for (Identifier id : in.getIdentifier()) {			    	
 					patient.addId(patientIdentifierUpd(id) );
+					
+					PRPAMT201302UV02OtherIDs asOtherIDs = new PRPAMT201302UV02OtherIDs();
+					PRPAMT201302UV02OtherIDsId id2 = new PRPAMT201302UV02OtherIDsId();
+					id2.setRoot(getScheme(id.getSystem()));
+					id2.setExtension(id.getValue());
+					   
+					/*
+					asOtherIDs.setClassCode("PAT");
+					asOtherIDs.setId(Collections.singletonList(id2) );
+					COCTMT150002UV01Organization scopingOrganization = new COCTMT150002UV01Organization();
+					scopingOrganization.setClassCode(EntityClassOrganization.ORG);
+					scopingOrganization.setDeterminerCode(EntityDeterminer.INSTANCE);
+					List<II> scopeOrgIds = new ArrayList<II>();
+					scopeOrgIds.add(new II(getScheme(id.getSystem()), null));
+					scopingOrganization.setId(scopeOrgIds);
+					asOtherIDs.setScopingOrganization(scopingOrganization );
+					patientPerson.addAsOtherIDs(asOtherIDs );
+				    	*/					
 			    }
-		    	
+			    
+			   
 		    	for (HumanName name : in.getName()) {		    				    	
 					patientPerson.addName(transform(name));	
 		    	}

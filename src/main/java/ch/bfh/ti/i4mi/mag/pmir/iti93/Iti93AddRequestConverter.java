@@ -138,14 +138,15 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 		  controlActProcess.setMoodCode(XActMoodIntentEvent.EVN); 
 		  controlActProcess.setCode(new CD("PRPA_TE201301UV02",null,"2.16.840.1.113883.1.18")); 
 		
-		  for (Reference ref : header.getFocus()) {
-			  BundleEntryComponent entry = entriesByReference.get(ref.getReference());
+		  for (BundleEntryComponent entry : entriesByReference.values()) {
+			  //BundleEntryComponent entry = entriesByReference.get(ref.getReference());
 		  	    	
 	    	if (entry.getResource() instanceof Patient) {
 	    		HTTPVerb method = entry.getRequest().getMethod();
 		    	if (method == null) throw new InvalidRequestException("HTTP verb missing in Bundle for Patient resource.");
 		    			    			    	
 		    	Patient in = (Patient) entry.getResource();
+		    	
 		    			    			    	
 		    	PRPAIN201301UV02MFMIMT700701UV01Subject1 subject = new PRPAIN201301UV02MFMIMT700701UV01Subject1();		    	
 			  controlActProcess.addSubject(subject);
@@ -299,10 +300,14 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 	}
 	
 	Organization getManagingOrganization(Patient in) {
+		return getManagingOrganization(in, null);
+	}
+	
+	Organization getManagingOrganization(Patient in, List<Resource> container) {
 		Reference org = in.getManagingOrganization();
 		if (org == null) return null;		
         String targetRef = org.getReference();		
-		List<Resource> resources = in.getContained();		
+		List<Resource> resources = container != null ? container : in.getContained();		
 		for (Resource resource : resources) {			
 			if (targetRef.equals(resource.getId()) && resource instanceof Organization) {
                 return (Organization) resource;
