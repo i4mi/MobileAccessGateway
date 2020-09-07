@@ -6,6 +6,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.HumanName.NameUse;
 import org.hl7.fhir.r4.model.Period;
@@ -20,6 +21,7 @@ import net.ihe.gazelle.hl7v3.datatypes.AdxpPostalCode;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpState;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpStreetAddressLine;
 import net.ihe.gazelle.hl7v3.datatypes.CE;
+import net.ihe.gazelle.hl7v3.datatypes.ENXP;
 import net.ihe.gazelle.hl7v3.datatypes.EnFamily;
 import net.ihe.gazelle.hl7v3.datatypes.EnGiven;
 import net.ihe.gazelle.hl7v3.datatypes.EnPrefix;
@@ -102,16 +104,22 @@ public class PMIRRequestConverter extends BaseRequestConverter {
 		return addr;
 	}
 	
+	public static <T extends ENXP> T qualifier(StringType fhirNamePart, T namePart) {
+		String qualifier = fhirNamePart.getExtensionString("http://hl7.org/fhir/StructureDefinition/iso21090-EN-qualifier");
+        if (qualifier != null) namePart.setQualifier(qualifier);	
+        return namePart;
+	}
+	
 	public static PN transform(HumanName name) { 
 		PN nameElement = new PN();
 		if (name.hasFamily()) {
 			EnFamily family = element(EnFamily.class, name.getFamily());
-			if (name.hasUse() && name.getUse().equals(NameUse.MAIDEN)) family.setQualifier("BR");
-			nameElement.addFamily(family);
+			if (name.hasUse() && name.getUse().equals(NameUse.MAIDEN)) family.setQualifier("BR");			
+			nameElement.addFamily(qualifier(name.getFamilyElement(), family));
 		}
-		for (StringType given : name.getGiven()) nameElement.addGiven(element(EnGiven.class, given.getValue()));
-		for (StringType prefix : name.getPrefix()) nameElement.addPrefix(element(EnPrefix.class, prefix.getValue()));
-		for (StringType suffix : name.getSuffix()) nameElement.addSuffix(element(EnSuffix.class, suffix.getValue()));
+		for (StringType given : name.getGiven()) nameElement.addGiven(qualifier(given, element(EnGiven.class, given.getValue())));
+		for (StringType prefix : name.getPrefix()) nameElement.addPrefix(qualifier(prefix, element(EnPrefix.class, prefix.getValue())));
+		for (StringType suffix : name.getSuffix()) nameElement.addSuffix(qualifier(suffix, element(EnSuffix.class, suffix.getValue())));
 		if (name.hasPeriod()) nameElement.addValidTime(transform(name.getPeriod()));	
 		
 		return nameElement;

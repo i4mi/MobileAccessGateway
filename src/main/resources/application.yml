@@ -48,11 +48,11 @@ spring:
 
 server:
   ssl:
-    key-store: classpath:271.p12
+    key-store: classpath:277.p12
     key-store-password: a1b2c3
     #key-password: password
     key-store-type: pkcs12
-    key-alias: bfh1        
+    key-alias: mobileaccessgateway.pagekite.me        
     #client-auth: need
     #trust-store: classpath:270.jks
     #trust-store-password: a1b2c3        

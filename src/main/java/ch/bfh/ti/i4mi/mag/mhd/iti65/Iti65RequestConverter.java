@@ -187,8 +187,10 @@ public class Iti65RequestConverter {
                     String contentURL = attachment.getUrl();                
 	                Resource binaryContent = resources.get(contentURL);
 	                if (binaryContent instanceof Binary) {
-	                	Binary binary = (Binary) binaryContent;	                	
-	                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(binary.getData(),binary.getContentType())));
+	                	String contentType = attachment.getContentType();	                	
+	                	Binary binary = (Binary) binaryContent;	         
+	                	if (binary.hasContentType() && !binary.getContentType().equals(contentType)) throw new InvalidRequestException("ContentType in Binary and in DocumentReference must match");
+	                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(binary.getData(),contentType)));
 	                	Identifier masterIdentifier = documentReference.getMasterIdentifier();
 	                    binary.setUserData("masterIdentifier", noPrefix(masterIdentifier.getValue()));	                	
                     }
