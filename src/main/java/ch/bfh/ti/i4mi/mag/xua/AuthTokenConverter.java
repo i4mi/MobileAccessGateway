@@ -37,6 +37,11 @@ import org.apache.ws.commons.schema.utils.DOMUtil;
 
 import static org.openehealth.ipf.platform.camel.ihe.ws.AbstractWsEndpoint.*;
 
+/**
+ * Use IHE-SAML Header from request as SOAP wsse Security Header
+ * @author alexander kreutz
+ *
+ */
 public class AuthTokenConverter {
 
 	public static String convert(String token) {
@@ -66,6 +71,7 @@ public class AuthTokenConverter {
 					converted = convert(authHeader.toString());
 			}
 			if (converted != null) {
+				converted = "<wsse:Security xmlns:wsse=\\\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\\\">"+converted+"</wsse:security>";
 				List<SoapHeader> soapHeaders = CastUtils.cast((List<?>) exchange.getIn().getHeader(Header.HEADER_LIST));
 				SoapHeader newHeader;
 

@@ -82,8 +82,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
-				
-
+		
+		<!-- <dependency>
+		  <groupId>org.apache.camel.springboot</groupId>
+		  <artifactId>camel-rest-starter</artifactId>		  
+		</dependency>  -->
+						
 		<!-- IPF -->
 		<dependency>
 			<groupId>org.openehealth.ipf.boot</groupId>
@@ -147,6 +151,11 @@
 			<artifactId>hibernate-validator</artifactId>
 			<version>5.2.4.Final</version>
 		</dependency>
+		
+		<dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-cxf</artifactId>           
+        </dependency>
 
 		<!-- Development tools -->
 		<dependency>
@@ -240,6 +249,7 @@
 				</executions>
 			</plugin>
 			<!-- end::unpack[] -->
+
 
 		</plugins>
 	</build>
