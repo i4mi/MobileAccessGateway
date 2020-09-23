@@ -1,12 +1,13 @@
 # General configuration of the IPF application.
 
 mag:
-  baseurl: https://localhost:9091
+  baseurl: https://mobileaccessgateway.pagekite.me
   client-ssl:
     enabled: true
     key-store: 270.jks
     key-store-password: a1b2c3
     cert-alias: gateway
+    #cert-alias: adswissnet
   xds:
     https: true
     iti-18:
@@ -16,16 +17,20 @@ mag:
     iti-41:
       url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/rep/prb
     retrieve:
-      url: https://localhost:9091/camel/xdsretrieve
+      url: http://10.2.200.18:9090/camel/xdsretrieve
       repositoryUniqueId: 1.1.4567332.1.2
   pix:
     https: true
     iti-45:
       url: ehealthsuisse.ihe-europe.net:10443/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType
       #url: gazelle.ihe.net/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType
+      #url: 10.2.101.10:11006/PIXPDQ/services/PIXPDQV3ManagerService
+      #url: epd-core.int.adswissnet.healthcare/mpi/pixmanager
     iti-44:
       url: ehealthsuisse.ihe-europe.net:10443/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType
       #url: gazelle.ihe.net/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType
+      #url: 10.2.101.10:11006/PIXPDQ/services/PIXPDQV3ManagerService
+      #url: epd-core.int.adswissnet.healthcare/mpi/pixmanager
     oids:
       sender: 1.3.6.1.4.1.21367.2017.2.2.108
       #receiver: 1.3.6.1.4.1.12559.11.20.1.10
@@ -33,11 +38,21 @@ mag:
       query: 1.3.6.1.4.1.21367.2017.2.1.104
   audit:
     audit-enabled: true 
+    # in productive system audit-source-id must be same as audit-enterprise-site-id
     audit-source-id: CCC_BFH_MAG
     audit-enterprise-site-id: 1.3.6.1.4.1.21367.2017.2.7.109
-    audit-repository-host: 147.135.232.177
-    audit-repository-port: 3001
-    audit-repostiory-transport: UDP        
+    # gazelle
+    audit-repository-host: 10.2.101.10
+    # post
+    # audit-repository-host: 81.223.215.43
+    # nexus
+    # audit-repository-host: 10.2.200.29
+    #audit-repository-port: 3001
+    audit-repository-port: 3202
+    #post audit-repository-port: 6514
+    #nexus audit-repository-port: 11001
+    #audit-repository-transport: UDP
+    audit-repository-transport: TLS        
         
 # https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#core-properties
 spring:
@@ -47,6 +62,7 @@ spring:
 # https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#server-properties
 
 server:
+  max-http-header-size: 100000
   ssl:
     key-store: classpath:277.p12
     key-store-password: a1b2c3

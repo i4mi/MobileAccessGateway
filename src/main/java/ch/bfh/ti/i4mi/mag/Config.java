@@ -20,6 +20,7 @@ import org.apache.camel.support.jsse.KeyManagersParameters;
 import org.apache.camel.support.jsse.KeyStoreParameters;
 import org.apache.camel.support.jsse.SSLContextParameters;
 import org.apache.camel.support.jsse.TrustManagersParameters;
+import org.openehealth.ipf.commons.audit.CustomTlsParameters;
 import org.openehealth.ipf.commons.audit.DefaultAuditContext;
 import org.openehealth.ipf.commons.audit.types.AuditSource;
 import org.openehealth.ipf.commons.ihe.ws.cxf.audit.AbstractAuditInterceptor;
@@ -174,14 +175,23 @@ public class Config {
     	scp.setKeyManagers(kmp);
     	scp.setTrustManagers(tmp);
     	scp.setCertAlias(certAlias);
-    	
+    
     	return scp;
     }
        
     @Bean(name = "myAuditContext")
     @ConfigurationProperties(prefix = "mag.audit")
     public DefaultAuditContext getAuditContext() {
-    	DefaultAuditContext context = new DefaultAuditContext();    	
+    	DefaultAuditContext context = new DefaultAuditContext();
+    	context.setTlsParameters(new TlsParameterTest(getPixSSLContext()));
+    	//CustomTlsParameters p = new CustomTlsParameters();
+    	
+    	//p.setKeyStoreFile("270.jks");
+    	//p.setKeyStorePassword("a1b2c3");
+    	//p.setCertAlias("gateway");
+    	 
+    
+    	//context.setTlsParameters(p);
     	/*context.setAuditEnabled(true);
     	context.setAuditSourceId("CCC_BFH_MAG"); 
         context.setAuditEnterpriseSiteId("BFH");

@@ -170,15 +170,16 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 			  patientPerson.setDeterminerCode(EntityDeterminer.INSTANCE);
 			  patientPerson.setAsOtherIDs(new ArrayList());
 			  // TODO How is the correct mapping done?
-			    for (Identifier id : in.getIdentifier()) {			    	
-					patient.addId(patientIdentifierUpd(id) );
-					
+			    for (Identifier id : in.getIdentifier()) {	
+			    	boolean isOwn = "urn:oid:1.3.6.1.4.1.21367.2017.2.5.83".equals(id.getSystem());
+					if (isOwn) patient.addId(patientIdentifierUpd(id) );
+					else {
 					PRPAMT201302UV02OtherIDs asOtherIDs = new PRPAMT201302UV02OtherIDs();
 					PRPAMT201302UV02OtherIDsId id2 = new PRPAMT201302UV02OtherIDsId();
 					id2.setRoot(getScheme(id.getSystem()));
 					id2.setExtension(id.getValue());
 					   
-					/*
+					
 					asOtherIDs.setClassCode("PAT");
 					asOtherIDs.setId(Collections.singletonList(id2) );
 					COCTMT150002UV01Organization scopingOrganization = new COCTMT150002UV01Organization();
@@ -189,7 +190,7 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 					scopingOrganization.setId(scopeOrgIds);
 					asOtherIDs.setScopingOrganization(scopingOrganization );
 					patientPerson.addAsOtherIDs(asOtherIDs );
-				    	*/					
+					}				
 			    }
 			    
 			   

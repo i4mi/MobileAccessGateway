@@ -82,7 +82,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
-				
+					
 
 		<!-- IPF -->
 		<dependency>
@@ -175,6 +175,14 @@
 			<version>${camel-version}</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+  <groupId>org.apache.cxf</groupId>
+  <artifactId>cxf-codegen-plugin</artifactId>
+  <version>3.4.0</version>
+  <type>maven-plugin</type>
+</dependency>
+
 	</dependencies>
 
 	<build>
@@ -189,6 +197,8 @@
 					<target>11</target>
 				</configuration>
 			</plugin>
+
+	
 
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

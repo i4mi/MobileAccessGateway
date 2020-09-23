@@ -38,7 +38,9 @@ public class HttpServer {
     
     @Bean
     public WebServerFactoryCustomizer<JettyServletWebServerFactory> webServerFactoryCustomizer() {
-
+    	//JettyComponent jettyComponent = getContext().getComponent("jetty", JettyComponent.class);
+    	//jettyComponent.setSslContextParameters(scp);
+    	
         return new WebServerFactoryCustomizer<JettyServletWebServerFactory>() {
 
             @Override
@@ -53,6 +55,8 @@ public class HttpServer {
 	                        httpConnector.setPort(httpPort);
 	                                               
 	                        server.addConnector(httpConnector);
+	                        
+	                      
 	                    }
 	                });
                 }

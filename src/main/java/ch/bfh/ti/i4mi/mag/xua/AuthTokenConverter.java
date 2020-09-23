@@ -66,6 +66,7 @@ public class AuthTokenConverter {
 					converted = convert(authHeader.toString());
 			}
 			if (converted != null) {
+				System.out.println(converted);
 				List<SoapHeader> soapHeaders = CastUtils.cast((List<?>) exchange.getIn().getHeader(Header.HEADER_LIST));
 				SoapHeader newHeader;
 
