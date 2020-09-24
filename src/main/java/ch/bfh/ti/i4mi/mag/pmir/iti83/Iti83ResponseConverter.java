@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -66,7 +67,11 @@ public class Iti83ResponseConverter implements ToFhirTranslator<byte[]> {
 	
 	public Parameters translateToFhir(byte[] input, Map<String, Object> parameters)  {
 		try {
-		PRPAIN201310UV02Type msg = HL7V3Transformer.unmarshallMessage(PRPAIN201310UV02Type.class, new ByteArrayInputStream(input));
+			
+			// FIX for xmlns:xmlns
+	    String content = new String(input);
+	    content = content.replace("xmlns:xmlns","xmlns:xxxxx");
+		PRPAIN201310UV02Type msg = HL7V3Transformer.unmarshallMessage(PRPAIN201310UV02Type.class, new ByteArrayInputStream(content.getBytes()));
 		
 		Parameters response = new Parameters();
 		
@@ -102,6 +107,7 @@ public class Iti83ResponseConverter implements ToFhirTranslator<byte[]> {
 						
 		return response;
 		} catch (JAXBException e) {
+			e.printStackTrace();
 			throw new InvalidRequestException("failed parsing response");
 		}
 	}

@@ -138,7 +138,7 @@ public class Iti65RequestConverter {
                 throw new IllegalArgumentException(resource + " is not allowed here");
             } 			
         }
-						
+					
 		processDocumentManifest(manifest, submissionSet);
 		
 		// set limited metadata
@@ -160,6 +160,8 @@ public class Iti65RequestConverter {
         		DocumentEntry entry = new DocumentEntry();        		        		        		
                 processDocumentReference(documentReference, entry);
                 doc.setDocumentEntry(entry);
+                // MUST BE SET FROM config
+                entry.setRepositoryUniqueId("1.3.6.1.4.1.21367.2017.2.3.54");
                 
                 // create associations
                 for (DocumentReferenceRelatesToComponent relatesTo : documentReference.getRelatesTo()) {
@@ -195,7 +197,7 @@ public class Iti65RequestConverter {
 	                    binary.setUserData("masterIdentifier", noPrefix(masterIdentifier.getValue()));	                	
                     }
                 }
-                
+             
                 builder.withDocument(doc);
 			}
 		}

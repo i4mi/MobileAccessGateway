@@ -136,9 +136,9 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	switch(precision) {
     	case YEAR: fhirPrecision = TemporalPrecisionEnum.YEAR;break;
     	case DAY: fhirPrecision = TemporalPrecisionEnum.DAY;break;
-    	// There is no mapping for HOUR
-    	case HOUR: fhirPrecision = TemporalPrecisionEnum.MINUTE;break;
-    	case MINUTE: fhirPrecision = TemporalPrecisionEnum.MINUTE;break;
+    	// There is no mapping for HOUR; MINUTE is not accepted
+    	case HOUR: fhirPrecision = TemporalPrecisionEnum.SECOND;break;
+    	case MINUTE: fhirPrecision = TemporalPrecisionEnum.SECOND;break;
     	case SECOND: fhirPrecision = TemporalPrecisionEnum.SECOND;break;
     	default: fhirPrecision = TemporalPrecisionEnum.MILLI;break;
     	}
@@ -175,7 +175,9 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     public Reference transform(ReferenceId ref) {
     	String id = ref.getId();
     	CXiAssigningAuthority authority = ref.getAssigningAuthority();
-    	return new Reference().setIdentifier(new Identifier().setValue(id).setSystem(getSystem(authority.getUniversalId())));
+    	// TODO handle authority not given
+    	String universalId = authority != null ? authority.getUniversalId() : "unknown";
+    	return new Reference().setIdentifier(new Identifier().setValue(id).setSystem(getSystem(universalId)));
     }
     
     /**
@@ -222,7 +224,11 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	Organization result = new Organization();
     	result.setName(org.getOrganizationName());
     	String id = org.getIdNumber();
-    	String system = org.getAssigningAuthority().getUniversalId();
+    	// TODO handle system not given
+    	String system = "unknown";
+    	if (org.getAssigningAuthority()!=null) {
+    	   system = org.getAssigningAuthority().getUniversalId();
+    	}
     	result.addIdentifier().setSystem("urn:oid:"+system).setValue(id);
     	return result;
     }

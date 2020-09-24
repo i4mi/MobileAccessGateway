@@ -36,6 +36,8 @@ import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import lombok.Data;
 
+
+// TODO: max-header-size must be used for http also
 /**
  * Configuration for MobileHealthGateway
  * see application.yml

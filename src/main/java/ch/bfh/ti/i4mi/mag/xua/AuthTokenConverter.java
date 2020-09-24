@@ -56,7 +56,7 @@ public class AuthTokenConverter {
 	public static Processor addWsHeader() {
 		return exchange -> {
 
-			Map<String, List<String>> httpHeaders = (Map<String, List<String>>) exchange.getIn().getHeader("FhirHttpHeaders");
+			Map<String, List<String>> httpHeaders = (Map<String, List<String>>) exchange.getMessage().getHeader("FhirHttpHeaders");
 
 			String converted = null;
 
@@ -64,18 +64,23 @@ public class AuthTokenConverter {
 				List<String> header = httpHeaders.get("Authorization");
 				if (header != null) {
 					converted = convert(header.get(0));
+					httpHeaders.remove("Authorization");
 				}
 			} else {
-				Object authHeader = exchange.getIn().getHeader("Authorization");
-				if (authHeader != null)
+				Object authHeader = exchange.getMessage().getHeader("Authorization");
+				if (authHeader != null) {
+					exchange.getMessage().removeHeader("Authorization");
 					converted = convert(authHeader.toString());
+				}
 			}
 			if (converted != null) {
 
+				
+
+								
+				converted = "<wsse:Security xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">"+converted+"</wsse:Security>";
+
 				System.out.println(converted);
-
-				//converted = "<wsse:Security xmlns:wsse=\\\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\\\">"+converted+"</wsse:security>";
-
 				List<SoapHeader> soapHeaders = CastUtils.cast((List<?>) exchange.getIn().getHeader(Header.HEADER_LIST));
 				SoapHeader newHeader;
 

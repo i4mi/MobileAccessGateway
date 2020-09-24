@@ -67,7 +67,12 @@ public class Iti93ResponseConverter implements ToFhirTranslator<byte[]> {
 		try {
 			
 			System.out.println(new String(input));
-			MCCIIN000002UV01Type  msg = HL7V3Transformer.unmarshallMessage(MCCIIN000002UV01Type.class, new ByteArrayInputStream(input));
+			
+			// FIX for xmlns:xmlns
+			String content = new String(input);
+		    content = content.replace("xmlns:xmlns","xmlns:xxxxx");
+			
+			MCCIIN000002UV01Type  msg = HL7V3Transformer.unmarshallMessage(MCCIIN000002UV01Type.class, new ByteArrayInputStream(content.getBytes()));
 									
 			Bundle responseBundle = new Bundle()
                     .setType(Bundle.BundleType.MESSAGE);

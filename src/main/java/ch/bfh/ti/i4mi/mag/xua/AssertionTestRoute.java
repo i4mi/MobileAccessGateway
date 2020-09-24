@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * Defined Route is for testing only and does not implement a specification
  *
  */
-@Component
+//@Component
 public class AssertionTestRoute extends RouteBuilder {
 
 	@Override

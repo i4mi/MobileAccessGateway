@@ -151,8 +151,8 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 		  receiver.setDevice(receiverDevice );
 		  receiverDevice.setClassCode(EntityClassDevice.DEV);
 		  receiverDevice.setDeterminerCode(EntityDeterminer.INSTANCE);
-		  receiverDevice.setId(Collections.singletonList(new II("1.3.6.1.4.1.12559.11.1.2.2.5.11", null)));
-		  
+		  receiverDevice.setId(Collections.singletonList(new II(config.getPixReceiverOid(), null)));
+			 
 		  MCCIMT000100UV01Sender sender = new MCCIMT000100UV01Sender();
 		  resultMsg.setSender(sender);
 		  sender.setTypeCode(CommunicationFunctionType.SND);
@@ -161,8 +161,8 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 		  sender.setDevice(senderDevice);
 		  senderDevice.setClassCode(EntityClassDevice.DEV);
 		  senderDevice.setDeterminerCode(EntityDeterminer.INSTANCE);
-		  senderDevice.setId(Collections.singletonList(new II("1.3.6.1.4.1.12559.11.1.2.2.5.7", null)));
-		 		  
+		  senderDevice.setId(Collections.singletonList(new II(config.getPixMySenderOid(), null)));
+			 		  
 		  PRPAIN201304UV02MFMIMT700701UV01ControlActProcess controlActProcess = new PRPAIN201304UV02MFMIMT700701UV01ControlActProcess();
 		  resultMsg.setControlActProcess(controlActProcess);
 		  controlActProcess.setClassCode(ActClassControlAct.CACT); // ???
