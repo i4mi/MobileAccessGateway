@@ -69,7 +69,7 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                 for (SubmissionSet submissionSet : input.getSubmissionSets()) {
                     DocumentManifest documentManifest = new DocumentManifest();
                     
-                    documentManifest.setId(submissionSet.getUniqueId());  
+                    documentManifest.setId(noUuidPrefix(submissionSet.getEntryUuid()));  
                     
                     list.add(documentManifest);
                     // limitedMetadata -> meta.profile canonical [0..*]       
@@ -92,7 +92,7 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                     
                     // entryUUID -> identifier Identifier [0..*]
                     if (submissionSet.getEntryUuid()!=null) {
-                        documentManifest.addIdentifier((new Identifier().setSystem("urn:ietf:rfc:3986").setValue("urn:uuid:"+submissionSet.getEntryUuid())));
+                        documentManifest.addIdentifier((new Identifier().setSystem("urn:ietf:rfc:3986").setValue(asUuid(submissionSet.getEntryUuid()))));
                     }
                     // availabilityStatus -> status code {DocumentReferenceStatus} [1..1]
                     //   approved -> status=current Other status values are allowed but are not defined in this mapping to XDS.

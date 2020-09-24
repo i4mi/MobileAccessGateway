@@ -67,6 +67,8 @@ public class SchemeMapper {
 		if (scheme != null) return scheme;
 		if (system.startsWith("urn:oid:")) {
             system = system.substring(8);
+        } else if (system.startsWith("urn:uuid:")) {
+        	system = system.substring(9);
         }
 		return system;
 	}

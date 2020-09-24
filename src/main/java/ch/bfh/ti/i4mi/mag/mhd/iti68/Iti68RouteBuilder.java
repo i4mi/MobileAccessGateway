@@ -17,6 +17,7 @@
 package ch.bfh.ti.i4mi.mag.mhd.iti68;
 
 import org.apache.camel.builder.RouteBuilder;
+
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
@@ -60,6 +61,7 @@ class Iti68RouteBuilder extends RouteBuilder {
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 .process(AuthTokenConverter.addWsHeader())
+               
                 // translate, forward, translate back
                 .bean(Iti68RequestConverter.class)                
                 .to(xds43Endpoint)

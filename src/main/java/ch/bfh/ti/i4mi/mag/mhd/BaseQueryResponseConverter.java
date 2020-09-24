@@ -82,6 +82,18 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     public String getSystem(String schemeName) {
     	return schemeMapper.getSystem(schemeName);        
     }
+    
+    public String asUuid(String urn) {
+    	if (urn == null) return null;
+    	if (urn.startsWith("urn:uuid:")) return urn;
+    	return "urn:uuid:"+urn;
+    }
+    
+    public String noUuidPrefix(String urn) {
+    	if (urn == null) return null;
+    	if (urn.startsWith("urn:uuid:")) return urn.substring("urn:uuid:".length());
+    	return urn;
+    }
 
     /**
      * XDS code -> FHIR CodeableConcept
@@ -176,9 +188,12 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	String id = ref.getId();
     	CXiAssigningAuthority authority = ref.getAssigningAuthority();
     	// TODO handle authority not given
-    	String universalId = authority != null ? authority.getUniversalId() : "unknown";
-    	return new Reference().setIdentifier(new Identifier().setValue(id).setSystem(getSystem(universalId)));
-    }
+    	if (authority != null) {
+    		return new Reference().setIdentifier(new Identifier().setValue(id).setSystem(getSystem(authority.getUniversalId())));
+    	} else {
+    		return new Reference().setIdentifier(new Identifier().setValue(id));
+    	}
+     }
     
     /**
      * XDS Person -> FHIR Practitioner
@@ -225,11 +240,11 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	result.setName(org.getOrganizationName());
     	String id = org.getIdNumber();
     	// TODO handle system not given
-    	String system = "unknown";
+    	
     	if (org.getAssigningAuthority()!=null) {
-    	   system = org.getAssigningAuthority().getUniversalId();
-    	}
-    	result.addIdentifier().setSystem("urn:oid:"+system).setValue(id);
+    	   String system = org.getAssigningAuthority().getUniversalId();
+    	   result.addIdentifier().setSystem("urn:oid:"+system).setValue(id);
+    	} else result.addIdentifier().setValue(id);
     	return result;
     }
     

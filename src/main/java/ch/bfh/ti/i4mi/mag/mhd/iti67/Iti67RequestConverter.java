@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 
 /**
@@ -94,7 +95,8 @@ public class Iti67RequestConverter extends BaseRequestConverter {
             // patient or patient.identifier  -->  $XDSDocumentEntryPatientId
             TokenParam tokenIdentifier = searchParameter.getPatientIdentifier();
             if (tokenIdentifier != null) {
-                String system = getScheme(tokenIdentifier.getSystem());                
+                String system = getScheme(tokenIdentifier.getSystem());   
+                if (system==null) throw new InvalidRequestException("Missing OID for patient");
                 query.setPatientId(new Identifiable(tokenIdentifier.getValue(), new AssigningAuthority(system)));
             }
             ReferenceParam patientRef =  searchParameter.getPatientReference();

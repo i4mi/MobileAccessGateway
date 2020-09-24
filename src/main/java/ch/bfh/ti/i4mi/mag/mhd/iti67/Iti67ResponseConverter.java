@@ -103,7 +103,7 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     DocumentReference documentReference = new DocumentReference();
 
                     
-                    documentReference.setId(documentEntry.getUniqueId()); // FIXME do we need to cache this id in
+                    documentReference.setId(noUuidPrefix(documentEntry.getEntryUuid())); // FIXME do we need to cache this id in
                                                                            // relation to the DocumentManifest itself
                                                                            // for
 
@@ -126,7 +126,7 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     // DocumentReference.identifier. use shall be ‘official’
                     if (documentEntry.getEntryUuid() != null) {
                         documentReference.addIdentifier((new Identifier().setSystem("urn:ietf:rfc:3986")
-                                .setValue("urn:uuid:" + documentEntry.getEntryUuid())).setUse(IdentifierUse.OFFICIAL));
+                                .setValue(asUuid(documentEntry.getEntryUuid()))).setUse(IdentifierUse.OFFICIAL));
                     }
                     // availabilityStatus -> status code {DocumentReferenceStatus} [1..1]
                     // approved -> status=current
@@ -288,7 +288,7 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     
                     Patient sourcePatient = new Patient();
                     if (sourcePatientId != null) {
-                      sourcePatient.addIdentifier((new Identifier().setSystem(sourcePatientId.getAssigningAuthority().getUniversalId())
+                      sourcePatient.addIdentifier((new Identifier().setSystem("urn:oid:"+sourcePatientId.getAssigningAuthority().getUniversalId())
                             .setValue(sourcePatientId.getId())).setUse(IdentifierUse.OFFICIAL));
                     }
                     
