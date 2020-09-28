@@ -205,6 +205,7 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 		        
 		        List<II> orgIds = new ArrayList<II>();
 		        Organization managingOrg = getManagingOrganization(in);
+		        // NULL POINTER CHECK
 		        for (Identifier id : managingOrg.getIdentifier()) {
 		        	orgIds.add(new II(getScheme(id.getSystem()), null));
 		        }
@@ -228,6 +229,7 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 		        	for (PatientCommunicationComponent pcc : in.getCommunication()) {		        		
 		        		PRPAMT201301UV02LanguageCommunication languageCommunication = new PRPAMT201301UV02LanguageCommunication();
 		        		languageCommunication.setLanguageCode(transform(pcc.getLanguage()));
+		        		// NULL POINTER EXCEPTION
 		        		if (pcc.hasPreferred()) languageCommunication.setPreferenceInd(new BL(pcc.getPreferred()));
 						patientPerson.addLanguageCommunication(languageCommunication);
 		        	}
