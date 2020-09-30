@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * Defined Route is for testing only and does not implement a specification
  *
  */
-//@Component
+@Component
 public class AssertionTestRoute extends RouteBuilder {
 
 	@Override
@@ -47,14 +47,15 @@ public class AssertionTestRoute extends RouteBuilder {
 		.setHeader(CxfConstants.OPERATION_NAMESPACE,
 		        constant("http://docs.oasis-open.org/ws-sx/ws-trust/200512/wsdl"))
 		//.setHeader("Accept-Encoding", constant("identity"))
-		.setProperty(javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD, constant(Boolean.TRUE))		
+		//.setProperty(javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD, constant(Boolean.TRUE))		
 		.to("cxf://https://ehealthsuisse.ihe-europe.net/STS"
 			     //+ "?serviceClass=ch.bfh.ti.i4mi.mag.xua.MessageXProvider"
 				 + "?dataFormat=CXF_MESSAGE"
 			     + "&wsdlURL=https://ehealthsuisse.ihe-europe.net/STS?wsdl")
 		//.bean(ProvideAssertionBuilder.class, "test")
-		.bean(AssertionExtractor.class);
-		
+		.bean(AssertionExtractor.class)
+		.removeHeaders("*")
+		.setHeader("content-type", constant("text/xml"));
 		
 	}
 

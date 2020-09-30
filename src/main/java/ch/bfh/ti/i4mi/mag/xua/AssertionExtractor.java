@@ -54,8 +54,9 @@ public class AssertionExtractor {
 		String xml = writer.toString();
 		System.out.println("TOKEN-PART:"+xml);
 		
-		String encoded = Base64.getEncoder().encodeToString(xml.getBytes("UTF-8"));
-		return "IHE-SAML "+encoded;
+		return xml;
+		/*String encoded = Base64.getEncoder().encodeToString(xml.getBytes("UTF-8"));
+		return "IHE-SAML "+encoded;*/
 				
 	}
 }

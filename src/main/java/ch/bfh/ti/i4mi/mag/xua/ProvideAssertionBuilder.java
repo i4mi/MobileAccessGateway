@@ -124,15 +124,25 @@ public class ProvideAssertionBuilder {
 		 		 		
 		 String token = request.getSamlToken();
 		 if (token == null) throw new InvalidRequestException("No SAML token found");
-		 if (token.startsWith("IHE-SAML ")) token = token.substring("IHE-SAML ".length());			
+		 /*if (token.startsWith("IHE-SAML ")) token = token.substring("IHE-SAML ".length());			
 		 byte[] decoded = Base64.getDecoder().decode(token);
-		 token = new String(decoded);
+		 token = new String(decoded);*/
+		 if (token.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")) token = token.substring("<?xml version=\"1.0\" encoding=\"UTF-8\"?>".length());
 		 System.out.println("Decoded Token:"+token);
 		 		 
+		 
+		 
+		 
 		 MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
 		 SOAPMessage message = factory.createMessage(new MimeHeaders(), new ByteArrayInputStream(BASE_MSG.getBytes(Charset.forName("UTF-8"))));
 
-		 message.getSOAPHeader().addChildElement("Security", "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd").appendChild(message.getSOAPHeader().getOwnerDocument().adoptNode(addSecurityHeader(token)));
+		 Element elem = addSecurityHeader(token);
+		 System.out.println("elem="+elem);
+
+		 Node node = message.getSOAPHeader().getOwnerDocument().importNode(elem, true);
+		 System.out.println("node="+node);
+		 
+		 message.getSOAPHeader().addChildElement("Security", "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd").appendChild(node);
 		 
 		 SOAPElement claims = (SOAPElement) message.getSOAPBody().getElementsByTagNameNS("http://docs.oasis-open.org/ws-sx/ws-trust/200512", "Claims").item(0);
 		 if (request.getResourceId() != null) {

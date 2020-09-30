@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.apache.camel.Header;
 import org.apache.camel.Headers;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -37,8 +39,7 @@ public class AuthRequestConverter {
 	public final static String ORGANIZATION = "organizationID/";
 	
 	public AssertionRequest buildRequest(
-			@Header("scope") String scope, 
-			@Header("Authorization") String authorization, 
+			@Header("scope") String scope, 			
 			@Header("response_type") String responseType,
 			@Header("client_id") String clientId,
 			@Header("token_type") String tokenType,
@@ -46,6 +47,11 @@ public class AuthRequestConverter {
 		for (Map.Entry<String, Object> entry : headers.entrySet()) {
 			System.out.println("HEADER: "+entry.getKey()+" = "+(entry.getValue()!=null?entry.getValue().toString():"null"));
 		}
+		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		//System.out.println("AUTH:"+auth);
+		//System.out.println("PRINCIPAL:"+auth.getPrincipal());
+		String authorization = auth.getPrincipal().toString();
 		
 		if (!"code".equals(responseType)) throw new InvalidRequestException("response_type must be 'code'");
 		
@@ -59,7 +65,9 @@ public class AuthRequestConverter {
           if (scopePart.startsWith(PRINCIPAL_ID)) result.setPrincipalID(scopePart.substring(PRINCIPAL_ID.length()));
           if (scopePart.startsWith(ORGANIZATION)) result.setOrganizationID(scopePart.substring(ORGANIZATION.length()));
 		}
+				
 		result.setSamlToken(authorization);
+		System.out.println("Auth:"+result.getSamlToken());
 		
 		return result;
 	}
