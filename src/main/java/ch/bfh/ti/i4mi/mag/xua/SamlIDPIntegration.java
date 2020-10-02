@@ -1,7 +1,21 @@
-package ch.bfh.ti.i4mi.mag;
+/*
+ * Copyright 2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+
+package ch.bfh.ti.i4mi.mag.xua;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.velocity.app.VelocityEngine;
 import org.opensaml.saml2.metadata.provider.HTTPMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
@@ -18,9 +34,8 @@ import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.parse.StaticBasicParserPool;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -81,11 +96,14 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import ch.bfh.ti.i4mi.mag.xua.IDPAssertionService;
-
+/**
+ * Integrate IDP
+ * @author alexander kreutz
+ *
+ */
 @Configuration
 @EnableWebSecurity
-public class WebSecurity extends WebSecurityConfigurerAdapter implements InitializingBean, DisposableBean {
+public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements InitializingBean, DisposableBean {
 	
 	 
 	 @Override
@@ -101,13 +119,16 @@ public class WebSecurity extends WebSecurityConfigurerAdapter implements Initial
 		 
 			http.authorizeRequests()
 			.antMatchers("/login").authenticated()
-			.antMatchers("/camel/token").authenticated()
+			.antMatchers("/camel/authorize").authenticated()
+			.antMatchers("/camel/token").permitAll()
 			.antMatchers("/saml/**").permitAll()
 	        .antMatchers("/**").permitAll();
 			
 		http
     		.logout()
     			.disable();	
+		
+		http.cors().and().csrf().disable();
 	 }
 	 
 	 private Timer backgroundTaskTimer;
@@ -175,7 +196,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter implements Initial
 	    @Bean
 	    public SAMLAuthenticationProvider samlAuthenticationProvider() {
 	        SAMLAuthenticationProvider samlAuthenticationProvider = new SAMLAuthenticationProvider();
-	        samlAuthenticationProvider.setUserDetails(new IDPAssertionService());
+	        samlAuthenticationProvider.setUserDetails(new IDPAssertionDetailsService());
 	        samlAuthenticationProvider.setForcePrincipalAsString(false);
 	        return samlAuthenticationProvider;
 	    }
@@ -233,16 +254,28 @@ public class WebSecurity extends WebSecurityConfigurerAdapter implements Initial
 	        return new SingleLogoutProfileImpl();
 	    }
 	 
+	    @Value("${mag.iua.idp.key-store}")
+	    private String samlKeystore;
+	    
+	    @Value("${mag.iua.idp.key-store-password}")
+	    private String keystorePass;
+	    
+	    @Value("${mag.iua.idp.key-alias}")
+	    private String keyAlias;
+	    
+	    @Value("${mag.iua.idp.key-password}")
+	    private String keyPassword;
+	    
 	    // Central storage of cryptographic keys
 	    @Bean	    
 	    public KeyManager keyManager() {
 	        DefaultResourceLoader loader = new DefaultResourceLoader();
 	        Resource storeFile = loader
-	                .getResource("classpath:samlKeystore.jks");
-	        String storePass = "samlidp";
+	                .getResource(samlKeystore);
+	        String storePass = keystorePass;
 	        Map<String, String> passwords = new HashMap<String, String>();
-	        passwords.put("saml", "samlidp");
-	        String defaultKey = "saml";
+	        passwords.put(keyAlias, keyPassword);
+	        String defaultKey = keyAlias;
 	        return new JKSKeyManager(storeFile, storePass, passwords, defaultKey);
 	    	
 	    }
@@ -282,11 +315,14 @@ public class WebSecurity extends WebSecurityConfigurerAdapter implements Initial
 	        return idpDiscovery;
 	    }
 	    
+	    @Value("${mag.iua.idp.metadata-url}")
+	    private String metadataUrl;
+	    
 		@Bean
-		@Qualifier("idp-ehealthsuisse")
+		@Qualifier("${mag.iua.idp.name}")
 		public ExtendedMetadataDelegate ssoCircleExtendedMetadataProvider()
 				throws MetadataProviderException {
-			String idpSSOCircleMetadataURL = "https://ehealthsuisse.ihe-europe.net/metadata/idp-metadata.xml";
+			String idpSSOCircleMetadataURL = metadataUrl;
 			HTTPMetadataProvider httpMetadataProvider = new HTTPMetadataProvider(
 					this.backgroundTaskTimer, httpClient(), idpSSOCircleMetadataURL);
 			httpMetadataProvider.setParserPool(parserPool());
@@ -309,12 +345,18 @@ public class WebSecurity extends WebSecurityConfigurerAdapter implements Initial
 	        return new CachingMetadataManager(providers);
 	    }
 	 
+	    @Value("${mag.iua.sp.entity-id}")
+	    private String entityId;
+	    
+	    @Value("${mag.baseurl}")
+	    private String baseUrl;
+	    
 	    // Filter automatically generates default SP metadata
 	    @Bean
 	    public MetadataGenerator metadataGenerator() {
 	        MetadataGenerator metadataGenerator = new MetadataGenerator();
-	        metadataGenerator.setEntityId("mobileaccessgateway.pagekite.me");
-	        metadataGenerator.setEntityBaseURL("https://mobileaccessgateway.pagekite.me");
+	        metadataGenerator.setEntityId(entityId);
+	        metadataGenerator.setEntityBaseURL(baseUrl);
 	        metadataGenerator.setExtendedMetadata(extendedMetadata());
 	        metadataGenerator.setIncludeDiscoveryExtension(false);
 	        metadataGenerator.setKeyManager(keyManager()); 

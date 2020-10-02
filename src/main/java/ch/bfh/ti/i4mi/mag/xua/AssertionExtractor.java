@@ -18,7 +18,6 @@ package ch.bfh.ti.i4mi.mag.xua;
 
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.Base64;
 
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPException;
@@ -42,21 +41,19 @@ import org.w3c.dom.NodeList;
 public class AssertionExtractor {
 
 	public String handle(@Body SOAPMessage in) throws SOAPException, TransformerConfigurationException, TransformerException, UnsupportedEncodingException {
-		System.out.println("INPUT:"+in);
+		//System.out.println("INPUT:"+in);
 		SOAPBody body = in.getSOAPBody();
 		NodeList lst = body.getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion","Assertion");
 		Node node = lst.item(0);
-		System.out.println("NODE: "+node.toString());
+		//System.out.println("NODE: "+node.toString());
 		
 		StringWriter writer = new StringWriter();
 		Transformer transformer = TransformerFactory.newInstance().newTransformer();
 		transformer.transform(new DOMSource(node), new StreamResult(writer));
 		String xml = writer.toString();
-		System.out.println("TOKEN-PART:"+xml);
+		//System.out.println("TOKEN-PART:"+xml);
 		
-		return xml;
-		/*String encoded = Base64.getEncoder().encodeToString(xml.getBytes("UTF-8"));
-		return "IHE-SAML "+encoded;*/
+		return xml;		
 				
 	}
 }

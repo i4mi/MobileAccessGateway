@@ -19,9 +19,7 @@ package ch.bfh.ti.i4mi.mag.xua;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.util.Base64;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
@@ -30,24 +28,20 @@ import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.dom.DOMSource;
 
 import org.apache.camel.Body;
 import org.apache.cxf.staxutils.StaxUtils;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import net.ihe.gazelle.validation.Assertion;
 
 /**
  * Create a Get-X-User-Assertion SOAP Message from AssertionRequest Bean
  * @author alexander kreutz
  *
  */
-public class ProvideAssertionBuilder {
+public class Iti40RequestGenerator {
 
 	 private final String BASE_MSG = "<env:Envelope xmlns:env=\"http://www.w3.org/2003/05/soap-envelope\">\n" + 
 	 		"   <env:Header xmlns:wsa=\"http://www.w3.org/2005/08/addressing\">      \n" + 

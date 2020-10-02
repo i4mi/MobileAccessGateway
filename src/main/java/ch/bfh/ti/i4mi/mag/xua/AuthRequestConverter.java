@@ -38,26 +38,40 @@ public class AuthRequestConverter {
 	public final static String PRINCIPAL_ID = "principalID/";
 	public final static String ORGANIZATION = "organizationID/";
 	
-	public AssertionRequest buildRequest(
+	public AuthenticationRequest buildAuthenticationRequest(
 			@Header("scope") String scope, 			
 			@Header("response_type") String responseType,
 			@Header("client_id") String clientId,
 			@Header("token_type") String tokenType,
+			@Header("redirect_uri") String redirect_uri,
+			@Header("state") String state,
 			@Headers Map<String, Object> headers) {
-		for (Map.Entry<String, Object> entry : headers.entrySet()) {
+		/*for (Map.Entry<String, Object> entry : headers.entrySet()) {
 			System.out.println("HEADER: "+entry.getKey()+" = "+(entry.getValue()!=null?entry.getValue().toString():"null"));
-		}
-		
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		//System.out.println("AUTH:"+auth);
-		//System.out.println("PRINCIPAL:"+auth.getPrincipal());
-		String authorization = auth.getPrincipal().toString();
-		
+		}*/
+				
 		if (!"code".equals(responseType)) throw new InvalidRequestException("response_type must be 'code'");
 		
-		AssertionRequest result = new AssertionRequest();
-		System.out.println("My Scope="+scope);
-		String scopes[] = scope.split("\\s");
+		if (tokenType==null) tokenType = "Bearer";
+		
+		AuthenticationRequest request = new AuthenticationRequest(); 
+		request.setScope(scope);
+		request.setRedirect_uri(redirect_uri);
+		request.setClient_id(clientId);
+		request.setState(state);
+		request.setToken_type(tokenType);
+						
+		return request;
+	}
+	
+	public AssertionRequest buildAssertionRequest(@Header("oauthrequest") AuthenticationRequest request) {
+		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth == null) throw new InvalidRequestException("authentication failed");
+		String authorization = auth.getPrincipal().toString();
+						
+		AssertionRequest result = new AssertionRequest();		
+		String scopes[] = request.getScope().split("\\s");
 		for (String scopePart : scopes) {
 		  if (scopePart.startsWith(SCOPE_PURPOSEOFUSE)) result.setPurposeOfUse(scopePart.substring(SCOPE_PURPOSEOFUSE.length()));
 		  if (scopePart.startsWith(RESOURCE_ID)) result.setResourceId(scopePart.substring(RESOURCE_ID.length()));
