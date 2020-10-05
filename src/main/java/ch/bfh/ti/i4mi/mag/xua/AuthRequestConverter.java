@@ -18,8 +18,11 @@ package ch.bfh.ti.i4mi.mag.xua;
 
 import java.util.Map;
 
+import javax.ws.rs.BadRequestException;
+
 import org.apache.camel.Header;
 import org.apache.camel.Headers;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -38,20 +41,22 @@ public class AuthRequestConverter {
 	public final static String PRINCIPAL_ID = "principalID/";
 	public final static String ORGANIZATION = "organizationID/";
 	
+	@Autowired
+	private ClientValidationService clients;
+	
 	public AuthenticationRequest buildAuthenticationRequest(
-			@Header("scope") String scope, 			
-			@Header("response_type") String responseType,
+			@Header("scope") String scope, 						
 			@Header("client_id") String clientId,
 			@Header("token_type") String tokenType,
 			@Header("redirect_uri") String redirect_uri,
 			@Header("state") String state,
-			@Headers Map<String, Object> headers) {
+			@Headers Map<String, Object> headers) throws AuthException {
 		/*for (Map.Entry<String, Object> entry : headers.entrySet()) {
 			System.out.println("HEADER: "+entry.getKey()+" = "+(entry.getValue()!=null?entry.getValue().toString():"null"));
 		}*/
-				
-		if (!"code".equals(responseType)) throw new InvalidRequestException("response_type must be 'code'");
 		
+		if (redirect_uri == null) throw new BadRequestException("redirect_uri is missing!");
+					
 		if (tokenType==null) tokenType = "Bearer";
 		
 		AuthenticationRequest request = new AuthenticationRequest(); 
@@ -64,10 +69,15 @@ public class AuthRequestConverter {
 		return request;
 	}
 	
-	public AssertionRequest buildAssertionRequest(@Header("oauthrequest") AuthenticationRequest request) {
+	public AssertionRequest buildAssertionRequest(@Header("response_type") String responseType, @Header("oauthrequest") AuthenticationRequest request) throws AuthException {
+		
+		if (!"code".equals(responseType)) throw new AuthException(400, "invalid_request", "response_type must be 'code'");
+		
+		if (!clients.isValidClientId(request.getClient_id())) throw new AuthException(400, "invalid_request", "Unknown client_id");
+		if (!clients.isValidRedirectUri(request.getClient_id(), request.getRedirect_uri())) throw new BadRequestException("Invalid redirect uri");
 		
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (auth == null) throw new InvalidRequestException("authentication failed");
+		if (auth == null) throw new AuthException(400, "access_denied", "authentication failed");
 		String authorization = auth.getPrincipal().toString();
 						
 		AssertionRequest result = new AssertionRequest();		

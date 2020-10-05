@@ -55,6 +55,10 @@ mag:
      ap:
         url: https://ehealthsuisse.ihe-europe.net/STS
         wsdl: https://ehealthsuisse.ihe-europe.net/STS?wsdl
+     clients:
+        oauthdebugger:
+           secret: demosecret
+           redirect: https://oauthdebugger.com/debug
 
   audit:
     audit-enabled: false 

@@ -17,6 +17,8 @@
 package ch.bfh.ti.i4mi.mag.xua;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
@@ -24,8 +26,11 @@ import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.config.builders.ExpiryPolicyBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import ch.bfh.ti.i4mi.mag.xua.ClientValidationService.ClientDefinition;
 
 /**
  * Additional configuration for authentication services
@@ -50,5 +55,11 @@ public class AuthenticationConfig {
 				    		    .build())
 				     .build(true);
 		 return cacheManager.getCache("codeToToken", String.class, AuthenticationRequest.class);
+	}
+	
+	@ConfigurationProperties("mag.iua.clients")
+	@Bean(name = "clients")
+	public Map<String, ClientDefinition> getClients() {
+		return new HashMap<String, ClientDefinition>();
 	}
 }

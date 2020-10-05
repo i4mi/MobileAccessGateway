@@ -52,4 +52,18 @@ public class AuthResponseConverter {
 				
 		return returnurl;
 	}
+	
+	public String handleerror(@Header("oauthrequest") AuthenticationRequest request, @Body AuthException exception) throws UnsupportedEncodingException{
+		System.out.println("CALLED ERROR HANDLER");
+		String returnurl = request.getRedirect_uri();
+		String state = request.getState();		
+		
+		if (returnurl.indexOf("?")<0) returnurl += "?"; else returnurl += "&";
+		
+		returnurl += "error="+URLEncoder.encode(exception.getError(), "UTF-8");
+		returnurl += "&error_description="+URLEncoder.encode(exception.getMessage(), "UTF-8");
+		if (state != null) returnurl += "&state="+URLEncoder.encode(state, "UTF-8");
+		
+		return returnurl;
+	}
 }

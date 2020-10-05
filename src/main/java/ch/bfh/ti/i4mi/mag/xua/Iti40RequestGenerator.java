@@ -114,10 +114,10 @@ public class Iti40RequestGenerator {
 		 return (Element) StaxUtils.read(new StringReader(input)).getDocumentElement();
 	 }
 	
-	 public SOAPMessage buildAssertion(@Body AssertionRequest request) throws SOAPException, IOException, XMLStreamException {
+	 public SOAPMessage buildAssertion(@Body AssertionRequest request) throws SOAPException, IOException, XMLStreamException, AuthException {
 		 		 		
 		 String token = request.getSamlToken();
-		 if (token == null) throw new InvalidRequestException("No SAML token found");
+		 if (token == null) throw new AuthException(400, "server_error", "No SAML token found");
 		 /*if (token.startsWith("IHE-SAML ")) token = token.substring("IHE-SAML ".length());			
 		 byte[] decoded = Base64.getDecoder().decode(token);
 		 token = new String(decoded);*/
