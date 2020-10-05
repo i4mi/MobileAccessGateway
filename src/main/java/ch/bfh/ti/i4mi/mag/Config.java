@@ -31,6 +31,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.web.DefaultSecurityFilterChain;
+import org.springframework.security.web.SecurityFilterChain;
 
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
@@ -168,7 +170,7 @@ public class Config {
 
     	KeyManagersParameters kmp = new KeyManagersParameters();
     	kmp.setKeyStore(ksp);
-    	kmp.setKeyPassword(keystorePassword);   
+    	kmp.setKeyPassword(keystorePassword);       	
     	
     	TrustManagersParameters tmp = new TrustManagersParameters();
     	tmp.setKeyStore(ksp);    	
@@ -236,6 +238,6 @@ public class Config {
     public PatientReferenceCreator getPatientReferenceCreator() {
     	return new PatientReferenceCreator();
     }
-    
+            
     
 }

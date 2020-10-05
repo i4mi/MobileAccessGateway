@@ -16,6 +16,8 @@
 
 package ch.bfh.ti.i4mi.mag;
 
+import org.eclipse.jetty.server.ConnectionFactory;
+import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +38,9 @@ public class HttpServer {
     @Value("${server.http.port:0}")
     private int httpPort;
     
+    @Value("${server.max-http-header-size:0}")
+    private int maxHttpHeaderSize;
+    
     @Bean
     public WebServerFactoryCustomizer<JettyServletWebServerFactory> webServerFactoryCustomizer() {
     	//JettyComponent jettyComponent = getContext().getComponent("jetty", JettyComponent.class);
@@ -45,18 +50,28 @@ public class HttpServer {
 
             @Override
             public void customize(JettyServletWebServerFactory factory) {
+            	            
                 if (httpPort > 0) {
 	                factory.addServerCustomizers(new JettyServerCustomizer() {
 	
 	                    @Override
 	                    public void customize(Server server) {
 	
-	                        ServerConnector httpConnector = new ServerConnector(server);	                        
+	                        ServerConnector httpConnector = new ServerConnector(server);	   	                       
 	                        httpConnector.setPort(httpPort);
-	                                               
 	                        server.addConnector(httpConnector);
 	                        
 	                      
+	                        if (maxHttpHeaderSize > 0) {
+		                        for (ConnectionFactory factory : httpConnector.getConnectionFactories()) {
+		                        	if (factory instanceof HttpConfiguration.ConnectionFactory) {
+		                				((HttpConfiguration.ConnectionFactory) factory).getHttpConfiguration()
+		                						.setRequestHeaderSize(maxHttpHeaderSize);
+		                			}
+		                        }
+	                        }
+	                       
+	                        	                        	                      
 	                    }
 	                });
                 }

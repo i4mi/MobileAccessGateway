@@ -19,9 +19,7 @@ package ch.bfh.ti.i4mi.mag.xua;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.util.Base64;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
@@ -30,24 +28,20 @@ import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.dom.DOMSource;
 
 import org.apache.camel.Body;
 import org.apache.cxf.staxutils.StaxUtils;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import net.ihe.gazelle.validation.Assertion;
 
 /**
  * Create a Get-X-User-Assertion SOAP Message from AssertionRequest Bean
  * @author alexander kreutz
  *
  */
-public class ProvideAssertionBuilder {
+public class Iti40RequestGenerator {
 
 	 private final String BASE_MSG = "<env:Envelope xmlns:env=\"http://www.w3.org/2003/05/soap-envelope\">\n" + 
 	 		"   <env:Header xmlns:wsa=\"http://www.w3.org/2005/08/addressing\">      \n" + 
@@ -120,19 +114,29 @@ public class ProvideAssertionBuilder {
 		 return (Element) StaxUtils.read(new StringReader(input)).getDocumentElement();
 	 }
 	
-	 public SOAPMessage buildAssertion(@Body AssertionRequest request) throws SOAPException, IOException, XMLStreamException {
+	 public SOAPMessage buildAssertion(@Body AssertionRequest request) throws SOAPException, IOException, XMLStreamException, AuthException {
 		 		 		
 		 String token = request.getSamlToken();
-		 if (token == null) throw new InvalidRequestException("No SAML token found");
-		 if (token.startsWith("IHE-SAML ")) token = token.substring("IHE-SAML ".length());			
+		 if (token == null) throw new AuthException(400, "server_error", "No SAML token found");
+		 /*if (token.startsWith("IHE-SAML ")) token = token.substring("IHE-SAML ".length());			
 		 byte[] decoded = Base64.getDecoder().decode(token);
-		 token = new String(decoded);
+		 token = new String(decoded);*/
+		 if (token.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")) token = token.substring("<?xml version=\"1.0\" encoding=\"UTF-8\"?>".length());
 		 System.out.println("Decoded Token:"+token);
 		 		 
+		 
+		 
+		 
 		 MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
 		 SOAPMessage message = factory.createMessage(new MimeHeaders(), new ByteArrayInputStream(BASE_MSG.getBytes(Charset.forName("UTF-8"))));
 
-		 message.getSOAPHeader().addChildElement("Security", "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd").appendChild(message.getSOAPHeader().getOwnerDocument().adoptNode(addSecurityHeader(token)));
+		 Element elem = addSecurityHeader(token);
+		 System.out.println("elem="+elem);
+
+		 Node node = message.getSOAPHeader().getOwnerDocument().importNode(elem, true);
+		 System.out.println("node="+node);
+		 
+		 message.getSOAPHeader().addChildElement("Security", "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd").appendChild(node);
 		 
 		 SOAPElement claims = (SOAPElement) message.getSOAPBody().getElementsByTagNameNS("http://docs.oasis-open.org/ws-sx/ws-trust/200512", "Claims").item(0);
 		 if (request.getResourceId() != null) {

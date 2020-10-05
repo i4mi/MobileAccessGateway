@@ -18,8 +18,13 @@ package ch.bfh.ti.i4mi.mag.xua;
 
 import java.util.Map;
 
+import javax.ws.rs.BadRequestException;
+
 import org.apache.camel.Header;
 import org.apache.camel.Headers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -36,22 +41,47 @@ public class AuthRequestConverter {
 	public final static String PRINCIPAL_ID = "principalID/";
 	public final static String ORGANIZATION = "organizationID/";
 	
-	public AssertionRequest buildRequest(
-			@Header("scope") String scope, 
-			@Header("Authorization") String authorization, 
-			@Header("response_type") String responseType,
+	@Autowired
+	private ClientValidationService clients;
+	
+	public AuthenticationRequest buildAuthenticationRequest(
+			@Header("scope") String scope, 						
 			@Header("client_id") String clientId,
 			@Header("token_type") String tokenType,
-			@Headers Map<String, Object> headers) {
-		for (Map.Entry<String, Object> entry : headers.entrySet()) {
+			@Header("redirect_uri") String redirect_uri,
+			@Header("state") String state,
+			@Headers Map<String, Object> headers) throws AuthException {
+		/*for (Map.Entry<String, Object> entry : headers.entrySet()) {
 			System.out.println("HEADER: "+entry.getKey()+" = "+(entry.getValue()!=null?entry.getValue().toString():"null"));
-		}
+		}*/
 		
-		if (!"code".equals(responseType)) throw new InvalidRequestException("response_type must be 'code'");
+		if (redirect_uri == null) throw new BadRequestException("redirect_uri is missing!");
+					
+		if (tokenType==null) tokenType = "Bearer";
 		
-		AssertionRequest result = new AssertionRequest();
-		System.out.println("My Scope="+scope);
-		String scopes[] = scope.split("\\s");
+		AuthenticationRequest request = new AuthenticationRequest(); 
+		request.setScope(scope);
+		request.setRedirect_uri(redirect_uri);
+		request.setClient_id(clientId);
+		request.setState(state);
+		request.setToken_type(tokenType);
+						
+		return request;
+	}
+	
+	public AssertionRequest buildAssertionRequest(@Header("response_type") String responseType, @Header("oauthrequest") AuthenticationRequest request) throws AuthException {
+		
+		if (!"code".equals(responseType)) throw new AuthException(400, "invalid_request", "response_type must be 'code'");
+		
+		if (!clients.isValidClientId(request.getClient_id())) throw new AuthException(400, "invalid_request", "Unknown client_id");
+		if (!clients.isValidRedirectUri(request.getClient_id(), request.getRedirect_uri())) throw new BadRequestException("Invalid redirect uri");
+		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth == null) throw new AuthException(400, "access_denied", "authentication failed");
+		String authorization = auth.getPrincipal().toString();
+						
+		AssertionRequest result = new AssertionRequest();		
+		String scopes[] = request.getScope().split("\\s");
 		for (String scopePart : scopes) {
 		  if (scopePart.startsWith(SCOPE_PURPOSEOFUSE)) result.setPurposeOfUse(scopePart.substring(SCOPE_PURPOSEOFUSE.length()));
 		  if (scopePart.startsWith(RESOURCE_ID)) result.setResourceId(scopePart.substring(RESOURCE_ID.length()));
@@ -59,7 +89,9 @@ public class AuthRequestConverter {
           if (scopePart.startsWith(PRINCIPAL_ID)) result.setPrincipalID(scopePart.substring(PRINCIPAL_ID.length()));
           if (scopePart.startsWith(ORGANIZATION)) result.setOrganizationID(scopePart.substring(ORGANIZATION.length()));
 		}
+				
 		result.setSamlToken(authorization);
+		System.out.println("Auth:"+result.getSamlToken());
 		
 		return result;
 	}
