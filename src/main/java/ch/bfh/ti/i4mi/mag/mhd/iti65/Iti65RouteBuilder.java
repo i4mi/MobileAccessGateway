@@ -22,6 +22,8 @@ import static org.openehealth.ipf.platform.camel.ihe.xds.XdsCamelValidators.iti4
 import java.util.Date;
 import java.util.UUID;
 
+import javax.xml.soap.SOAPException;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.support.ExpressionAdapter;
@@ -37,6 +39,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.Response;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
 import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +63,6 @@ class Iti65RouteBuilder extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         log.debug("Iti65RouteBuilder configure");
-        
         
         final String xds41Endpoint = String.format("xds-iti41://%s/xds/iti41" +
                 "?secure=%s", this.config.getIti41HostUrl(), this.config.isHttps() ? "true" : "false")

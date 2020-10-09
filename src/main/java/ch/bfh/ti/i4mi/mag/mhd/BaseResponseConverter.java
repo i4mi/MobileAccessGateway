@@ -31,6 +31,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.Response;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Severity;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 
 /**
  * base class for XDS to MHD response converters
@@ -45,6 +46,10 @@ public class BaseResponseConverter {
 	 */
 	public void processError(Response input) {		
 		throw new InvalidRequestException("Retrieved error response", processErrorAsOutcome(input));
+	}
+	
+	public void errorFromException(Exception e) {
+		throw new InvalidRequestException(e.getMessage());		
 	}
 	
 	/**

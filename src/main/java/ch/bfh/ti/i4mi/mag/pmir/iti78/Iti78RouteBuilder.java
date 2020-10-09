@@ -14,43 +14,47 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.pmir.iti83;
+package ch.bfh.ti.i4mi.mag.pmir.iti78;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.openehealth.ipf.commons.ihe.fhir.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
+import ch.bfh.ti.i4mi.mag.mhd.Utils;
+import ch.bfh.ti.i4mi.mag.mhd.iti67.IdRequestConverter;
+import ch.bfh.ti.i4mi.mag.mhd.iti67.Iti67RequestConverter;
 import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- *
+ * IHE PDQM: ITI-78 Patient Demographics Query
  */
 @Slf4j
 @Component
-class Iti83RouteBuilder extends RouteBuilder {
+public class Iti78RouteBuilder extends RouteBuilder {
 
 	private final Config config;
 	
 	@Autowired
-	Iti83ResponseConverter converter;
+	Iti78ResponseConverter converter;
 	
-	public Iti83RouteBuilder(final Config config) {
+	public Iti78RouteBuilder(final Config config) {
 		super();
 	    this.config = config;
-		log.debug("Iti83RouteBuilder initialized");
+		log.debug("Iti78RouteBuilder initialized");
 	}
 
 	@Override
 	public void configure() throws Exception {
-		log.debug("Iti83RouteBuilder configure");
+		log.debug("Iti78RouteBuilder configure");
 		
-		 final String xds45Endpoint = String.format("pixv3-iti45://%s" +
-	                "?secure=%s", this.config.getIti45HostUrl(), this.config.isPixHttps() ? "true" : "false")
+		 final String xds47Endpoint = String.format("pdqv3-iti47://%s" +
+	                "?secure=%s", this.config.getIti47HostUrl(), this.config.isPixHttps() ? "true" : "false")
 	                +
 	                //"&sslContextParameters=#pixContext" +
 	                "&audit=false" +
@@ -60,14 +64,21 @@ class Iti83RouteBuilder extends RouteBuilder {
 	                "&outInterceptors=#soapRequestLogger" + 
 	                "&outFaultInterceptors=#soapRequestLogger";
 		
-		from("pixm-iti83:translation?audit=true&auditContext=#myAuditContext").routeId("pixm-adapter")
+		from("pdqm-iti78:translation?audit=true&auditContext=#myAuditContext").routeId("pdqm-adapter")
 				// pass back errors to the endpoint
 				.errorHandler(noErrorHandler())
 				.process(AuthTokenConverter.addWsHeader())
-				.bean(Iti83RequestConverter.class)
+				.choice()									
+					.when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())
+					   .bean(Iti78RequestConverter.class, "iti78ToIti47Converter")  
+	                .endChoice()
+	                .when(header("FhirHttpUri").isNotNull())
+	                   .bean(Iti78RequestConverter.class, "idConverter")
+	                .endChoice()
+                .end()								
 				.doTry()
-				  .to(xds45Endpoint)										
-				  .process(translateToFhir(converter , byte[].class))
+				  .to(xds47Endpoint)											
+			      .process(translateToFhir(converter , byte[].class))
 				.doCatch(javax.xml.ws.soap.SOAPFaultException.class)
 				  .setBody(simple("${exception}"))
 				  .bean(BaseResponseConverter.class, "errorFromException")

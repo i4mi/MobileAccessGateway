@@ -123,6 +123,11 @@
 			<groupId>org.openehealth.ipf.platform-camel</groupId>
 			<artifactId>ipf-platform-camel-ihe-fhir-r4-mhd</artifactId>
 		</dependency>
+		
+		<dependency>
+           <groupId>org.openehealth.ipf.platform-camel</groupId>
+           <artifactId>ipf-platform-camel-ihe-fhir-stu3-pixpdq</artifactId>        
+        </dependency>
 
 		<dependency>
 			<groupId>org.openehealth.ipf.platform-camel</groupId>
@@ -149,6 +154,12 @@
 			<groupId>net.ihe.gazelle</groupId>
 			<artifactId>hl7v3-code-jar</artifactId>
 			<version>1.3.7</version>
+			<exclusions>
+				<exclusion>
+					<groupId>saxon9he</groupId>
+					<artifactId>net.sf.saxon</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -195,7 +206,11 @@
           <artifactId>ehcache</artifactId>        
         </dependency>
                 
-      
+        <dependency>
+          <groupId>net.sf.saxon</groupId>
+          <artifactId>Saxon-HE</artifactId>
+          <version>10.2</version>
+        </dependency>
         <!-- 
         <dependency>
     <groupId>xerces</groupId>
