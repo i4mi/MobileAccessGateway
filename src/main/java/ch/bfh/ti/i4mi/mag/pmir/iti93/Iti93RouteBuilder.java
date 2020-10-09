@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
 import ch.bfh.ti.i4mi.mag.pmir.iti83.Iti83ResponseConverter;
 import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
@@ -70,9 +71,14 @@ class Iti93RouteBuilder extends RouteBuilder {
                 .process(AuthTokenConverter.addWsHeader())
                 .process(Utils.keepBody())
                 .bean(Iti93RequestConverter.class)
-                .to(xds44Endpoint)
-                .process(Utils.keptBodyToHeader())
-                .process(translateToFhir(converter , byte[].class));
+                .doTry()
+                  .to(xds44Endpoint)
+                  .process(Utils.keptBodyToHeader())
+                  .process(translateToFhir(converter , byte[].class))
+            	.doCatch(javax.xml.ws.soap.SOAPFaultException.class)
+				  .setBody(simple("${exception}"))
+				  .bean(BaseResponseConverter.class, "errorFromException")
+				.end();
                 
     }
 

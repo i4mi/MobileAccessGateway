@@ -48,8 +48,12 @@ public class PatientReferenceCreator {
 	public Reference createPatientReference(String system, String value) {
 		Reference result = new Reference();
 		//result.setReference(config.getUriPatientEndpoint()+"?identifier=urn:oid:"+system+"|"+value);		
-		result.setReference(config.getUriPatientEndpoint()+"/"+system+"-"+value);
+		result.setReference(config.getUriPatientEndpoint()+"/"+createPatientId(system,value));
 		return result;
+	}
+	
+	public String createPatientId(String system, String value) {
+		return system+"-"+value;
 	}
 	
 	public Identifiable resolvePatientReference(String reference) {

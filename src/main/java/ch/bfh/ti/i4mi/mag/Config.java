@@ -112,6 +112,12 @@ public class Config {
      */
 	@Value("${mag.pix.iti-44.url}")
     private String iti44HostUrl;// = iti45HostUrl;
+	
+	/**
+	 * URL of ITI-47 endpoint
+	 */
+	@Value("${mag.pix.iti-47.url}")
+    private String iti47HostUrl;
     
     /**
      * sender OID used when sending requests
