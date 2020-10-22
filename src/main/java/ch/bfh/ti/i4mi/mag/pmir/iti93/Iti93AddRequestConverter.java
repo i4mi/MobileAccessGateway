@@ -48,6 +48,7 @@ import net.ihe.gazelle.hl7v3.coctmt090003UV01.COCTMT090003UV01Organization;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03ContactParty;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03Organization;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03Person;
+import net.ihe.gazelle.hl7v3.datatypes.AD;
 import net.ihe.gazelle.hl7v3.datatypes.BL;
 import net.ihe.gazelle.hl7v3.datatypes.CD;
 import net.ihe.gazelle.hl7v3.datatypes.CE;
@@ -253,6 +254,7 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
                 for (ContactPoint contactPoint : managingOrg.getTelecom()) {
                 	contactParty.addTelecom(transform(contactPoint));
 				}		
+                contactParty.setAddr(new ArrayList<AD>());
                 for (Address address : managingOrg.getAddress()) {
                 	contactParty.addAddr(transform(address));
                 }

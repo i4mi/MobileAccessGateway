@@ -17,7 +17,9 @@
 package ch.bfh.ti.i4mi.mag.pmir.iti78;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 
 import javax.xml.bind.JAXBException;
 
@@ -27,15 +29,18 @@ import org.openehealth.ipf.commons.ihe.fhir.iti78.Iti78SearchParameters;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.pmir.PMIRRequestConverter;
 import net.ihe.gazelle.hl7v3.datatypes.AD;
@@ -90,6 +95,11 @@ public class Iti78RequestConverter extends PMIRRequestConverter {
 	
 	  public IVXBTS transform(DateParam date) {
 		   DateTimeType dt = new DateTimeType(date.getValueAsString());
+		   return transform(dt);			
+	  }
+	  
+	  public IVXBTS transform(Date date) {
+		   DateTimeType dt = new DateTimeType(date);
 		   return transform(dt);			
 	  }
 	  	 
@@ -185,44 +195,93 @@ public class Iti78RequestConverter extends PMIRRequestConverter {
 		  // livingSubjectBirthTime
 		  DateAndListParam birthdate = parameters.getBirthDate();
 		  if (birthdate != null) {
+			  IVLTS ivlts = new IVLTS();
 			  for (DateOrListParam birthdateOr : birthdate.getValuesAsQueryTokens()) {
-				  for (DateParam birthdateParam : birthdateOr.getValuesAsQueryTokens()) {
-			
-					  PRPAMT201306UV02LivingSubjectBirthTime livingSubjectBirthTime = new PRPAMT201306UV02LivingSubjectBirthTime();
-					  IVLTS ivlts = new IVLTS();
+				  for (DateParam birthdateParam : birthdateOr.getValuesAsQueryTokens()) {	
 					  
-					  IVXBTS ivxbts = transform(birthdateParam);
-					  switch(birthdateParam.getPrefix()) {
-						case APPROXIMATE:
+					  Date lDate = null;
+					  Date hDate = null;
+					  TemporalPrecisionEnum precision = birthdateParam.getPrecision();
+					  ParamPrefixEnum prefix = birthdateParam.getPrefix();
+												
+					  Calendar cal = Calendar.getInstance();
+					  cal.setTime(birthdateParam.getValue());
+						
+						switch (precision) {					  
+						case SECOND: 
+							cal.set(Calendar.MILLISECOND, 0);
+							lDate = cal.getTime();
+							cal.set(Calendar.MILLISECOND, 1000);
+							hDate = cal.getTime();
 							break;
-						case ENDS_BEFORE:
-							ivlts.setHigh(ivxbts);
+						case MINUTE: 
+							cal.set(Calendar.MILLISECOND, 0);
+							cal.set(Calendar.SECOND, 0);
+							lDate = cal.getTime();
+							cal.add(Calendar.MINUTE, 1);
+							hDate = cal.getTime();
 							break;
-						case EQUAL:
+						case DAY: 
+							cal.set(Calendar.MILLISECOND, 0);
+							cal.set(Calendar.SECOND, 0);
+							cal.set(Calendar.MINUTE, 0);
+							cal.set(Calendar.HOUR_OF_DAY, 0);
+							lDate = cal.getTime();
+							cal.add(Calendar.DAY_OF_MONTH, 1);
+							hDate = cal.getTime();
 							break;
-						case GREATERTHAN:
+						case MONTH: 
+							int month = cal.get(Calendar.MONTH);
+							int year = cal.get(Calendar.YEAR);
+							cal.set(year, month, 1, 0, 0, 0);
+							lDate = cal.getTime();
+							cal.add(Calendar.MONTH, 1);
+							hDate = cal.getTime();
 							break;
-						case GREATERTHAN_OR_EQUALS:
+						case YEAR: 
+							year = cal.get(Calendar.YEAR);
+							cal.set(year, 0, 1, 0, 0, 0);
+							lDate = cal.getTime();
+							cal.add(Calendar.YEAR, 1);
+							hDate = cal.getTime();
 							break;
-						case LESSTHAN:
-							break;
-						case LESSTHAN_OR_EQUALS:
-							break;
-						case NOT_EQUAL:
-							break;
-						case STARTS_AFTER:
-							ivlts.setLow(ivxbts);
-							break;
-						default:
-							break;					  
-					  }
-					  
-					  livingSubjectBirthTime.addValue(ivlts);
-					  livingSubjectBirthTime.setSemanticsText(ST("LivingSubject.birthTime"));
-					  parameterList.addLivingSubjectBirthTime(livingSubjectBirthTime);
+						case MILLI:
+						default: 
+		                    lDate = cal.getTime();
+		                    cal.add(Calendar.MILLISECOND, 1);
+		                    hDate = cal.getTime();
+		                    break;
+						}
+					  					  					  	
+						  switch (prefix) {
+							case GREATERTHAN: ivlts.setLow(transform(hDate));break;
+							case LESSTHAN: ivlts.setHigh(transform(lDate));break;
+							case GREATERTHAN_OR_EQUALS:							
+								ivlts.setLow(transform(lDate));break;								
+							case LESSTHAN_OR_EQUALS:
+								ivlts.setHigh(transform(hDate));break;													
+							case STARTS_AFTER:					
+								ivlts.setLow(transform(hDate));break;								
+							case ENDS_BEFORE:
+								ivlts.setHigh(transform(lDate));break;																
+							case EQUAL:
+							case APPROXIMATE:
+								ivlts.setLow(transform(lDate));
+								ivlts.setHigh(transform(hDate));								
+								break;
+							//case NOT_EQUAL:
+							//									
+							default:throw new InvalidRequestException("Date operation not supported.");
+							}													 
 					  
 				  }
 			  }
+			  
+			  PRPAMT201306UV02LivingSubjectBirthTime livingSubjectBirthTime = new PRPAMT201306UV02LivingSubjectBirthTime();					  
+			  livingSubjectBirthTime.addValue(ivlts);
+			  livingSubjectBirthTime.setSemanticsText(ST("LivingSubject.birthTime"));
+			  parameterList.addLivingSubjectBirthTime(livingSubjectBirthTime);
+
 		  }
 
 		  // given, family -> livingSubjectName

@@ -75,10 +75,10 @@ public class Iti65ResponseConverter extends BaseResponseConverter implements ToF
 	              response.setLocation(config.getUriMagXdsRetrieve() + "?uniqueId=" + uniqueId
                      + "&repositoryUniqueId=" + config.getRepositoryUniqueId());	            
 	            } else if (requestEntry.getResource() instanceof DocumentManifest) {
-	            	String id = config.getSchemeMapper().getScheme(((DocumentManifest) requestEntry.getResource()).getMasterIdentifier().getValue());
+	            	String id = config.getSchemeMapper().getScheme(((DocumentManifest) requestEntry.getResource()).getId());
 	            	response.setLocation("DocumentManifest/"+id);
 	            } else if (requestEntry.getResource() instanceof DocumentReference) {
-	            	String id = config.getSchemeMapper().getScheme(((DocumentReference) requestEntry.getResource()).getMasterIdentifier().getValue());
+	            	String id = config.getSchemeMapper().getScheme(((DocumentReference) requestEntry.getResource()).getId());
 	            	response.setLocation("DocumentReference/"+id);	              
 	            }
 	            responseBundle.addEntry()
