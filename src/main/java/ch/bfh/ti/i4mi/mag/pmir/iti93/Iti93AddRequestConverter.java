@@ -196,6 +196,7 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 			        }
 		    	}
 		        
+		    	if (in.hasAddress()) patientPerson.setAddr(new ArrayList<AD>());
 		        for (Address address : in.getAddress()) {
 					patientPerson.addAddr(transform(address));
 		        }
@@ -254,7 +255,7 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
                 for (ContactPoint contactPoint : managingOrg.getTelecom()) {
                 	contactParty.addTelecom(transform(contactPoint));
 				}		
-                contactParty.setAddr(new ArrayList<AD>());
+                if (managingOrg.hasAddress()) contactParty.setAddr(new ArrayList<AD>());
                 for (Address address : managingOrg.getAddress()) {
                 	contactParty.addAddr(transform(address));
                 }
