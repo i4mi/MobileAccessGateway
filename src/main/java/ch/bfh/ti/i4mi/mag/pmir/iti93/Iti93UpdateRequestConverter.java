@@ -45,6 +45,7 @@ import net.ihe.gazelle.hl7v3.coctmt150002UV01.COCTMT150002UV01Organization;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03ContactParty;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03Organization;
 import net.ihe.gazelle.hl7v3.coctmt150003UV03.COCTMT150003UV03Person;
+import net.ihe.gazelle.hl7v3.datatypes.AD;
 import net.ihe.gazelle.hl7v3.datatypes.BL;
 import net.ihe.gazelle.hl7v3.datatypes.CD;
 import net.ihe.gazelle.hl7v3.datatypes.CE;
@@ -209,6 +210,7 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 			        }
 		    	}
 		        
+		    	if (in.hasAddress()) patientPerson.setAddr(new ArrayList<AD>());
 		        for (Address address : in.getAddress()) {
 					patientPerson.addAddr(transform(address));
 		        }
@@ -266,6 +268,8 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
                 for (ContactPoint contactPoint : managingOrg.getTelecom()) {
                 	contactParty.addTelecom(transform(contactPoint));
 				}		
+                
+                if (managingOrg.hasAddress()) contactParty.setAddr(new ArrayList<AD>());
                 for (Address address : managingOrg.getAddress()) {
                 	contactParty.addAddr(transform(address));
                 }
