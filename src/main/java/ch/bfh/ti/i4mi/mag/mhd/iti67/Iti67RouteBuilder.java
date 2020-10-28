@@ -57,16 +57,29 @@ class Iti67RouteBuilder extends RouteBuilder {
                 "&inFaultInterceptors=#soapResponseLogger"+
                 "&outInterceptors=#soapRequestLogger" + 
                 "&outFaultInterceptors=#soapRequestLogger";
+        final String pharm1Endpoint = String.format("cmpd-pharm1://%s/xds/pharm1" +
+                "?secure=%s", this.config.getIti18HostUrl(), this.config.isHttps() ? "true" : "false")
+                +
+                "&audit=true" +
+                "&auditContext=#myAuditContext" +
+         //       "&sslContextParameters=#pixContext" +
+                "&inInterceptors=#soapResponseLogger" + 
+                "&inFaultInterceptors=#soapResponseLogger"+
+                "&outInterceptors=#soapRequestLogger" + 
+                "&outFaultInterceptors=#soapRequestLogger";
+        final boolean isPharm = config.isUseCmpdPharm();
+        final String endPoint = (isPharm ? pharm1Endpoint : xds18Endpoint); 
+        
         from("mhd-iti67:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentreference-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 .process(AuthTokenConverter.addWsHeader()).choice()
                .when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())
                    .bean(Utils.class,"searchParameterToBody")                
-                   .bean(Iti67RequestConverter.class).endChoice()
+                   .bean((isPharm ? Pharm1RequestConverter.class : Iti67RequestConverter.class)).endChoice()
                .when(header("FhirHttpUri").isNotNull())
                    .bean(IdRequestConverter.class).endChoice().end()
-               .to(xds18Endpoint)
+               .to(endPoint)
                .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class));
     }
 }
