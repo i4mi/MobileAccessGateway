@@ -65,8 +65,10 @@ class Iti68RouteBuilder extends RouteBuilder {
                 // translate, forward, translate back
                 .bean(Iti68RequestConverter.class)                
                 .to(xds43Endpoint)
-                .bean(Iti68ResponseConverter.class);
-                //.process(Utils.retrievedDocumentSetToHttResponse());
+                .bean(Iti68ResponseConverter.class,"retrievedDocumentSetToHttResponse"); 
+                // if removing retrievedDocumentSetToHttResponse its given an AmbiguousMethodCallException with two same methods??
+                // public java.lang.Object ch.bfh.ti.i4mi.mag.mhd.iti68.Iti68ResponseConverter.retrievedDocumentSetToHttResponse(org.openehealth.ipf.commons.ihe.xds.core.responses.RetrievedDocumentSet,java.util.Map) throws java.io.IOException,
+                // public java.lang.Object ch.bfh.ti.i4mi.mag.mhd.iti68.Iti68ResponseConverter.retrievedDocumentSetToHttResponse(org.openehealth.ipf.commons.ihe.xds.core.responses.RetrievedDocumentSet,java.util.Map) throws java.io.IOException] 
     }
 
 }
