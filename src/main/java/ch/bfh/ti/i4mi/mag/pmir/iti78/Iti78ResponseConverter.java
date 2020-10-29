@@ -48,6 +48,7 @@ import org.springframework.stereotype.Component;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
+import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import net.ihe.gazelle.hl7v3.coctmt030007UV.COCTMT030007UVPerson;
 import net.ihe.gazelle.hl7v3.datatypes.AD;
@@ -91,6 +92,9 @@ public class Iti78ResponseConverter implements ToFhirTranslator<byte[]> {
 	@Autowired
 	PatientReferenceCreator patientRefCreator;
 	
+	@Autowired
+	SchemeMapper schemeMapper;
+	
 	public OperationOutcome error(IssueType type, String diagnostics) {
 		OperationOutcome result = new OperationOutcome();
 		
@@ -100,6 +104,10 @@ public class Iti78ResponseConverter implements ToFhirTranslator<byte[]> {
 		issue.setDiagnostics(diagnostics);
 		return result;
 	}
+	
+	public String getSystem(String schemeName) {
+    	return schemeMapper.getSystem(schemeName);        
+    }
 	
 	public void errorFromException(Exception e) {
 		throw new UnclassifiedServerFailureException(500, e.getMessage());		
@@ -140,7 +148,7 @@ public class Iti78ResponseConverter implements ToFhirTranslator<byte[]> {
 	public CodeableConcept transform(CE in) {
 		if (in == null) return null;
 		CodeableConcept cc = new CodeableConcept();
-		cc.addCoding().setSystem(in.getCodeSystem()).setCode(in.getCode()).setDisplay(in.getDisplayName());
+		cc.addCoding().setSystem(getSystem(in.getCodeSystem())).setCode(in.getCode()).setDisplay(in.getDisplayName());
 		return cc;
 	}
 	
@@ -229,7 +237,7 @@ public class Iti78ResponseConverter implements ToFhirTranslator<byte[]> {
 			boolean idadded = false;
 			
 			for (II patientId : patient.getId()) {
-				result.addIdentifier().setSystem(patientId.getRoot()).setValue(patientId.getExtension());
+				result.addIdentifier().setSystem(getSystem(patientId.getRoot())).setValue(patientId.getExtension());
 				
 				if (!idadded) {
 					result.setId(patientRefCreator.createPatientId(patientId.getRoot(), patientId.getExtension()));
