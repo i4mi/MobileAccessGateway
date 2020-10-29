@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.mhd.iti67;
+package ch.bfh.ti.i4mi.mag.mhd.pharm5;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.camel.Body;
-import org.openehealth.ipf.commons.ihe.fhir.iti67.Iti67SearchParameters;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntryType;
@@ -41,26 +44,26 @@ import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
  * @author Oliver Egger
  *
  */
-public class Pharm1RequestConverter extends BaseRequestConverter {
+public class Pharm5RequestConverter extends BaseRequestConverter {
 
     /**
-     * convert ITI-67 request to CMPD Pharm-1
+     * convert PHARM-5 request to CMPD Pharm-1
      * 
      * @param searchParameter
      * @return
      */
-    public QueryRegistry searchParameterIti67ToFindMedicationListQuery(@Body Iti67SearchParameters searchParameter) {
+    public QueryRegistry operationFindMedicationListToFindMedicationListQuery(@Body Parameters searchParameter) {
 
         boolean getLeafClass = true;
 
         FindMedicationListQuery query = new FindMedicationListQuery();
 
         // status --> $XDSDocumentEntryStatus
-        TokenOrListParam status = searchParameter.getStatus();
-        if (status != null) {
+        List<Type> statusTypes = searchParameter.getParameters(Pharm5Constants.PHARM5_STATUS);
+        if (statusTypes != null) {
             List<AvailabilityStatus> availabilites = new ArrayList<AvailabilityStatus>();
-            for (TokenParam statusToken : status.getValuesAsQueryTokens()) {
-                String tokenValue = statusToken.getValue();
+            for (Type status : statusTypes) {
+                String tokenValue = status.primitiveValue();
                 if (tokenValue.equals("current"))
                     availabilites.add(AvailabilityStatus.APPROVED);
                 else if (tokenValue.equals("superseded"))
@@ -70,30 +73,19 @@ public class Pharm1RequestConverter extends BaseRequestConverter {
         }
 
         // patient or patient.identifier --> $XDSDocumentEntryPatientId
-        TokenParam tokenIdentifier = searchParameter.getPatientIdentifier();
-        if (tokenIdentifier != null) {
-            String system = getScheme(tokenIdentifier.getSystem());
-            if (system == null)
+        Type patientIdentifier = searchParameter.getParameter(Pharm5Constants.PHARM5_PATIENT_IDENTIFIER);
+        if (patientIdentifier != null) {
+            Identifier patIdentifier = (Identifier) patientIdentifier; 
+            String system = patIdentifier.getSystem();
+            if (system == null || !system.startsWith("urn:oid:"))
                 throw new InvalidRequestException("Missing OID for patient");
-            query.setPatientId(new Identifiable(tokenIdentifier.getValue(), new AssigningAuthority(system)));
-        }
-        ReferenceParam patientRef = searchParameter.getPatientReference();
-        if (patientRef != null) {
-            Identifiable id = transformReference(patientRef.getValue());
-            query.setPatientId(id);
+            query.setPatientId(new Identifiable(patIdentifier.getValue(), new AssigningAuthority(system.substring(8))));
         }
 
-        // format --> $XDSDocumentEntryFormatCode
-        TokenOrListParam formats = searchParameter.getFormat();
-        query.setFormatCodes(codesFromTokens(formats));
-
-        // add on-demand documents also to the query, maybe make it configurable
-        if (true) {
-            List<DocumentEntryType> documentEntryTypes = new ArrayList<DocumentEntryType>();
-            documentEntryTypes.add(DocumentEntryType.ON_DEMAND);
-            documentEntryTypes.add(DocumentEntryType.STABLE);
-            query.setDocumentEntryTypes(documentEntryTypes);
-        }
+        List<DocumentEntryType> documentEntryTypes = new ArrayList<DocumentEntryType>();
+        documentEntryTypes.add(DocumentEntryType.ON_DEMAND);
+        documentEntryTypes.add(DocumentEntryType.STABLE);
+        query.setDocumentEntryTypes(documentEntryTypes);
 
         final QueryRegistry queryRegistry = new QueryRegistry(query);
         queryRegistry.setReturnType((getLeafClass) ? QueryReturnType.LEAF_CLASS : QueryReturnType.OBJECT_REF);

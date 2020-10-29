@@ -66,11 +66,10 @@ public class Config {
 	@Value("${mag.xds.iti-18.url:}")
     private String iti18HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
     /**
-     * Use if IHE CMPD PHARM instead of XDS (PHARM-1 instead of ITI-18)
+     * URL of ITI-18 endpoint (
      */
-    @Value("${mag.xds.cmpd-pharm:false}")
-    private boolean useCmpdPharm;
-
+    @Value("${mag.xds.pharm-5.url:}")
+    private String pharm5HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
     /**
      * URL of ITI-43 endpoint
      */
