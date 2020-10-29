@@ -330,12 +330,12 @@ public class Iti78RequestConverter extends PMIRRequestConverter {
 				
 					  if (identifier.getValue() == null || identifier.getValue().length()==0) {
 						  PRPAMT201306UV02OtherIDsScopingOrganization otherIDsScopingOrganization = new PRPAMT201306UV02OtherIDsScopingOrganization();
-						  otherIDsScopingOrganization.addValue(new II(identifier.getSystem(), null));
+						  otherIDsScopingOrganization.addValue(new II(getScheme(identifier.getSystem()), null));
 						  otherIDsScopingOrganization.setSemanticsText(ST("OtherIDs.scopingOrganization.id"));
 						  parameterList.addOtherIDsScopingOrganization(otherIDsScopingOrganization );					  
 					  } else {
 						  PRPAMT201306UV02LivingSubjectId livingSubjectId = new PRPAMT201306UV02LivingSubjectId();
-						  livingSubjectId.addValue(new II(identifier.getSystem(),identifier.getValue()));
+						  livingSubjectId.addValue(new II(getScheme(identifier.getSystem()),identifier.getValue()));
 						  livingSubjectId.setSemanticsText(ST("LivingSubject.id"));
 						  parameterList.addLivingSubjectId(livingSubjectId);
 					  }
