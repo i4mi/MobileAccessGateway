@@ -87,6 +87,19 @@ public class TokenEndpoint {
 				
 	}
 	
+	public OAuth2TokenResponse handleFromIdp(@Body String assertion, @Header("scope") String scope) throws UnsupportedEncodingException, AuthException {
+											
+		String encoded = Base64.getEncoder().encodeToString(assertion.getBytes("UTF-8"));
+		
+		OAuth2TokenResponse result = new OAuth2TokenResponse();
+		result.setAccess_token(encoded);
+		result.setExpires_in(defaultTimeout);
+		result.setScope(scope);
+		result.setToken_type("IHE-SAML" /*request.getToken_type()*/);
+		return result;
+				
+	}
+	
 	public ErrorResponse handleError(@Body AuthException in) {
 		ErrorResponse response = new ErrorResponse();
 		response.setError(in.getError());

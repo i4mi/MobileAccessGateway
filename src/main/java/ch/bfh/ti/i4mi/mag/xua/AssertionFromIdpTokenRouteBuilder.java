@@ -23,13 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * IUA: ITI-71 Define route for Get-X-User-Assertion
- *
- */
 @Component
-public class Iti71RouteBuilder extends RouteBuilder {
-
+public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
 	@Value("${mag.iua.ap.url}")
 	private String assertionEndpointUrl;
 	
@@ -45,33 +40,26 @@ public class Iti71RouteBuilder extends RouteBuilder {
 		final String assertionEndpoint = String.format("cxf://%s?dataFormat=CXF_MESSAGE&wsdlURL=%s",
 				assertionEndpointUrl, wsdl);
 			
-		from("servlet://authorize?matchOnUriPrefix=true").routeId("iti71")	
-		.doTry()
-		    .setHeader("oauthrequest").method(converter, "buildAuthenticationRequest")
-		    .bean(AuthRequestConverter.class, "buildAssertionRequest")
-			.bean(Iti40RequestGenerator.class, "buildAssertion")
-			
-			.removeHeaders("*","oauthrequest")
+		from("servlet://assertion?httpMethodRestrict=POST&matchOnUriPrefix=true").routeId("assertionFromIdpToken")	
+		.doTry()		    
+		    .bean(AuthRequestConverter.class, "buildAssertionRequestFromIdp")
+			.bean(Iti40RequestGenerator.class, "buildAssertion")			
+			.removeHeaders("*", "scope")
 			.setHeader(CxfConstants.OPERATION_NAME,
 			        constant("Issue"))
 			.setHeader(CxfConstants.OPERATION_NAMESPACE,
 			        constant("http://docs.oasis-open.org/ws-sx/ws-trust/200512/wsdl"))			
 			.to(assertionEndpoint)		
 			.bean(AssertionExtractor.class)
-			.removeHeaders("*","oauthrequest")
-			.setHeader("Location").method(AuthResponseConverter.class, "handle")
-			.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(302))
-			.removeHeaders("oauthrequest")
-			.setBody(constant(null))
-		.doCatch(AuthException.class)	
-		    .setBody(simple("${exception}"))
-			.setHeader("Location").method(AuthResponseConverter.class, "handleerror")
-			.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(302))
-			.setBody(constant(null))
-		.end();
-		
-		
+			.bean(TokenEndpoint.class, "handleFromIdp")	
+			
+	    .doCatch(AuthException.class)
+		    .setBody(simple("${exception}"))		    
+		    .bean(TokenEndpoint.class, "handleError")
+		    .setHeader(Exchange.HTTP_RESPONSE_CODE, simple("${exception.status}"))
+		.end()			
+		.removeHeaders("*")
+		.marshal().json();				
 	}
 
-	
 }
