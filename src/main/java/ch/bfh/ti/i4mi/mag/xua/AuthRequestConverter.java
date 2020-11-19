@@ -20,11 +20,13 @@ import java.util.Map;
 
 import javax.ws.rs.BadRequestException;
 
+import org.apache.camel.Body;
 import org.apache.camel.Header;
 import org.apache.camel.Headers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -33,6 +35,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
  * @author alexander kreutz
  *
  */
+@Component
 public class AuthRequestConverter {
 
 	public final static String SCOPE_PURPOSEOFUSE = "purposeOfUse/";
@@ -80,8 +83,15 @@ public class AuthRequestConverter {
 		if (auth == null) throw new AuthException(400, "access_denied", "authentication failed");
 		String authorization = auth.getPrincipal().toString();
 						
+		return buildAssertionRequestFromIdp(authorization, request.getScope());		
+	}
+	
+	public AssertionRequest buildAssertionRequestFromIdp(@Body String authorization, @Header("scope") String scope) throws AuthException {
+        								
+		if (authorization == null) throw new AuthException(400, "invalid_request", "missing IDP token");
+		if (scope == null || scope.length()==0) throw new AuthException(400, "invalid_request", "missing scope parameter");
 		AssertionRequest result = new AssertionRequest();		
-		String scopes[] = request.getScope().split("\\s");
+		String scopes[] = scope.split("\\s");
 		for (String scopePart : scopes) {
 		  if (scopePart.startsWith(SCOPE_PURPOSEOFUSE)) result.setPurposeOfUse(scopePart.substring(SCOPE_PURPOSEOFUSE.length()));
 		  if (scopePart.startsWith(RESOURCE_ID)) result.setResourceId(scopePart.substring(RESOURCE_ID.length()));
