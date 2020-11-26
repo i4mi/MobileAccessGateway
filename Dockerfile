@@ -13,6 +13,6 @@ ENTRYPOINT java -Xmx1G -Xshareclasses -Xquickstart -jar /app.jar
 
 
 # export PROJECT_ID="$(gcloud config get-value project -q)"
-# docker build -t eu.gcr.io/${PROJECT_ID}/mag:v013 .
-# docker push eu.gcr.io/${PROJECT_ID}/mag:v013
-# docker run -d --name mag  -p 9090:9090 --memory="5G" --cpus="1" eu.gcr.io/fhir-ch/mag:v013
+# docker build -t eu.gcr.io/${PROJECT_ID}/mag:v016 .
+# docker push eu.gcr.io/${PROJECT_ID}/mag:v016
+# docker run -d --name mag  -p 9090:9090 --memory="5G" --cpus="1" eu.gcr.io/fhir-ch/mag:v016

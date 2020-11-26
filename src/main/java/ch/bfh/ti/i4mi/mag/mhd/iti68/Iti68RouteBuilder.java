@@ -47,7 +47,7 @@ class Iti68RouteBuilder extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         log.debug("Iti68RouteBuilder configure");
-        final String xds43Endpoint = String.format("xds-iti43://%s/xds/iti43" +
+        final String xds43Endpoint = String.format("xds-iti43://%s" +
                 "?secure=%s", this.config.getIti43HostUrl(), this.config.isHttps() ? "true" : "false")
                 +
                 "&audit=true" +
@@ -65,8 +65,10 @@ class Iti68RouteBuilder extends RouteBuilder {
                 // translate, forward, translate back
                 .bean(Iti68RequestConverter.class)                
                 .to(xds43Endpoint)
-                .bean(Iti68ResponseConverter.class);
-                //.process(Utils.retrievedDocumentSetToHttResponse());
+                .bean(Iti68ResponseConverter.class,"retrievedDocumentSetToHttResponse"); 
+                // if removing retrievedDocumentSetToHttResponse its given an AmbiguousMethodCallException with two same methods??
+                // public java.lang.Object ch.bfh.ti.i4mi.mag.mhd.iti68.Iti68ResponseConverter.retrievedDocumentSetToHttResponse(org.openehealth.ipf.commons.ihe.xds.core.responses.RetrievedDocumentSet,java.util.Map) throws java.io.IOException,
+                // public java.lang.Object ch.bfh.ti.i4mi.mag.mhd.iti68.Iti68ResponseConverter.retrievedDocumentSetToHttResponse(org.openehealth.ipf.commons.ihe.xds.core.responses.RetrievedDocumentSet,java.util.Map) throws java.io.IOException] 
     }
 
 }

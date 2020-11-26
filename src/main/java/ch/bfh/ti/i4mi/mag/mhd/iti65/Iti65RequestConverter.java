@@ -43,6 +43,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
@@ -212,7 +213,8 @@ public class Iti65RequestConverter {
 	 */
 	public LocalizedString localizedString(String string) {
 		if (string==null) return null;
-		return new LocalizedString(string);
+		    // FIX FOR CARA
+		    return new LocalizedString(string,"en","UTF-8");
 	}
 	
 	/**
@@ -489,11 +491,18 @@ public class Iti65RequestConverter {
 		submissionSet.setPatientId(transformReferenceToIdentifiable(ref, manifest));
 		
 		// Author
-		if (manifest.hasAuthor()) {
+        Extension authorRoleExt = manifest.getExtensionByUrl("http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-author-authorrole");
+		if (manifest.hasAuthor() || (authorRoleExt!=null)) {
+		    Identifiable identifiable = null;
 			Reference author = manifest.getAuthorFirstRep();
-			submissionSet.setAuthor(transformAuthor(author, manifest.getContained()));
+            if (authorRoleExt!=null) {
+                Coding coding = authorRoleExt.castToCoding(authorRoleExt.getValue());
+                if (coding !=null) {
+                    identifiable = new Identifiable(coding.getCode(), new AssigningAuthority(noPrefix(coding.getSystem())));
+                }
+            }
+			submissionSet.setAuthor(transformAuthor(author, manifest.getContained(), identifiable));
 		}
-				   				 
 		 // recipient	SubmissionSet.intendedRecipient		
 		for (Reference recipientRef : manifest.getRecipient()) {
 			Resource res = findResource(recipientRef, manifest.getContained());
@@ -584,7 +593,7 @@ public class Iti65RequestConverter {
         // authorSpeciality, authorTelecommunication -> author Reference(Practitioner|
         // PractitionerRole| Organization| Device| Patient| RelatedPerson) [0..*]   		
 		for (Reference authorRef : reference.getAuthor()) {
-		   entry.getAuthors().add(transformAuthor(authorRef, reference.getContained()));
+		   entry.getAuthors().add(transformAuthor(authorRef, reference.getContained(),null));
 		}
 		
         // legalAuthenticator -> authenticator Note 1
@@ -835,23 +844,35 @@ public class Iti65RequestConverter {
 	 * @param contained
 	 * @return
 	 */
-	public Author transformAuthor(Reference author, List<Resource> contained) {
-		if (author == null || author.getReference() == null) return null;
+	public Author transformAuthor(Reference author, List<Resource> contained, Identifiable authorRole) {
+		if (author == null || author.getReference() == null) {
+		    if (authorRole!=null) {
+	            Author result = new Author();
+	            result.getAuthorRole().add(authorRole);
+	            return result;
+		    }
+		    return null;
+		}
 		Resource authorObj = findResource(author, contained);
-		
 		if (authorObj instanceof Practitioner) {
 			Practitioner practitioner = (Practitioner) authorObj;
 			Author result = new Author();
 			result.setAuthorPerson(transform((Practitioner) authorObj));
 			for (ContactPoint contactPoint : practitioner.getTelecom()) result.getAuthorTelecom().add(transform(contactPoint));
-			result.getAuthorRole().add(new Identifiable("HCP", new AssigningAuthority("2.16.756.5.30.1.127.3.10.1.41")));
+			if (authorRole==null) {
+			    authorRole = new Identifiable("HCP", new AssigningAuthority("2.16.756.5.30.1.127.3.10.1.41"));
+			}
+			result.getAuthorRole().add(authorRole);
 			return result;
 		} else if (authorObj instanceof Patient) {
 			Patient patient = (Patient) authorObj;
 			Author result = new Author();
 			result.setAuthorPerson(transform(patient));
 			for (ContactPoint contactPoint : patient.getTelecom()) result.getAuthorTelecom().add(transform(contactPoint));
-			result.getAuthorRole().add(new Identifiable("PAT", new AssigningAuthority("2.16.756.5.30.1.127.3.10.1.41")));
+            if (authorRole==null) {
+                authorRole = new Identifiable("PAT", new AssigningAuthority("2.16.756.5.30.1.127.3.10.1.41"));
+            }
+            result.getAuthorRole().add(authorRole);
 			return result;
 		} else if (authorObj instanceof PractitionerRole) { 
 			Author result = new Author();

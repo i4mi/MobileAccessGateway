@@ -42,7 +42,7 @@ import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
  */
 public class Iti68ResponseConverter extends BaseResponseConverter {
 
-	public Object retrievedDocumentSetToHttResponse(@Body RetrievedDocumentSet retrievedDocumentSet, @Headers Map<String, Object> headers) throws IOException {
+	public static Object retrievedDocumentSetToHttResponse(@Body RetrievedDocumentSet retrievedDocumentSet, @Headers Map<String, Object> headers) throws IOException {
                 		
             if (Status.SUCCESS.equals(retrievedDocumentSet.getStatus())) {
                 List<RetrievedDocument> documentResponses = retrievedDocumentSet.getDocuments();

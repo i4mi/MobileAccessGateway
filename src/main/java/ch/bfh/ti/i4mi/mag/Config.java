@@ -57,34 +57,38 @@ public class Config {
    /**
     * Use HTTPS for XDS ?
     */
-	@Value("${mag.xds.https}")
-    private boolean https;// = false;
+	@Value("${mag.xds.https:true}")
+    private boolean https;
     
     /**
      * URL of ITI-18 endpoint (
      */
-	@Value("${mag.xds.iti-18.url}")
+	@Value("${mag.xds.iti-18.url:}")
     private String iti18HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
-    
+    /**
+     * URL of ITI-18 endpoint (
+     */
+    @Value("${mag.xds.pharm-5.url:}")
+    private String pharm5HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
     /**
      * URL of ITI-43 endpoint
      */
-	@Value("${mag.xds.iti-43.url}")
+	@Value("${mag.xds.iti-43.url:}")
     private String iti43HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/ret"; // http
     
     /**
      * URL of ITI-41 endpoint
      */
-	@Value("${mag.xds.iti-41.url}")
+	@Value("${mag.xds.iti-41.url:}")
     private String iti41HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/prb"; // http
     
     /**
      * Own full URL where clients can retrieve documents from 
      */
-	@Value("${mag.xds.retrieve.url}")
+	@Value("${mag.xds.retrieve.url:}")
     private String uriMagXdsRetrieve;// = "https://localhost:9091/camel/xdsretrieve";
     
-	@Value("${mag.xds.retrieve.repositoryUniqueId}")
+	@Value("${mag.xds.retrieve.repositoryUniqueId:}")
 	private String repositoryUniqueId;
 	
     //private String hostUrl45Http = "gazelle.interopsante.org/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType"; // http
@@ -98,49 +102,49 @@ public class Config {
     /**
      * Use HTTPS for PIX V3?
      */
-	@Value("${mag.pix.https}")
+	@Value("${mag.pix.https:true}")
     private boolean pixHttps;// = true;
     
     /**
      * URL of ITI-45 endpoint
      */
-	@Value("${mag.pix.iti-45.url}")
+	@Value("${mag.pix.iti-45.url:}")
     private String iti45HostUrl;// = "ehealthsuisse.ihe-europe.net:10443/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType";
     
     /**
      * URL of ITI-44 endpoint
      */
-	@Value("${mag.pix.iti-44.url}")
+	@Value("${mag.pix.iti-44.url:}")
     private String iti44HostUrl;// = iti45HostUrl;
 	
 	/**
 	 * URL of ITI-47 endpoint
 	 */
-	@Value("${mag.pix.iti-47.url}")
+	@Value("${mag.pix.iti-47.url:}")
     private String iti47HostUrl;
     
     /**
      * sender OID used when sending requests
      */
-	@Value("${mag.pix.oids.sender}")
+	@Value("${mag.pix.oids.sender:}")
     private String pixMySenderOid;// = "1.3.6.1.4.1.12559.11.1.2.2.5.7";
     
     /**
      * receiver OID (of target system) used when sending requests
      */
-	@Value("${mag.pix.oids.receiver}")
+	@Value("${mag.pix.oids.receiver:}")
     private String pixReceiverOid;// = "1.3.6.1.4.1.12559.11.1.2.2.5.11";
     
     /**
      * OID for queries
      */
-	@Value("${mag.pix.oids.query}")
+	@Value("${mag.pix.oids.query:}")
     private String pixQueryOid;// = pixMySenderOid;
     
    /**
     * baseurl of gateway
     */
-	@Value("${mag.baseurl}")
+	@Value("${mag.baseurl:}")
 	private String baseurl;
 	 
 	/**
@@ -150,16 +154,18 @@ public class Config {
    
     
    
-    @Value("${mag.client-ssl.key-store}")
+    @Value("${mag.client-ssl.key-store:}")
     private String keystore;
     
-    @Value("${mag.client-ssl.key-store-password}")
+    @Value("${mag.client-ssl.key-store-password:}")
     private String keystorePassword;
     
-    @Value("${mag.client-ssl.cert-alias}")
+    @Value("${mag.client-ssl.cert-alias:}")
     private String certAlias;
     
-   
+    @Value("${mag.audit.audit-tls-enabled:false}")
+    private boolean auditTlsEnabled;
+
     /**
      * Connection security : Use client certificate
      */    
@@ -193,7 +199,9 @@ public class Config {
     @ConfigurationProperties(prefix = "mag.audit")
     public DefaultAuditContext getAuditContext() {
     	DefaultAuditContext context = new DefaultAuditContext();
-    	context.setTlsParameters(new TlsParameterTest(getPixSSLContext()));
+    	if (this.auditTlsEnabled) {
+    	    context.setTlsParameters(new TlsParameterTest(getPixSSLContext()));
+    	}
     	//CustomTlsParameters p = new CustomTlsParameters();
     	
     	//p.setKeyStoreFile("270.jks");

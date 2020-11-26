@@ -47,7 +47,7 @@ class Iti67RouteBuilder extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         log.debug("Iti67RouteBuilder configure");
-        final String xds18Endpoint = String.format("xds-iti18://%s/xds/iti18" +
+        final String endpoint = String.format("xds-iti18://%s" +
                 "?secure=%s", this.config.getIti18HostUrl(), this.config.isHttps() ? "true" : "false")
                 +
                 "&audit=true" +
@@ -63,10 +63,11 @@ class Iti67RouteBuilder extends RouteBuilder {
                 .process(AuthTokenConverter.addWsHeader()).choice()
                .when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())
                    .bean(Utils.class,"searchParameterToBody")                
-                   .bean(Iti67RequestConverter.class).endChoice()
+//                   .bean((isPharm ? Pharm1RequestConverter.class : Iti67RequestConverter.class)).endChoice()
+               .bean(Iti67RequestConverter.class).endChoice()
                .when(header("FhirHttpUri").isNotNull())
                    .bean(IdRequestConverter.class).endChoice().end()
-               .to(xds18Endpoint)
+               .to(endpoint)
                .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class));
     }
 }

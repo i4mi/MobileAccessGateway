@@ -1,7 +1,7 @@
 # General configuration of the IPF application.
 
 mag:
-  baseurl: https://mobileaccessgateway.pagekite.me
+  baseurl: http://test.ahdis.ch
   client-ssl:
     enabled: true
     key-store: 270.jks
@@ -19,7 +19,7 @@ mag:
     iti-41:
       url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/rep/prb
     retrieve:
-      url: https://mobileaccessgateway.pagekite.me/camel/xdsretrieve
+      url: http://test.ahdis.ch/camel/xdsretrieve
       repositoryUniqueId: 1.1.4567332.1.2
       #repositoryUniqueId: 1.3.6.1.4.1.21367.2017.2.3.54
   pix:

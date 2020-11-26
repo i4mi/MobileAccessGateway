@@ -25,8 +25,8 @@ import org.openehealth.ipf.commons.ihe.fhir.iti67.Iti67SearchParameters;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntryType;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.Name;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Person;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.ReferenceId;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.XcnName;
@@ -179,10 +179,10 @@ public class Iti67RequestConverter extends BaseRequestConverter {
 	            query.setTypedAuthorPersons(authorPersons);
 	            
             }
-
             final QueryRegistry queryRegistry = new QueryRegistry(query);
             queryRegistry.setReturnType((getLeafClass) ? QueryReturnType.LEAF_CLASS : QueryReturnType.OBJECT_REF);
             
             return queryRegistry;
     }
+
 }

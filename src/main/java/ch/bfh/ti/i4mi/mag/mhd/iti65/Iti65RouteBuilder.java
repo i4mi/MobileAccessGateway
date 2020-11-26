@@ -64,7 +64,7 @@ class Iti65RouteBuilder extends RouteBuilder {
     public void configure() throws Exception {
         log.debug("Iti65RouteBuilder configure");
         
-        final String xds41Endpoint = String.format("xds-iti41://%s/xds/iti41" +
+        final String xds41Endpoint = String.format("xds-iti41://%s" +
                 "?secure=%s", this.config.getIti41HostUrl(), this.config.isHttps() ? "true" : "false")
               +
                       "&audit=true" +

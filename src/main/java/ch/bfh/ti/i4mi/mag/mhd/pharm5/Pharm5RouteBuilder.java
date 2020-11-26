@@ -14,61 +14,53 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.mhd.iti66;
+package ch.bfh.ti.i4mi.mag.mhd.pharm5;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.openehealth.ipf.commons.ihe.fhir.Constants;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
-import ch.bfh.ti.i4mi.mag.mhd.Utils;
+import ch.bfh.ti.i4mi.mag.mhd.iti67.Iti67ResponseConverter;
 import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * IHE MHD: Find Document Manifests [ITI-66] for Document Responder
- * https://oehf.github.io/ipf-docs/docs/ihe/iti66/
+ * IHE MHD: Use $find-medication-list as PHARM5
  */
 @Slf4j
 @Component
-class Iti66RouteBuilder extends RouteBuilder {
-    
+class Pharm5RouteBuilder extends RouteBuilder {
+
     private final Config config;
 
-    public Iti66RouteBuilder(final Config config) {
+    public Pharm5RouteBuilder(final Config config) {
         super();
+        log.debug("Pharm5RouteBuilder initialized");
         this.config = config;
-        log.debug("Iti66RouteBuilder initialized");
     }
 
     @Override
     public void configure() throws Exception {
-        log.debug("Iti66RouteBuilder configure");
-        final String xds18Endpoint = String.format("xds-iti18://%s" +
-          "?secure=%s", this.config.getIti18HostUrl(), this.config.isHttps() ? "true" : "false")
-        +
+        log.debug("Pharm5RouteBuilder configure");
+        final String endpoint = String.format("cmpd-pharm1://%s" +
+                "?secure=%s", this.config.getPharm5HostUrl(), this.config.isHttps() ? "true" : "false")
+                +
                 "&audit=true" +
                 "&auditContext=#myAuditContext" +
-          //      "&sslContextParameters=#pixContext" +
+         //       "&sslContextParameters=#pixContext" +
                 "&inInterceptors=#soapResponseLogger" + 
                 "&inFaultInterceptors=#soapResponseLogger"+
                 "&outInterceptors=#soapRequestLogger" + 
                 "&outFaultInterceptors=#soapRequestLogger";
-
-        from("mhd-iti66:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentmanifest-adapter")
+        from("mhd-pharm5:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentreference-findmedicationlist-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(AuthTokenConverter.addWsHeader()).choice()
-                .when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())
-                    .bean(Utils.class,"searchParameterToBody")
-                    .bean(Iti66RequestConverter.class).endChoice()
-                .when(header("FhirHttpUri").isNotNull())
-                    .bean(IdRequestConverter.class).endChoice().end()
-                .to(xds18Endpoint)
-                .bean(Iti66ResponseBugfix.class)
-                .process(translateToFhir(new Iti66ResponseConverter(config) , QueryResponse.class));
-        }
+                .process(AuthTokenConverter.addWsHeader())
+                .bean(Pharm5RequestConverter.class)
+                .to(endpoint)
+                .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class));
+    }
 }
