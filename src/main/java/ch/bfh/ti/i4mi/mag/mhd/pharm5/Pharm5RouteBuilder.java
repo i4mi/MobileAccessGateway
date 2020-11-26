@@ -45,7 +45,7 @@ class Pharm5RouteBuilder extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         log.debug("Pharm5RouteBuilder configure");
-        final String endpoint = String.format("cmpd-pharm1://%s/xds/pharm1" +
+        final String endpoint = String.format("cmpd-pharm1://%s" +
                 "?secure=%s", this.config.getPharm5HostUrl(), this.config.isHttps() ? "true" : "false")
                 +
                 "&audit=true" +
