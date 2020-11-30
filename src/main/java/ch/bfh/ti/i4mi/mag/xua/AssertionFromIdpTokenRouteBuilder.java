@@ -37,7 +37,11 @@ public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
 				
-		final String assertionEndpoint = String.format("cxf://%s?dataFormat=CXF_MESSAGE&wsdlURL=%s",
+		final String assertionEndpoint = String.format("cxf://%s?dataFormat=CXF_MESSAGE&wsdlURL=%s&loggingFeatureEnabled=true"+
+                "&inInterceptors=#soapResponseLogger" + 
+                "&inFaultInterceptors=#soapResponseLogger"+
+                "&outInterceptors=#soapRequestLogger" + 
+                "&outFaultInterceptors=#soapRequestLogger",
 				assertionEndpointUrl, wsdl);
 			
 		from("servlet://assertion?httpMethodRestrict=POST&matchOnUriPrefix=true").routeId("assertionFromIdpToken")	
