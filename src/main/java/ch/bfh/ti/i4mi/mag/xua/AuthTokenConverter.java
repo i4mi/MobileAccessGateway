@@ -33,6 +33,11 @@ import org.apache.cxf.binding.soap.SoapHeader;
 import org.apache.cxf.headers.Header;
 import org.apache.cxf.headers.Header.Direction;
 import org.apache.cxf.staxutils.StaxUtils;
+import org.openehealth.ipf.commons.ihe.ws.cxf.audit.AbstractAuditInterceptor;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Use IHE-SAML Header from request as SOAP wsse Security Header
@@ -50,6 +55,21 @@ public class AuthTokenConverter {
 		return null;
 	}
 
+	private static String getNodeValue(Element in, String ns, String element) {
+		 NodeList lst = in.getElementsByTagNameNS(ns, element);
+		 if (lst.getLength()==0) return "";
+		 return lst.item(0).getTextContent();
+         
+	}
+	
+	private static String getAttrValue(Element in, String ns, String element, String attribute) {
+		 NodeList lst = in.getElementsByTagNameNS(ns, element);
+		 if (lst.getLength()==0) return "";
+		 Node attr = lst.item(0).getAttributes().getNamedItem(attribute);
+		 return attr != null ? attr.getTextContent() : ""; 
+        
+	}
+	
 	public static Processor addWsHeader() {
 		return exchange -> {
 
@@ -71,7 +91,7 @@ public class AuthTokenConverter {
 				}
 			}
 			if (converted != null) {				               
-								
+			    if (converted.startsWith("<?xml")) converted = converted.substring(converted.indexOf(">")+1);		
 				converted = "<wsse:Security xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">"+converted+"</wsse:Security>";
 
 				//System.out.println(converted);
@@ -81,14 +101,22 @@ public class AuthTokenConverter {
 				if (soapHeaders == null) {
 					soapHeaders = new ArrayList<SoapHeader>();
 				}
-
-				newHeader = new SoapHeader(new QName("soapHeader"), StaxUtils.read(new StringReader(converted)).getDocumentElement());
+                Element headerDocument = StaxUtils.read(new StringReader(converted)).getDocumentElement();
+                
+                String alias = getAttrValue(headerDocument, "urn:oasis:names:tc:SAML:2.0:assertion", "NameID", "SPProvidedID");
+                String user = getNodeValue(headerDocument, "urn:oasis:names:tc:SAML:2.0:assertion", "NameID");
+                String issuer = getNodeValue(headerDocument, "urn:oasis:names:tc:SAML:2.0:assertion", "Issuer");
+                
+                String userName = alias+"<"+user+"@"+issuer+">";                
+                               
+				newHeader = new SoapHeader(new QName("soapHeader"), headerDocument);
 				newHeader.setDirection(Direction.DIRECTION_OUT);
 
 				soapHeaders.add(newHeader);
-
+																				
 				exchange.getMessage().setHeader(OUTGOING_SOAP_HEADERS, soapHeaders);
-
+				exchange.setProperty("UserName", userName);
+				
 			}
 
 		};
