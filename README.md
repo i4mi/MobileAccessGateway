@@ -7,6 +7,7 @@ It uses [IPF](https://oehf.github.io/ipf/) and [HAPI-FHIR](https://hapifhir.io/)
 
 | IHE-Profile | ITI           | Transacation Name                                       | IHE Actor                          | Implemented in the Gateway with following actors                                                     |
 |-------------|---------------|---------------------------------------------------------|------------------------------------|----------------------------------------------------------------------|
+|     PDQm     |     ITI-78    |   Mobile Patient Demographics Query                  |     Patient Demographics Supplier          |     PDQv3 Patient Demographics Consumer |
 |     PMIR    |     ITI-83    |     Mobile   Patient Identifier Crossreference Query    |     Patient   Identity Manager     |     PIX V3 Patient Identifier      Cross-reference      Consumer     |
 |     PMIR    |     ITI-93    |     Mobile   Patient Identity Feed                      |     Patient   Identity Manager     |     PIX V3 Patient Identitiy Source                                  |
 |     MHD     |     ITI-65    |     Provide   Document Bundle                           |     Document   Recipient           |     XDS   Document Source, X-Service-User                            |
