@@ -34,13 +34,14 @@ import org.apache.cxf.staxutils.StaxUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Create a Get-X-User-Assertion SOAP Message from AssertionRequest Bean
  * @author alexander kreutz
  *
  */
+@Slf4j
 public class Iti40RequestGenerator {
 
 	 private final String BASE_MSG = "<env:Envelope xmlns:env=\"http://www.w3.org/2003/05/soap-envelope\">\n" + 
@@ -68,7 +69,10 @@ public class Iti40RequestGenerator {
 	   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
 	   attributeValue.addNamespaceDeclaration("xs", "http://www.w3.org/2001/XMLSchema");
 	   attributeValue.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:type", "xs:string");
-	   attributeValue.setTextContent(id);	   	   
+	   if (id!=null && !id.contains("^") && id.matches("\\d{18}")) {
+		   id += "^^^&2.16.756.5.30.1.127.3.10.3&ISO";
+	   }
+	   attributeValue.setTextContent(id);
 	 }
 	 
 	 public void addPurposeOfUse(SOAPElement claims, String purposeOfUse) throws SOAPException {
@@ -122,19 +126,16 @@ public class Iti40RequestGenerator {
 		 byte[] decoded = Base64.getDecoder().decode(token);
 		 token = new String(decoded);*/
 		 if (token.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")) token = token.substring("<?xml version=\"1.0\" encoding=\"UTF-8\"?>".length());
-		 System.out.println("Decoded Token:"+token);
-		 		 
-		 
-		 
+		 log.debug("Decoded Token:"+token);
 		 
 		 MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
 		 SOAPMessage message = factory.createMessage(new MimeHeaders(), new ByteArrayInputStream(BASE_MSG.getBytes(Charset.forName("UTF-8"))));
 
 		 Element elem = addSecurityHeader(token);
-		 System.out.println("elem="+elem);
+		 log.debug("elem="+elem);
 
 		 Node node = message.getSOAPHeader().getOwnerDocument().importNode(elem, true);
-		 System.out.println("node="+node);
+		 log.debug("node="+node);
 		 
 		 message.getSOAPHeader().addChildElement("Security", "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd").appendChild(node);
 		 
@@ -155,7 +156,7 @@ public class Iti40RequestGenerator {
 			 addPrincipal(claims, request.getPrincipalID());
 		 }
 		 		 
-		 //System.out.println("SEND:"+message.toString());
+		 log.debug("SEND:"+message.toString());
 		 
 		 message.saveChanges();
 		 				 
