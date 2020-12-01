@@ -96,12 +96,12 @@
 		<dependency>
 			<groupId>org.openehealth.ipf.boot</groupId>
 			<artifactId>ipf-fhir-r4-spring-boot-starter</artifactId>
-			<!-- <exclusions>
+			<exclusions>
 				<exclusion>
 					<groupId>xpp3</groupId>
 					<artifactId>xpp3</artifactId>
 				</exclusion>
-			</exclusions>  -->
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -182,7 +182,13 @@
         <dependency>
           <groupId>org.springframework.security.extensions</groupId>
           <artifactId>spring-security-saml2-core</artifactId>
-          <version>1.0.10.RELEASE</version>         
+          <version>1.0.10.RELEASE</version>
+            <exclusions>
+              <exclusion>
+                <groupId>xml-apis</groupId>
+                <artifactId>xml-apis</artifactId>
+              </exclusion>
+            </exclusions>
         </dependency>
         
        
