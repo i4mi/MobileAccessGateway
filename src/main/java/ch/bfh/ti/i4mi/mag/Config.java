@@ -136,6 +136,13 @@ public class Config {
     private String pixReceiverOid;// = "1.3.6.1.4.1.12559.11.1.2.2.5.11";
     
     /**
+     * oid of MPI-PID (Master Patient indext oid in affinity domain this mobile access gateway is configured)
+     */
+    @Value("${mag.pix.oids.mpi-pid:}")
+    private String oidMpiPid;
+
+    final public String OID_EPRSPID = "2.16.756.5.30.1.127.3.10.3";
+    /**
      * OID for queries
      */
 	@Value("${mag.pix.oids.query:}")
