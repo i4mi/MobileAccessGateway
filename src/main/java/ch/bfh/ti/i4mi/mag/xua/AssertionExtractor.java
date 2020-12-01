@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -33,25 +34,30 @@ import org.apache.camel.Body;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Extract a SAML Assertion from a SOAP Message and return it as String
  * @author alexander
  *
  */
+@Slf4j
 public class AssertionExtractor {
 
 	public String handle(@Body SOAPMessage in) throws SOAPException, TransformerConfigurationException, TransformerException, UnsupportedEncodingException {
-		//System.out.println("INPUT:"+in);
+		log.debug("INPUT:"+in);
 		SOAPBody body = in.getSOAPBody();
 		NodeList lst = body.getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion","Assertion");
 		Node node = lst.item(0);
-		//System.out.println("NODE: "+node.toString());
+		log.debug("NODE: "+node.toString());
 		
 		StringWriter writer = new StringWriter();
 		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 		transformer.transform(new DOMSource(node), new StreamResult(writer));
+		
 		String xml = writer.toString();
-		//System.out.println("TOKEN-PART:"+xml);
+		log.debug("TOKEN-PART:"+xml);
 		
 		return xml;		
 				
