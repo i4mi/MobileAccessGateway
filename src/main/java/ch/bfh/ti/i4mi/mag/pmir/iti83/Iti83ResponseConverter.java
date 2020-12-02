@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import net.ihe.gazelle.hl7v3.datatypes.CS;
 import net.ihe.gazelle.hl7v3.datatypes.II;
@@ -53,7 +54,10 @@ public class Iti83ResponseConverter implements ToFhirTranslator<byte[]> {
 
 	@Autowired
 	PatientReferenceCreator patientRefCreator;
-	
+
+	@Autowired
+	private Config config;
+
 	public OperationOutcome error(IssueType type, String diagnostics) {
 		OperationOutcome result = new OperationOutcome();
 		
@@ -91,17 +95,14 @@ public class Iti83ResponseConverter implements ToFhirTranslator<byte[]> {
 			
 			List<II> ids = subject.getRegistrationEvent().getSubject1().getPatient().getId();
 			for (II ii : ids) {
-				String authority = ii.getAssigningAuthorityName();
 				String root = ii.getRoot();
 				String extension = ii.getExtension();
-				response.addParameter().setName("targetIdentifier").setValue((new Identifier()).setSystem(root).setValue(extension));
-				if (!targetIdAdded) {
-				  response.addParameter().setName("targetId").setValue(patientRefCreator.createPatientReference(root, extension));
-				  targetIdAdded = true;
+				response.addParameter().setName("targetIdentifier").setValue((new Identifier()).setSystem("urn:oid:"+root).setValue(extension));
+				if (!targetIdAdded && root.equals(config.getOidMpiPid())) {
+					response.addParameter().setName("targetId").setValue(patientRefCreator.createPatientReference(root, extension));
+					targetIdAdded = true;
 				}
 			}
-			
-			
 		}
 						
 		return response;
