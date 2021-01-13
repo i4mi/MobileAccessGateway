@@ -1,6 +1,7 @@
 FROM adoptopenjdk/openjdk11-openj9:alpine-slim
 MAINTAINER oliver egger <oliver.egger@ahdis.ch>
 EXPOSE 9090
+EXPOSE 9091
 VOLUME /tmp
 
 ARG JAR_FILE=target/i4mi-ipf-hapifhir-gateway-1.0-SNAPSHOT-spring-boot.jar
