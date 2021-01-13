@@ -31,6 +31,9 @@ public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
 	@Value("${mag.iua.ap.wsdl}")
 	private String wsdl;
 	
+	@Value("${mag.iua.ap.endpoint-name:}")
+	private String endpointName;
+	
 	@Autowired
 	private AuthRequestConverter converter;
 	
@@ -38,6 +41,7 @@ public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
 	public void configure() throws Exception {
 				
 		final String assertionEndpoint = String.format("cxf://%s?dataFormat=CXF_MESSAGE&wsdlURL=%s&loggingFeatureEnabled=true"+
+		        ((endpointName!=null && endpointName.length()>0) ? "&endpointName="+endpointName : "")+
                 "&inInterceptors=#soapResponseLogger" + 
                 "&inFaultInterceptors=#soapResponseLogger"+
                 "&outInterceptors=#soapRequestLogger" + 
