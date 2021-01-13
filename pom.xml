@@ -19,8 +19,8 @@
 
 		<java.version>11</java.version>
 
-		<ipf-version>4.0-SNAPSHOT</ipf-version>
-		<camel-version>3.6.0</camel-version>
+		<ipf-version>4.0.0</ipf-version>
+		<camel-version>3.7.0</camel-version>
 	</properties>
 
 
