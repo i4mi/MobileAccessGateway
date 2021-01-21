@@ -20,21 +20,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.camel.Body;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntryType;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.QueryRegistry;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindMedicationListQuery;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryReturnType;
 
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 
@@ -80,6 +78,23 @@ public class Pharm5RequestConverter extends BaseRequestConverter {
             if (system == null || !system.startsWith("urn:oid:"))
                 throw new InvalidRequestException("Missing OID for patient");
             query.setPatientId(new Identifiable(patIdentifier.getValue(), new AssigningAuthority(system.substring(8))));
+        }
+
+        List<Type> formatTypes = searchParameter.getParameters(Pharm5Constants.PHARM5_FORMAT);
+        if (formatTypes!=null && formatTypes.size()>0) {
+            List<Code> formatCodes = new ArrayList<Code>();
+            for (Type format : formatTypes) {
+                Coding formatCoding = (Coding) format;
+                Code formatCode = new Code();
+                formatCode.setCode(formatCoding.getCode());
+                String system = formatCoding.getSystem();
+                if (system.startsWith("urn:oid:")) {
+                    system = system.substring(8);
+                }
+                formatCode.setSchemeName(system);
+                formatCodes.add(formatCode);
+            }
+            query.setFormatCodes(formatCodes);
         }
 
         List<DocumentEntryType> documentEntryTypes = new ArrayList<DocumentEntryType>();

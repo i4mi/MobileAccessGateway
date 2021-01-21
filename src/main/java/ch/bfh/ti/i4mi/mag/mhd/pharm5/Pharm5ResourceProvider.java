@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -54,10 +55,12 @@ public class Pharm5ResourceProvider extends AbstractPlainProvider {
             @IdParam(optional = true) IdType resourceId,
             @OperationParam(name = Pharm5Constants.PHARM5_PATIENT_IDENTIFIER) TokenParam patientIdentifier,
             @OperationParam(name = Pharm5Constants.PHARM5_STATUS) StringParam status,
+            @OperationParam(name = Pharm5Constants.PHARM5_FORMAT) TokenParam format,
             RequestDetails requestDetails,
             HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
 
+    	// FIXME format should be TokenAndListParam
         var sourceIdentifier = new Identifier();
 
         if (resourceId == null) {
@@ -67,10 +70,20 @@ public class Pharm5ResourceProvider extends AbstractPlainProvider {
             sourceIdentifier.setValue(resourceId.getIdPart());
         }
         var statusType = status == null ? null : new StringType(status.getValue());
-  
+
+        
+        Coding formatCoding = null;
+        if (format!=null) {
+            formatCoding = new Coding();
+            formatCoding.setSystem(format.getSystem()).setCode(format.getValue());
+        }
+
         var inParams = new Parameters();
         inParams.addParameter().setName(Pharm5Constants.PHARM5_PATIENT_IDENTIFIER).setValue(sourceIdentifier);
         inParams.addParameter().setName(Pharm5Constants.PHARM5_STATUS).setValue(statusType);
+        if (formatCoding!=null) {
+          inParams.addParameter().setName(Pharm5Constants.PHARM5_FORMAT).setValue(formatCoding);
+        }
         
         return requestBundleProvider(inParams, null, ResourceType.DocumentReference.name(),
                 httpServletRequest, httpServletResponse, requestDetails);

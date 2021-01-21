@@ -28,9 +28,11 @@ public interface Pharm5Constants {
     final String PHARM5_OPERATION_NAME = "$find-medication-list";
     final String PHARM5_STATUS = "status";
     final String PHARM5_PATIENT_IDENTIFIER = "patient.identifier";
+    final String PHARM5_FORMAT = "format";
 
     // needs to be extended
     Set<String> PHARM5_PARAMETERS = new HashSet<>(Arrays.asList(
             PHARM5_STATUS,
-            PHARM5_PATIENT_IDENTIFIER));
+            PHARM5_PATIENT_IDENTIFIER,
+            PHARM5_FORMAT));
 }
