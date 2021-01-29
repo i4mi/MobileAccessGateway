@@ -5,9 +5,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>ch.bfh</groupId>
-	<artifactId>i4mi-ipf-hapifhir-gateway</artifactId>
+	<artifactId>mobile-access-gateway</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<description>IPF HAPI-FHIR IHE ITI springboot example</description>
+	<description>FHIR Gateway supporting the PMIR and MHD server actors and uses XDS/PIXV3 to communicate with an XDS Affinity Domain</description>
 	<packaging>jar</packaging>
 
 	<properties>

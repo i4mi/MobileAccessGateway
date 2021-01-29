@@ -1,10 +1,8 @@
-# General configuration of the Mobile Access Gateway
-
 mag:
   baseurl: http://localhost
   client-ssl:
     enabled: true
-    key-store: example-client-certificate.jks    
+    key-store: /secret/client.jks    
     key-store-password: a1b2c3
     cert-alias: gateway    
   xds:
@@ -34,7 +32,7 @@ mag:
      idp:
         name: idp-ehealthsuisse
         metadata-url: https://ehealthsuisse.ihe-europe.net/metadata/idp-metadata.xml
-        key-store: example-client-certificate.jks    
+        key-store: /secret/client.jks
         key-store-password: a1b2c3
         key-alias: gateway         
         key-password: a1b2c3
@@ -62,23 +60,8 @@ mag:
 server:
   max-http-header-size: 10000
   ssl:
-    key-store: classpath:example-server-certificate.p12    
+    key-store: /secret/server.p12
     key-store-password: a1b2c3    
     key-store-type: pkcs12
     key-alias: bfh1             
-  port: 9091 # Application listening port for HTTPS
-  http:
-    port: 9090 # Application listening port for HTTP. Remove line to disable.
 
-logging:
-  level:
-    root: info
-camel:
-  springboot:
-    xmlRoutes: false
-    main-run-controller: true
-
-# https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#core-properties
-spring:
-  application:
-    name: mobile-access-gateway
