@@ -21,8 +21,7 @@ spec:
           secretName: mobile-access-gateway-secret
       containers:
       - name: mobile-access-gateway
-        image: gateway:latest
-        imagePullPolicy: Never  
+        image: eu.gcr.io/fhir-ch/mag:v020        
         resources:
           requests:
             memory: "0.6Gi"
@@ -54,10 +53,10 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 8080
+  - port: 9090
     name: http
     targetPort: 9090    
-  - port: 8081
+  - port: 9091
     name: https
     targetPort: 9091
   selector:

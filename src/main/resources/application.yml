@@ -65,7 +65,7 @@ server:
     key-store: classpath:example-server-certificate.p12    
     key-store-password: a1b2c3    
     key-store-type: pkcs12
-    key-alias: bfh1             
+    key-alias: server             
   port: 9091 # Application listening port for HTTPS
   http:
     port: 9090 # Application listening port for HTTP. Remove line to disable.
