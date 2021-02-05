@@ -43,7 +43,7 @@ public class MobileAccessGateway {
      * @param args The list of CLI parameters.
      */
     public static void main(final String[] args) {
-        log.info("Configuring IPF app for a JAR deployment");
+        log.info("Configuring MobileAccessGateway");
         
         final SpringApplication application = new SpringApplication(MobileAccessGateway.class);
         addApplicationStartupHook(application);
@@ -56,7 +56,7 @@ public class MobileAccessGateway {
      */
     public static void addApplicationStartupHook(final SpringApplication application) {
         application.addListeners((ApplicationListener<ApplicationReadyEvent>) event -> {
-            log.info("IPF app has been configured and has started");
+            log.info("MobileAccessGateway has been configured and has started");
         });
     }
 }

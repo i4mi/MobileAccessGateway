@@ -33,6 +33,11 @@ See [client.http](client.http) for example calls to the Mobile Access Gateway.
 4. Install the dependencies: `mvn install`
 5. Either run it from your favorite IDE or in the CLI: `mvn clean compile && mvn exec:java -Dexec.mainClass="ch.bfh.ti.i4mi.mag.MobileAccessGateway"`
 
+To run your own configuration stored in a properties file use the `-Dspring.config.additional-location` switch.
+Any config parameter that is not specified in the file will be taken from the defaults.
+If your config file is called "myownconfig.properties" run it using:
+`mvn clean compile && mvn exec:java -Dexec.mainClass="ch.bfh.ti.i4mi.mag.MobileAccessGateway" -Dspring.config.additional-location=file:myownconfig.properties`
+
 ## Caution
 - a @ComponentScan had to be added to the main Application class, otherwise the routes / component could note  be defined (see open issues)
 
@@ -47,3 +52,31 @@ See [client.http](client.http) for example calls to the Mobile Access Gateway.
 
 ### open issues
 - ipf-platform-camel-ihe-fhir-r4-pixpdq works not nicely with spring-boot together, is the META-INF directory not added to the output source?
+
+## Deployment
+
+The MobileAccessGateway can run in a docker container and can be deployed to a Kubernetes cluster. 
+
+### Building an image
+To create a new docker image run:
+
+```
+mvn clean package
+docker build -t gateway:v020
+```
+
+Where "gateway" is the image name and v020 is the version. Then push to a registry.
+
+### Creating a configuration
+- Create an empty folder ("**myconfig**" in this example) and copy the contents of the example-config directory.
+- Edit the application.yml. Leave the pathes for the keystores as they are.
+- Provide p12 or jks keystores for the client certificate, the server certificate and for IDP.
+
+### Deploying to Kubernetes
+- Edit myconfig/kubernetes-config.yml as you need it
+- Create a config map for "application.yml"
+`kubectl create configmap  mobile-access-gateway-configmap --from-file=application.yml=myconfig/application.yml`
+- Create a secret for the certificates and keys
+`kubectl create secret generic mobile-access-gateway-secret --from-file=client.jks=myconfig/client-certificate.jks --from-file=server.p12=myconfig/server-certificate.jks --from-file=idp.jks=myconfig/idp.jks`
+- Upload configuration
+`kubectl apply -f myconfig/kubernetes-config.yml`
