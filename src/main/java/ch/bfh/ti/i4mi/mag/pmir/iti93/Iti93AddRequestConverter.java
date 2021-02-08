@@ -279,7 +279,7 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 				assignedEntity.setClassCode(RoleClassAssignedEntity.ASSIGNED);
 				
 				List<II> custIds = new ArrayList<II>();			        			       
-			    custIds.add(new II(getScheme("1.3.6.1.4.1.21367.2017.2.5.83"), null));
+			    custIds.add(new II(getScheme(config.getCustodianOid()), null));
 				
 				assignedEntity.setId(custIds);
 				//assignedEntity.setId(orgIds);
