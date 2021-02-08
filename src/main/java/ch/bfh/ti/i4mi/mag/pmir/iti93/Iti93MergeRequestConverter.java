@@ -136,7 +136,7 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 		 PRPAIN201304UV02Type resultMsg = new PRPAIN201304UV02Type();
 		  resultMsg.setITSVersion("XML_1.0");
 		  //String UUID.randomUUID().toString();
-		  resultMsg.setId(new II("1.3.6.1.4.1.12559.11.1.2.2.5.7.1", "351"));
+		  resultMsg.setId(new II(config.getPixQueryOid(), uniqueId()));
 		  resultMsg.setCreationTime(new TS(Timestamp.now().toHL7())); // Now
 		  resultMsg.setProcessingCode(new CS("T", null ,null));
 		  resultMsg.setProcessingModeCode(new CS("T", null, null));
@@ -318,7 +318,7 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 				assignedEntity.setClassCode(RoleClassAssignedEntity.ASSIGNED);
 				
 				List<II> custIds = new ArrayList<II>();			        			       
-			    custIds.add(new II(getScheme("1.3.6.1.4.1.21367.2017.2.5.83"), null));
+			    custIds.add(new II(getScheme(config.getCustodianOid()), null));
 				
 				assignedEntity.setId(custIds);
 				//assignedEntity.setId(orgIds);

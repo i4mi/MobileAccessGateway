@@ -172,7 +172,7 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 			  patientPerson.setAsOtherIDs(new ArrayList());
 			  // TODO How is the correct mapping done?
 			    for (Identifier id : in.getIdentifier()) {	
-			    	boolean isOwn = "urn:oid:1.3.6.1.4.1.21367.2017.2.5.83".equals(id.getSystem());
+			    	boolean isOwn = ("urn:oid:"+config.getCustodianOid()).equals(id.getSystem());
 					if (isOwn) patient.addId(patientIdentifierUpd(id) );
 					else {
 					PRPAMT201302UV02OtherIDs asOtherIDs = new PRPAMT201302UV02OtherIDs();
@@ -293,7 +293,7 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 				assignedEntity.setClassCode(RoleClassAssignedEntity.ASSIGNED);
 				
 				List<II> custIds = new ArrayList<II>();			        			       
-			    custIds.add(new II(getScheme("1.3.6.1.4.1.21367.2017.2.5.83"), null));
+			    custIds.add(new II(getScheme(config.getCustodianOid()), null));
 				
 				assignedEntity.setId(custIds);
 				//assignedEntity.setId(orgIds);								

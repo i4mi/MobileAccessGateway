@@ -147,6 +147,10 @@ public class Config {
      */
 	@Value("${mag.pix.oids.query:}")
     private String pixQueryOid;// = pixMySenderOid;
+	
+	@Value("${mag.pix.oids.custodian:}")
+	private String custodianOid;
+	
     
    /**
     * baseurl of gateway
