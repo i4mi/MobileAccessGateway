@@ -318,7 +318,8 @@ public class Iti78RequestConverter extends PMIRRequestConverter {
 		        case "OTHER":livingSubjectAdministrativeGender.addValue(new CE("A","Ambiguous","2.16.840.1.113883.12.1"));break;
 		        case "UNKNOWN":livingSubjectAdministrativeGender.addValue(new CE("U","Unknown","2.16.840.1.113883.12.1"));break;
 		        default: throw new InvalidRequestException("Unknown gender query parameter value");
-			  }		  		  
+			  }		
+			  livingSubjectAdministrativeGender.setSemanticsText(ST("LivingSubject.administrativeGender"));
 		      parameterList.addLivingSubjectAdministrativeGender(livingSubjectAdministrativeGender );
 		  }
 		  
