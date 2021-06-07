@@ -44,6 +44,7 @@ import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
 import net.ihe.gazelle.hl7v3.datatypes.CE;
 import net.ihe.gazelle.hl7v3.datatypes.CS;
+import net.ihe.gazelle.hl7v3.datatypes.ED;
 import net.ihe.gazelle.hl7v3.mcciin000002UV01.MCCIIN000002UV01Type;
 import net.ihe.gazelle.hl7v3.mccimt000200UV01.MCCIMT000200UV01AcknowledgementDetail;
 import net.ihe.gazelle.hl7v3.prpain201310UV02.PRPAIN201310UV02MFMIMT700711UV01ControlActProcess;
@@ -95,7 +96,7 @@ public class Iti93ResponseConverter implements ToFhirTranslator<byte[]> {
 					response.setDetails((Reference) new Reference().setResource(outcome));
 					for (MCCIMT000200UV01AcknowledgementDetail detail : akk.getAcknowledgementDetail()) {
 						OperationOutcomeIssueComponent issue = outcome.addIssue();
-						issue.setDetails(new CodeableConcept().setText(detail.getText().toString()).addCoding(transform(detail.getCode())));
+						issue.setDetails(new CodeableConcept().setText(toText(detail.getText())).addCoding(transform(detail.getCode())));
 					     	
 					}
 				}
@@ -118,5 +119,15 @@ public class Iti93ResponseConverter implements ToFhirTranslator<byte[]> {
 	
 	public Coding transform(CE code) {
 		return new Coding(code.getCodeSystem(),code.getCode(),code.getDisplayName());
+	}
+	
+	public String toText(ED in) {
+		StringBuffer result = new StringBuffer();
+		for (java.io.Serializable obj : in.getMixed()) {
+			if (obj instanceof String) {
+				result.append((String) obj);
+			}
+		}
+		return result.toString();
 	}
 }
