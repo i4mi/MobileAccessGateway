@@ -21,6 +21,7 @@
 
 		<ipf-version>4.0.0</ipf-version>
 		<camel-version>3.7.0</camel-version>
+		<start-class>ch.bfh.ti.i4mi.mag.MobileAccessGateway</start-class>
 	</properties>
 
 
@@ -289,6 +290,13 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>exec-maven-plugin</artifactId>
+              <configuration>
+                <mainClass>${start-class}</mainClass>
+              </configuration>
+            </plugin>
 			<!-- tag::plugin[] -->
 			<plugin>
 				<groupId>com.spotify</groupId>

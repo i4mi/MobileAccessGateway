@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.util.List;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
@@ -104,13 +105,43 @@ public class Iti40RequestGenerator {
 		   roleElement.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:type", "CE");		   		  
 	}
 	 
-	 public void addPrincipal(SOAPElement claims, String principal) throws SOAPException {
+	 public void addPrincipal(SOAPElement claims, String principalId, String principalName) throws SOAPException {
 		   SOAPElement attribute = claims.addChildElement("Attribute", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
 		   attribute.setAttribute("Name", "urn:e-health-suisse:principal-id");		   
 		   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
 		   attributeValue.addNamespaceDeclaration("xs", "http://www.w3.org/2001/XMLSchema");
 		   attributeValue.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:type", "xs:string");
-	       attributeValue.setTextContent(principal);		   		  		   		 	   		 
+	       attributeValue.setTextContent(principalId);		   		  		   		 	   		 
+	       
+	       attribute = claims.addChildElement("Attribute", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+		   attribute.setAttribute("Name", "urn:e-health-suisse:principal-name");		   
+		   attributeValue = attribute.addChildElement("AttributeValue", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+		   attributeValue.addNamespaceDeclaration("xs", "http://www.w3.org/2001/XMLSchema");
+		   attributeValue.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:type", "xs:string");
+	       attributeValue.setTextContent(principalName);
+	}
+	 
+	 public void addOrganization(SOAPElement claims, List<String> orgIds, List<String> orgNames) throws SOAPException {
+		 if (orgIds!=null) {
+			 for (String orgId : orgIds) {
+			   SOAPElement attribute = claims.addChildElement("Attribute", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+			   attribute.setAttribute("Name", "\"urn:oasis:names:tc:xspa:1.0:sub-ject:organization-id");		   
+			   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+			   attributeValue.addNamespaceDeclaration("xs", "http://www.w3.org/2001/XMLSchema");
+			   attributeValue.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:type", "xs:string");
+		       attributeValue.setTextContent(orgId);
+			 }
+		 }
+		 if (orgNames != null) {
+			 for (String orgName : orgNames) {
+			   SOAPElement attribute = claims.addChildElement("Attribute", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+			   attribute.setAttribute("Name", "urn:oasis:names:tc:xspa:1.0:sub-ject:organization");		   
+			   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+			   attributeValue.addNamespaceDeclaration("xs", "http://www.w3.org/2001/XMLSchema");
+			   attributeValue.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:type", "xs:string");
+		       attributeValue.setTextContent(orgName);
+			 }
+		 }
 	}
 	
 	
@@ -152,8 +183,12 @@ public class Iti40RequestGenerator {
 			addRole(claims, request.getRole()); 
 		 }
 		 
-		 if (request.getPrincipalID() != null) {
-			 addPrincipal(claims, request.getPrincipalID());
+		 if (request.getPrincipalID() != null || request.getPrincipalName() != null) {
+			 addPrincipal(claims, request.getPrincipalID(), request.getPrincipalName());
+		 }
+		 
+		 if (request.getOrganizationID() != null || request.getOrganizationName() != null) {
+			 addOrganization(claims, request.getOrganizationID(), request.getOrganizationName());
 		 }
 		 		 
 		 log.debug("SEND:"+message.toString());

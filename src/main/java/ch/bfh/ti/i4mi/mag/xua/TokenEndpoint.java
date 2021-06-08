@@ -18,12 +18,13 @@
 package ch.bfh.ti.i4mi.mag.xua;
 
 import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 import org.apache.camel.Body;
 import org.apache.camel.Header;
 import org.ehcache.Cache;
-import org.jboss.resteasy.spi.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -54,6 +55,7 @@ public class TokenEndpoint {
 	public OAuth2TokenResponse handle(
 			@Header("grant_type") String grantType, 
 			@Header("code") String code,
+			@Header("code_verifier") String codeVerifier,
 			@Header("client_id") String clientId,
 			@Header("client_secret") String clientSecret,
 			@Header("redirect_uri") String redirectUri) throws UnsupportedEncodingException, AuthException {
@@ -63,6 +65,7 @@ public class TokenEndpoint {
 		require(code, "code");
 		require(clientId, "client_id");
 		require(redirectUri, "redirect_uri");
+		require(codeVerifier, "code_verifier");
 	    
 		AuthenticationRequest request = codeToToken.get(code);
 		
@@ -73,7 +76,9 @@ public class TokenEndpoint {
 		mustMatch(redirectUri, request.getRedirect_uri(), "redirect_uri");
 		
 		if (!clients.isValidSecret(clientId, clientSecret)) throw new AuthException(400, "access_denied", "Wrong client_secret");
-		
+												
+		if (!sha256ThenBase64(codeVerifier).equals(request.getCode_challenge())) throw new AuthException(400, "access_denied", "Code challenge failed.");    			  
+							
 		String assertion = request.getAssertion();
 		String encoded = Base64.getEncoder().encodeToString(assertion.getBytes("UTF-8"));
 		//String token = "IHE-SAML "+encoded;
@@ -85,6 +90,19 @@ public class TokenEndpoint {
 		result.setToken_type("IHE-SAML" /*request.getToken_type()*/);
 		return result;
 				
+	}
+
+	public static String sha256ThenBase64(String input) throws AuthException  {
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			md.update(input.getBytes("ASCII")); 
+			byte[] digest = md.digest();
+			return org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(digest);
+		} catch (NoSuchAlgorithmException e) {
+			throw new AuthException(400, "access_denied", "Code challenge failed.");
+		} catch (UnsupportedEncodingException e7) {
+			throw new AuthException(400, "access_denied", "Code challenge failed.");
+		}
 	}
 	
 	public OAuth2TokenResponse handleFromIdp(@Body String assertion, @Header("scope") String scope) throws UnsupportedEncodingException, AuthException {

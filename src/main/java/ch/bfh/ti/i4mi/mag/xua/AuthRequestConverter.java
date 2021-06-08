@@ -38,11 +38,13 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 @Component
 public class AuthRequestConverter {
 
-	public final static String SCOPE_PURPOSEOFUSE = "purposeOfUse/";
-	public final static String RESOURCE_ID = "resourceId/";
-	public final static String ROLE = "role/";
-	public final static String PRINCIPAL_ID = "principalID/";
-	public final static String ORGANIZATION = "organizationID/";
+	public final static String SCOPE_PURPOSEOFUSE = "purpose_of_use=";
+	public final static String RESOURCE_ID = "person_id=";
+	public final static String ROLE = "subject_role=";
+	public final static String PRINCIPAL_ID = "principal_id=";
+	public final static String PRINCIPAL_NAME = "principa=";
+	public final static String ORGANIZATION_ID = "group_id=";
+	public final static String ORGANIZATION_NAME = "group=";
 	
 	@Autowired
 	private ClientValidationService clients;
@@ -53,21 +55,26 @@ public class AuthRequestConverter {
 			@Header("token_type") String tokenType,
 			@Header("redirect_uri") String redirect_uri,
 			@Header("state") String state,
+			@Header("code_challenge_method") String codeChallengeMethod,
+			@Header("code_challenge") String codeChallenge,	
+			@Header("access_token_format") String accessTokenFormat,
 			@Headers Map<String, Object> headers) throws AuthException {
 		/*for (Map.Entry<String, Object> entry : headers.entrySet()) {
 			System.out.println("HEADER: "+entry.getKey()+" = "+(entry.getValue()!=null?entry.getValue().toString():"null"));
-		}*/
-		
+		}*/		
 		if (redirect_uri == null) throw new BadRequestException("redirect_uri is missing!");
-					
-		if (tokenType==null) tokenType = "Bearer";
+		if (codeChallengeMethod==null || !codeChallengeMethod.equals("S256")) throw new BadRequestException("code_challenge_method must be 'S256'");
+		if (codeChallenge==null || codeChallenge.trim().length()==0) throw new BadRequestException("code_challenge is missing!");			
+		
+		if (tokenType!=null && !tokenType.equals("Bearer")) throw new BadRequestException("token_type must be Bearer");
 		
 		AuthenticationRequest request = new AuthenticationRequest(); 
 		request.setScope(scope);
 		request.setRedirect_uri(redirect_uri);
 		request.setClient_id(clientId);
 		request.setState(state);
-		request.setToken_type(tokenType);
+		request.setToken_type(accessTokenFormat);
+		request.setCode_challenge(codeChallenge);
 						
 		return request;
 	}
@@ -93,16 +100,25 @@ public class AuthRequestConverter {
 		AssertionRequest result = new AssertionRequest();		
 		String scopes[] = scope.split("\\s");
 		for (String scopePart : scopes) {
-		  if (scopePart.startsWith(SCOPE_PURPOSEOFUSE)) result.setPurposeOfUse(scopePart.substring(SCOPE_PURPOSEOFUSE.length()));
+		  if (scopePart.startsWith(SCOPE_PURPOSEOFUSE)) result.setPurposeOfUse(token(scopePart.substring(SCOPE_PURPOSEOFUSE.length()),"urn:oid:2.16.756.5.30.1.127.3.10.5"));
 		  if (scopePart.startsWith(RESOURCE_ID)) result.setResourceId(scopePart.substring(RESOURCE_ID.length()));
-          if (scopePart.startsWith(ROLE)) result.setRole(scopePart.substring(ROLE.length()));
+          if (scopePart.startsWith(ROLE)) result.setRole(token(scopePart.substring(ROLE.length()),"urn:oid:2.16.756.5.30.1.127.3.10.6"));
           if (scopePart.startsWith(PRINCIPAL_ID)) result.setPrincipalID(scopePart.substring(PRINCIPAL_ID.length()));
-          if (scopePart.startsWith(ORGANIZATION)) result.setOrganizationID(scopePart.substring(ORGANIZATION.length()));
+          if (scopePart.startsWith(PRINCIPAL_NAME)) result.setPrincipalName(scopePart.substring(PRINCIPAL_NAME.length()));
+          if (scopePart.startsWith(ORGANIZATION_ID)) result.addOrganizationID(scopePart.substring(ORGANIZATION_ID.length()));
+          if (scopePart.startsWith(ORGANIZATION_NAME)) result.addOrganizationName(scopePart.substring(ORGANIZATION_NAME.length()));
 		}
 				
 		result.setSamlToken(authorization);
 		System.out.println("Auth:"+result.getSamlToken());
 		
 		return result;
+	}
+	
+	private String token(String token, String system) throws AuthException{
+		if (token.startsWith(system+"|")) return token.substring(system.length()+1);
+		if (token.startsWith("|")) return token.substring(1);
+		if (token.indexOf("|")<0) return token;
+		throw new AuthException(400,"invalid_request","Invalid scope");		
 	}
 }

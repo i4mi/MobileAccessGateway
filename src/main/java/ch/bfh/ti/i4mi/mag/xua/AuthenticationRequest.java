@@ -38,5 +38,7 @@ public class AuthenticationRequest {
 	private String token_type;
 	
 	private String assertion;
+	
+	private String code_challenge;
 		
 }
