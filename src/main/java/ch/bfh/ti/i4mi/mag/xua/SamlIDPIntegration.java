@@ -96,6 +96,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+
 /**
  * Integrate IDP
  * @author alexander kreutz
@@ -128,7 +129,9 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
     		.logout()
     			.disable();	
 		
-		http.cors().and().csrf().disable();
+		http.cors().disable();
+		http.csrf().disable();
+		
 	 }
 	 
 	 private Timer backgroundTaskTimer;

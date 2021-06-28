@@ -53,6 +53,7 @@ import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import net.ihe.gazelle.hl7v3.coctmt030007UV.COCTMT030007UVPerson;
 import net.ihe.gazelle.hl7v3.datatypes.AD;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpStreetAddressLine;
+import net.ihe.gazelle.hl7v3.datatypes.AdxpStreetName;
 import net.ihe.gazelle.hl7v3.datatypes.BL;
 import net.ihe.gazelle.hl7v3.datatypes.CE;
 import net.ihe.gazelle.hl7v3.datatypes.CS;
@@ -167,6 +168,9 @@ public class Iti78ResponseConverter implements ToFhirTranslator<byte[]> {
 		addr.setDistrict(val(address.getCounty()));
 		addr.setPostalCode(val(address.getPostalCode()));
 		addr.setState(val(address.getState()));
+		for (AdxpStreetName street : address.getStreetName()) {
+			addr.addLine(val(street));
+		}
 		// TODO Missing: type, use
 		for (AdxpStreetAddressLine line : address.getStreetAddressLine()) {
 			addr.addLine(val(line));
