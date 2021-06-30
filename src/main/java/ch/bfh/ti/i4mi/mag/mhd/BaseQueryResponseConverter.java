@@ -94,6 +94,12 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	if (urn.startsWith("urn:uuid:")) return urn.substring("urn:uuid:".length());
     	return urn;
     }
+    
+    public String noOidPrefix(String urn) {
+    	if (urn == null) return null;
+    	if (urn.startsWith("urn:oid:")) return urn.substring("urn:oid:".length());
+    	return urn;
+    }
 
     /**
      * XDS code -> FHIR CodeableConcept

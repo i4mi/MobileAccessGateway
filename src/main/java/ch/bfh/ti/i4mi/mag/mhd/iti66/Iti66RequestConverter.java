@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.camel.Body;
-import org.openehealth.ipf.commons.ihe.fhir.iti66.Iti66SearchParameters;
+import org.openehealth.ipf.commons.ihe.fhir.iti66_v401.Iti66SearchParameters;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
@@ -74,7 +74,7 @@ public class Iti66RequestConverter extends BaseRequestConverter {
         
          // created Note 1 -> $XDSSubmissionSetSubmissionTimeFrom
          // created Note 2 -> $XDSSubmissionSetSubmissionTimeTo 
-         DateRangeParam createdRange = searchParameter.getCreated();
+         DateRangeParam createdRange = searchParameter.getDate();
          if (createdRange != null) {
 	            DateParam creationTimeFrom = createdRange.getLowerBound();
 	            DateParam creationTimeTo = createdRange.getUpperBound();
@@ -83,20 +83,20 @@ public class Iti66RequestConverter extends BaseRequestConverter {
          }            
          
          // TODO author.given / author.family -> $XDSSubmissionSetAuthorPerson
-         StringParam authorGivenName = searchParameter.getAuthorGivenName();
-         StringParam authorFamilyName = searchParameter.getAuthorFamilyName();
+         StringParam authorGivenName = searchParameter.getSourceGiven();
+         StringParam authorFamilyName = searchParameter.getSourceFamily();
          if (authorGivenName != null || authorFamilyName != null) {
 	            String author = (authorGivenName != null ? authorGivenName.getValue() : "%")+" "+(authorFamilyName != null ? authorFamilyName.getValue() : "%");	            
 	            query.setAuthorPerson(author);
          }
                                  
          // type -> $XDSSubmissionSetContentType
-         TokenOrListParam types = searchParameter.getType();
+         TokenOrListParam types = searchParameter.getDesignationType();
          query.setContentTypeCodes(codesFromTokens(types));
          
          
          // source -> $XDSSubmissionSetSourceId 
-         TokenOrListParam sources = searchParameter.getSource();
+         TokenOrListParam sources = searchParameter.getSourceId();
          query.setSourceIds(urisFromTokens(sources));
          
          // status -> $XDSSubmissionSetStatus 
