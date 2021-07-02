@@ -43,7 +43,7 @@ import java.util.Set;
 @Builder @ToString
 public class Iti66SearchParameters implements FhirSearchParameters {
 
-	@Getter @Setter private TokenOrListParam code;
+	@Getter @Setter private TokenParam code;
     @Getter @Setter private DateRangeParam date;
     @Getter @Setter private StringParam sourceFamily;
     @Getter @Setter private StringParam sourceGiven;
