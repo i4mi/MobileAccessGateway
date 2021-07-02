@@ -42,7 +42,7 @@ public class Iti66ResourceProvider extends AbstractPlainProvider {
     @SuppressWarnings("unused")
     @Search(type = ListResource.class)
     public IBundleProvider documentManifestSearch(
-    		@OptionalParam(name = ListResource.SP_CODE) TokenOrListParam code,
+    		@OptionalParam(name = ListResource.SP_CODE) TokenParam code,
             @RequiredParam(name = ListResource.SP_PATIENT, chainWhitelist = {"", Patient.SP_IDENTIFIER}) ReferenceParam patient,
             @OptionalParam(name = ListResource.SP_DATE) DateRangeParam date,
             @OptionalParam(name = ListResource.SP_SOURCE, chainWhitelist = { Practitioner.SP_FAMILY, Practitioner.SP_GIVEN }) ReferenceAndListParam author,
