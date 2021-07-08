@@ -17,6 +17,7 @@
 package ch.bfh.ti.i4mi.mag.pmir.iti83;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -93,7 +94,13 @@ public class Iti83ResponseConverter implements ToFhirTranslator<byte[]> {
 		for (PRPAIN201310UV02MFMIMT700711UV01Subject1 subject : subjects) {
 			boolean targetIdAdded = false;
 			
-			List<II> ids = subject.getRegistrationEvent().getSubject1().getPatient().getId();
+			List<II> ids = new ArrayList<II>();
+			
+			ids.addAll(subject.getRegistrationEvent().getSubject1().getPatient().getId());
+			for (var otherId : subject.getRegistrationEvent().getSubject1().getPatient().getPatientPerson().getAsOtherIDs()) {
+				ids.addAll(otherId.getId());
+			}
+						
 			for (II ii : ids) {
 				String root = ii.getRoot();
 				String extension = ii.getExtension();
@@ -103,6 +110,8 @@ public class Iti83ResponseConverter implements ToFhirTranslator<byte[]> {
 					targetIdAdded = true;
 				}
 			}
+			
+			
 		}
 						
 		return response;
