@@ -17,6 +17,7 @@
 package ch.bfh.ti.i4mi.mag.mhd.iti67;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.camel.Header;
@@ -44,13 +45,11 @@ public class IdRequestConverter extends BaseRequestConverter {
 
         if (fhirHttpUri != null && fhirHttpUri.contains("/")) {
             boolean getLeafClass = true;
-            String uniqueId = fhirHttpUri.substring(fhirHttpUri.lastIndexOf("/") + 1);
+            String uuid = fhirHttpUri.substring(fhirHttpUri.lastIndexOf("/") + 1);
 
             GetDocumentsQuery query = new GetDocumentsQuery();
-            final QueryRegistry queryRegistry = new QueryRegistry(query);
-            List<String> uniqueIds = new ArrayList<String>();
-            uniqueIds.add(uniqueId);
-            query.setUniqueIds(uniqueIds);
+            final QueryRegistry queryRegistry = new QueryRegistry(query);            
+            query.setUuids(Collections.singletonList(uuid));
             queryRegistry.setReturnType((getLeafClass) ? QueryReturnType.LEAF_CLASS : QueryReturnType.OBJECT_REF);
             return queryRegistry;
         }

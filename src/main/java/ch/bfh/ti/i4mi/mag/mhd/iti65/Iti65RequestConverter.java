@@ -24,6 +24,7 @@ import javax.activation.DataHandler;
 
 import org.apache.camel.Body;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -48,6 +49,7 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.ListResource;
+import org.hl7.fhir.r4.model.ListResource.ListEntryComponent;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
@@ -57,6 +59,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.codesystems.IdentifierUse;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Association;
@@ -87,6 +90,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.sun.istack.ByteArrayDataSource;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import lombok.extern.slf4j.Slf4j;
@@ -100,6 +104,9 @@ import lombok.extern.slf4j.Slf4j;
 public class Iti65RequestConverter {
 
 	private SchemeMapper schemeMapper;
+	
+	@Autowired
+	private Config config;
 	
 	@Autowired
 	public void setSchemeMapper(SchemeMapper schemeMapper) {
@@ -122,16 +129,18 @@ public class Iti65RequestConverter {
 		
 		// create mapping fullUrl -> resource for each resource in bundle
 		Map<String, Resource> resources = new HashMap<String, Resource>();
-		DocumentManifest manifest = null;
+		
+		ListResource manifestNeu = null; 
+		
 		for (Bundle.BundleEntryComponent requestEntry : requestBundle.getEntry()) {
             Resource resource = requestEntry.getResource();
-            if (resource instanceof DocumentManifest) {
+            /*if (resource instanceof DocumentManifest) {
             	manifest = (DocumentManifest) resource;            	
-            } else if (resource instanceof DocumentReference) {
+            } else*/ if (resource instanceof DocumentReference) {
             	resources.put(requestEntry.getFullUrl(), resource);
             	
             } else if (resource instanceof ListResource) {
-            	new IllegalArgumentException("List Resource is currently not supported");
+            	manifestNeu = (ListResource) resource;
             	//resources.put(requestEntry.getFullUrl(), resource);
             } else if (resource instanceof Binary) {
             	resources.put(requestEntry.getFullUrl(), resource);
@@ -140,7 +149,11 @@ public class Iti65RequestConverter {
             } 			
         }
 					
-		processDocumentManifest(manifest, submissionSet);
+	    /*if (manifest != null) {
+		  processDocumentManifest(manifest, submissionSet);
+	    } else {*/
+	      processDocumentManifest(manifestNeu, submissionSet);
+	    //}
 		
 		// set limited metadata
 		for (CanonicalType profile : requestBundle.getMeta().getProfile()) {
@@ -148,11 +161,16 @@ public class Iti65RequestConverter {
 				submissionSet.setLimitedMetadata(false);
 			} else if ("http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle".equals(profile.getValue())) {
 				submissionSet.setLimitedMetadata(true);
-			}
+			} else if ("http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle".equals(profile.getValue())) {
+				submissionSet.setLimitedMetadata(false);
+			} else if ("http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle".equals(profile.getValue())) {
+				submissionSet.setLimitedMetadata(true);
+			} 
 		}
 		
 		// process all resources referenced in DocumentManifest.content
-		for (Reference content : manifest.getContent()) {
+		for (ListEntryComponent listEntry : manifestNeu.getEntry()) {
+			Reference content = listEntry.getItem();
 			String refTarget = content.getReference();
 			Resource resource = resources.get(refTarget);
 			if (resource instanceof DocumentReference) {
@@ -161,8 +179,7 @@ public class Iti65RequestConverter {
         		DocumentEntry entry = new DocumentEntry();        		        		        		
                 processDocumentReference(documentReference, entry);
                 doc.setDocumentEntry(entry);
-                // TODO MUST BE SET FROM config
-                entry.setRepositoryUniqueId("1.3.6.1.4.1.21367.2017.2.3.54");
+                entry.setRepositoryUniqueId(config.getRepositoryUniqueId());
                 
                 // create associations
                 for (DocumentReferenceRelatesToComponent relatesTo : documentReference.getRelatesTo()) {
@@ -542,6 +559,101 @@ public class Iti65RequestConverter {
 		  
 		String description = manifest.getDescription();		
 		if (description!=null) submissionSet.setTitle(localizedString(description));		  
+		
+	}
+	
+	/**
+	 * ITI-65: process ListResource resource from Bundle
+	 * @param manifest
+	 * @param submissionSet
+	 */
+	private  void processDocumentManifest(ListResource manifest, SubmissionSet submissionSet) {
+		
+		for (Identifier id : manifest.getIdentifier()) {
+			if (id.getUse().equals(Identifier.IdentifierUse.OFFICIAL)) {
+							
+			} else if (id.getUse().equals(Identifier.IdentifierUse.USUAL)) {
+				String uniqueId = noPrefix(id.getValue());				
+				submissionSet.setUniqueId(uniqueId);	
+			}
+		}
+		
+		
+		submissionSet.assignEntryUuid();
+		manifest.setId(submissionSet.getEntryUuid());
+		
+		Extension designationType = manifest.getExtensionByUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType");
+		if (designationType != null && designationType.getValue() instanceof CodeableConcept) {
+			submissionSet.setContentTypeCode(transformCodeableConcept((CodeableConcept) designationType.getValue()));
+		}
+				 		
+		DateTimeType created = manifest.getDateElement();
+		submissionSet.setSubmissionTime(timestampFromDate(created));
+		   
+		//  subject	SubmissionSet.patientId
+		Reference ref = manifest.getSubject();
+		submissionSet.setPatientId(transformReferenceToIdentifiable(ref, manifest));
+		
+		// Author
+        Extension authorRoleExt = manifest.getExtensionByUrl("http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-author-authorrole");
+		if (manifest.hasSource() || (authorRoleExt!=null)) {
+		    Identifiable identifiable = null;
+			Reference author = manifest.getSource();
+            if (authorRoleExt!=null) {
+                Coding coding = authorRoleExt.castToCoding(authorRoleExt.getValue());
+                if (coding !=null) {
+                    identifiable = new Identifiable(coding.getCode(), new AssigningAuthority(noPrefix(coding.getSystem())));
+                }
+            }
+			submissionSet.setAuthor(transformAuthor(author, manifest.getContained(), identifiable));
+		}
+		 // recipient	SubmissionSet.intendedRecipient		
+		
+		for (Extension recipientExt : manifest.getExtensionsByUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-intendedRecipient")) {
+			Reference recipientRef = (Reference) recipientExt.getValue();		
+			Resource res = findResource(recipientRef, manifest.getContained());
+			
+			if (res instanceof Practitioner) {
+				Recipient recipient = new Recipient();
+				recipient.setPerson(transform((Practitioner) res));
+				recipient.setTelecom(transform(((Practitioner) res).getTelecomFirstRep()));
+				submissionSet.getIntendedRecipients().add(recipient);
+			} else if (res instanceof Organization) {
+				Recipient recipient = new Recipient();
+				recipient.setOrganization(transform((Organization) res));
+				recipient.setTelecom(transform(((Organization) res).getTelecomFirstRep()));
+				submissionSet.getIntendedRecipients().add(recipient);
+			} else if (res instanceof PractitionerRole) {
+				Recipient recipient = new Recipient();
+				PractitionerRole role = (PractitionerRole) res;
+				recipient.setOrganization(transform((Organization) findResource(role.getOrganization(), manifest.getContained())));
+				recipient.setPerson(transform((Practitioner) findResource(role.getPractitioner(), manifest.getContained())));
+				recipient.setTelecom(transform(role.getTelecomFirstRep()));
+				submissionSet.getIntendedRecipients().add(recipient);
+			} else if (res instanceof Patient) {
+				Recipient recipient = new Recipient();
+				recipient.setPerson(transform((Patient) res));
+				recipient.setTelecom(transform(((Patient) res).getTelecomFirstRep()));
+			} else if (res instanceof RelatedPerson) {
+				Recipient recipient = new Recipient();
+				recipient.setPerson(transform((RelatedPerson) res));
+				recipient.setTelecom(transform(((RelatedPerson) res).getTelecomFirstRep()));
+			}								
+						
+		}
+		
+		Extension source = manifest.getExtensionByUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId");
+		if (source != null && source.getValue() instanceof Identifier) {
+		  submissionSet.setSourceId(noPrefix(((Identifier) source.getValue()).getValue()));
+		}
+		  
+		String title = manifest.getTitle();		
+		if (title!=null) submissionSet.setTitle(localizedString(title));		  
+				
+		Annotation note = manifest.getNoteFirstRep();
+		if (note != null && note.hasText()) {			
+		  submissionSet.setComments(localizedString(note.getText()));
+		}
 		
 	}
 	

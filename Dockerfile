@@ -10,7 +10,7 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
 COPY ${JAR_FILE} /app.jar
 
-ENTRYPOINT java -Xmx1G -Xshareclasses -Xquickstart -jar /app.jar -Dspring.config.additional-location=optional:file:/config/application.yml
+ENTRYPOINT java -Xmx1G -Xshareclasses -Xquickstart -jar /app.jar -Djavax.net.ssl.trustStore=cacerts -Djavax.net.ssl.trustStorePassword=changeit -Dspring.config.additional-location=optional:file:/config/application.yml
 
 
 # export PROJECT_ID="$(gcloud config get-value project -q)"

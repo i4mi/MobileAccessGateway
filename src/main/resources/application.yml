@@ -48,6 +48,9 @@ mag:
         oauthdebugger:
            secret: demosecret
            redirect: https://oauthdebugger.com/debug
+        playground:
+           secret: secret
+           redirect: https://developers.google.com/oauthplayground
 
   audit:
     audit-enabled: true 

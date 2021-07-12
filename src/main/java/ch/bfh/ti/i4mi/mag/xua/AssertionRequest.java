@@ -16,6 +16,9 @@
 
 package ch.bfh.ti.i4mi.mag.xua;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -39,8 +42,24 @@ public class AssertionRequest {
 	private String principalID;
 	
 	@Getter @Setter
-	private String organizationID;
+	private String principalName;
+	
+	@Getter @Setter
+	private List<String> organizationID;
+	
+	@Getter @Setter
+	private List<String> organizationName;
 	
 	@Getter @Setter
 	private String samlToken;
+	
+	public void addOrganizationID(String orgId) {
+		if (organizationID==null) organizationID = new ArrayList<String>();
+		organizationID.add(orgId);
+	}
+	
+	public void addOrganizationName(String orgName) {
+		if (organizationName==null) organizationName = new ArrayList<String>();
+		organizationName.add(orgName);
+	}
 }

@@ -41,10 +41,10 @@ public class IdRequestConverter extends BaseRequestConverter {
 
         if (fhirHttpUri != null && fhirHttpUri.contains("/")) {
             boolean getLeafClass = true;
-            String uniqueId = fhirHttpUri.substring(fhirHttpUri.lastIndexOf("/") + 1);
+            String uuid = fhirHttpUri.substring(fhirHttpUri.lastIndexOf("/") + 1);
             GetSubmissionSetAndContentsQuery query = new GetSubmissionSetAndContentsQuery();
             final QueryRegistry queryRegistry = new QueryRegistry(query);
-            query.setUniqueId(uniqueId);
+            query.setUuid(uuid);
             queryRegistry.setReturnType((getLeafClass) ? QueryReturnType.LEAF_CLASS : QueryReturnType.OBJECT_REF);
             return queryRegistry;
         }

@@ -205,13 +205,39 @@ public class Config {
     
     	return scp;
     }
+    
+    @Bean(name = "auditSslContext")
+    @ConditionalOnProperty(
+    	    value="mag.audit.audit-tls-enabled", 
+    	    havingValue = "true", 
+    	    matchIfMissing = false)
+    public SSLContextParameters getAuditSSLContext() {
+    	KeyStoreParameters ksp = new KeyStoreParameters();
+    	// Keystore file may be found at src/main/resources
+    	ksp.setResource(keystore); 
+    	ksp.setPassword(keystorePassword);    	
+
+    	KeyManagersParameters kmp = new KeyManagersParameters();
+    	kmp.setKeyStore(ksp);
+    	kmp.setKeyPassword(keystorePassword);       	
+    	
+    	TrustManagersParameters tmp = new TrustManagersParameters();
+    	tmp.setKeyStore(ksp);    	
+    
+    	SSLContextParameters scp = new SSLContextParameters();
+    	scp.setKeyManagers(kmp);
+    	scp.setTrustManagers(tmp);
+    	scp.setCertAlias(certAlias);
+    
+    	return scp;
+    }
        
     @Bean(name = "myAuditContext")
     @ConfigurationProperties(prefix = "mag.audit")
     public DefaultAuditContext getAuditContext() {
     	DefaultAuditContext context = new DefaultAuditContext();
     	if (this.auditTlsEnabled) {
-    	    context.setTlsParameters(new TlsParameterTest(getPixSSLContext()));
+    	    context.setTlsParameters(new TlsParameterTest(getAuditSSLContext()));
     	}
     	//CustomTlsParameters p = new CustomTlsParameters();
     	

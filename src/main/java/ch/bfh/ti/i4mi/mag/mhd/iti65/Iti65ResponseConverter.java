@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DocumentManifest;
 import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
@@ -66,6 +67,8 @@ public class Iti65ResponseConverter extends BaseResponseConverter implements ToF
 			Bundle responseBundle = new Bundle();		
 			Bundle requestBundle = (Bundle) parameters.get(Utils.KEPT_BODY);
 			
+			responseBundle.getMeta().addProfile("http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.ProvideDocumentBundleResponse");
+			
 			for (Bundle.BundleEntryComponent requestEntry : requestBundle.getEntry()) {
 	            Bundle.BundleEntryResponseComponent response = new Bundle.BundleEntryResponseComponent()
 	                    .setStatus("201 Created")
@@ -74,9 +77,9 @@ public class Iti65ResponseConverter extends BaseResponseConverter implements ToF
 	              String uniqueId = (String) requestEntry.getResource().getUserData("masterIdentifier");
 	              response.setLocation(config.getUriMagXdsRetrieve() + "?uniqueId=" + uniqueId
                      + "&repositoryUniqueId=" + config.getRepositoryUniqueId());	            
-	            } else if (requestEntry.getResource() instanceof DocumentManifest) {
-	            	String id = config.getSchemeMapper().getScheme(((DocumentManifest) requestEntry.getResource()).getId());
-	            	response.setLocation("DocumentManifest/"+id);
+	            } else if (requestEntry.getResource() instanceof ListResource) {
+	            	String id = config.getSchemeMapper().getScheme(((ListResource) requestEntry.getResource()).getId());
+	            	response.setLocation("List/"+id);
 	            } else if (requestEntry.getResource() instanceof DocumentReference) {
 	            	String id = config.getSchemeMapper().getScheme(((DocumentReference) requestEntry.getResource()).getId());
 	            	response.setLocation("DocumentReference/"+id);	              

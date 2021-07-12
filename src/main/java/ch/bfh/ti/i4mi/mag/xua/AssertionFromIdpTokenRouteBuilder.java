@@ -34,6 +34,9 @@ public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
 	@Value("${mag.iua.ap.endpoint-name:}")
 	private String endpointName;
 	
+	@Value("${mag.client-ssl.enabled}")
+	private boolean clientSsl;
+	
 	@Autowired
 	private AuthRequestConverter converter;
 	
@@ -45,7 +48,8 @@ public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
                 "&inInterceptors=#soapResponseLogger" + 
                 "&inFaultInterceptors=#soapResponseLogger"+
                 "&outInterceptors=#soapRequestLogger" + 
-                "&outFaultInterceptors=#soapRequestLogger",
+                "&outFaultInterceptors=#soapRequestLogger"+
+                (clientSsl ? "&sslContextParameters=#sslContext" : ""),
 				assertionEndpointUrl, wsdl);
 			
 		from("servlet://assertion?httpMethodRestrict=POST&matchOnUriPrefix=true").routeId("assertionFromIdpToken")	
