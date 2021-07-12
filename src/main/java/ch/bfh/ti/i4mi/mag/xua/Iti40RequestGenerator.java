@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.UUID;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
@@ -162,6 +163,7 @@ public class Iti40RequestGenerator {
 		 MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
 		 SOAPMessage message = factory.createMessage(new MimeHeaders(), new ByteArrayInputStream(BASE_MSG.getBytes(Charset.forName("UTF-8"))));
 
+		 message.getSOAPHeader().addChildElement("MessageID","wsa","http://www.w3.org/2005/08/addressing").addTextNode(UUID.randomUUID().toString());
 		 Element elem = addSecurityHeader(token);
 		 log.debug("elem="+elem);
 
