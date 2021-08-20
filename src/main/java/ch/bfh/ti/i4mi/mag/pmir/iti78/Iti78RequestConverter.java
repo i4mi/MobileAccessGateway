@@ -25,6 +25,7 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.camel.Header;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.openehealth.ipf.commons.ihe.fhir.iti78.Iti78SearchParameters;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,9 +99,16 @@ public class Iti78RequestConverter extends PMIRRequestConverter {
 		   return transform(dt);			
 	  }
 	  
-	  public IVXBTS transform(Date date) {
+	  public IVXBTS transform(Date date) {		   
 		   DateTimeType dt = new DateTimeType(date);
 		   return transform(dt);			
+	  }
+	  
+	  public IVXBTS transformDay(Date date) {		   
+		   DateType dt = new DateType(date);
+		   IVXBTS result = new IVXBTS();
+		   result.setValue(dt.asStringValue().replace("-", ""));
+		   return result;		
 	  }
 	  	 
 	  public String iti78ToIti47Converter(@Header("FhirRequestParameters") Iti78SearchParameters parameters) throws JAXBException  {
@@ -168,7 +176,7 @@ public class Iti78RequestConverter extends PMIRRequestConverter {
 		  if (active != null) {
 			  String activeCode = "active";
 			  PRPAMT201306UV02PatientStatusCode patientStatusCode = new PRPAMT201306UV02PatientStatusCode();
-			  patientStatusCode.setValue(new CS(activeCode,null,null));
+			  patientStatusCode.setValue(new CS(activeCode,null,null));			  
 			  parameterList.addPatientStatusCode(patientStatusCode );
 		  }
 		
@@ -203,7 +211,7 @@ public class Iti78RequestConverter extends PMIRRequestConverter {
 					  Date hDate = null;
 					  TemporalPrecisionEnum precision = birthdateParam.getPrecision();
 					  ParamPrefixEnum prefix = birthdateParam.getPrefix();
-												
+					  if (prefix==null) prefix = ParamPrefixEnum.EQUAL;				
 					  Calendar cal = Calendar.getInstance();
 					  cal.setTime(birthdateParam.getValue());
 						

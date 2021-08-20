@@ -205,12 +205,7 @@ public class Config {
     
     	return scp;
     }
-    
-    @Bean(name = "auditSslContext")
-    @ConditionalOnProperty(
-    	    value="mag.audit.audit-tls-enabled", 
-    	    havingValue = "true", 
-    	    matchIfMissing = false)
+       
     public SSLContextParameters getAuditSSLContext() {
     	KeyStoreParameters ksp = new KeyStoreParameters();
     	// Keystore file may be found at src/main/resources
