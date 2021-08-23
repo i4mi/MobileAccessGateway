@@ -77,6 +77,7 @@ import net.ihe.gazelle.hl7v3.prpain201306UV02.PRPAIN201306UV02MFMIMT700711UV01Su
 import net.ihe.gazelle.hl7v3.prpain201306UV02.PRPAIN201306UV02MFMIMT700711UV01Subject2;
 import net.ihe.gazelle.hl7v3.prpain201306UV02.PRPAIN201306UV02Type;
 import net.ihe.gazelle.hl7v3.prpamt201310UV02.PRPAMT201310UV02LanguageCommunication;
+import net.ihe.gazelle.hl7v3.prpamt201310UV02.PRPAMT201310UV02OtherIDs;
 import net.ihe.gazelle.hl7v3.prpamt201310UV02.PRPAMT201310UV02Patient;
 import net.ihe.gazelle.hl7v3.prpamt201310UV02.PRPAMT201310UV02Person;
 import net.ihe.gazelle.hl7v3.prpamt201310UV02.PRPAMT201310UV02PersonalRelationship;
@@ -246,6 +247,12 @@ public class Iti78ResponseConverter implements ToFhirTranslator<byte[]> {
 				if (!idadded) {
 					result.setId(patientRefCreator.createPatientId(patientId.getRoot(), patientId.getExtension()));
 					idadded = true;
+				}
+			}
+			
+			for (PRPAMT201310UV02OtherIDs otherIds : patient.getPatientPerson().getAsOtherIDs()) {
+				for (II patientId : otherIds.getId()) {
+				   result.addIdentifier().setSystem(getSystem(patientId.getRoot())).setValue(patientId.getExtension());	
 				}
 			}
 			
