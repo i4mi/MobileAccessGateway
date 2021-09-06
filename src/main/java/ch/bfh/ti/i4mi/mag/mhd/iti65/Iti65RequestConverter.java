@@ -414,7 +414,9 @@ public class Iti65RequestConverter {
 			
 			MultiValueMap<String, String> vals = UriComponentsBuilder.fromUriString(targetRef).build().getQueryParams();
 			if (vals.containsKey("identifier")) {
-				String[] identifier = vals.getFirst("identifier").split("\\|");
+				String ids = vals.getFirst("identifier");
+				if (ids == null) return null;
+				String[] identifier = ids.split("\\|");
 				if (identifier.length == 2) {
 					return new Identifiable(identifier[1], new AssigningAuthority(noPrefix(identifier[0])));
 				}
@@ -717,7 +719,7 @@ public class Iti65RequestConverter {
 				 entry.setLegalAuthenticator(transform((Practitioner) authenticator));	
 			 } else if (authenticator instanceof PractitionerRole) {
 				 Practitioner practitioner = (Practitioner) findResource(((PractitionerRole) authenticator).getPractitioner(), reference.getContained());
-				 if (practitioner != null) entry.setLegalAuthenticator(transform((Practitioner) authenticator));
+				 if (practitioner != null) entry.setLegalAuthenticator(transform(practitioner));
 			 } else throw new InvalidRequestException("No authenticator of type Organization supported.");			
 		}
 		             

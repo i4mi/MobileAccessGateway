@@ -24,6 +24,7 @@ import org.apache.camel.Body;
 import org.apache.camel.Header;
 import org.apache.camel.Headers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -49,6 +50,9 @@ public class AuthRequestConverter {
 	@Autowired
 	private ClientValidationService clients;
 	
+	@Value("${mag.iua.sp.disable-code-challenge:false}")
+	private boolean disableCodeChallenge;
+	
 	public AuthenticationRequest buildAuthenticationRequest(
 			@Header("scope") String scope, 						
 			@Header("client_id") String clientId,
@@ -63,8 +67,10 @@ public class AuthRequestConverter {
 			System.out.println("HEADER: "+entry.getKey()+" = "+(entry.getValue()!=null?entry.getValue().toString():"null"));
 		}*/		
 		if (redirect_uri == null) throw new BadRequestException("redirect_uri is missing!");
-		if (codeChallengeMethod==null || !codeChallengeMethod.equals("S256")) throw new BadRequestException("code_challenge_method must be 'S256'");
-		if (codeChallenge==null || codeChallenge.trim().length()==0) throw new BadRequestException("code_challenge is missing!");			
+		if (!disableCodeChallenge) {
+		  if (codeChallengeMethod==null || !codeChallengeMethod.equals("S256")) throw new BadRequestException("code_challenge_method must be 'S256'");
+		  if (codeChallenge==null || codeChallenge.trim().length()==0) throw new BadRequestException("code_challenge is missing!");
+		}
 		
 		if (tokenType!=null && !tokenType.equals("Bearer")) throw new BadRequestException("token_type must be Bearer");
 		

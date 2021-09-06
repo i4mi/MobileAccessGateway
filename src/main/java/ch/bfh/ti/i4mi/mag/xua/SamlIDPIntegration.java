@@ -219,7 +219,9 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    // Logger for SAML messages and events
 	    @Bean
 	    public SAMLDefaultLogger samlLogger() {
-	        return new SAMLDefaultLogger();
+	        SAMLDefaultLogger log = new SAMLDefaultLogger();
+	        log.setLogAllMessages(true);
+	        return log;
 	    }
 	 
 	    // SAML 2.0 WebSSO Assertion Consumer
@@ -287,6 +289,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    public WebSSOProfileOptions defaultWebSSOProfileOptions() {
 	        WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
 	        webSSOProfileOptions.setIncludeScoping(false);
+	        // webSSOProfileOptions.setBinding("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact");
 	        return webSSOProfileOptions;
 	    }
 	 
