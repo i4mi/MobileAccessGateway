@@ -111,7 +111,9 @@ public class Iti40RequestGenerator {
 		   case "HCP":displayName = "Healthcare professional";break;
 		   case "ASS":displayName = "Assistant";break;
 		   case "REP":displayName = "Representative";break;
-		   case "TCU":displayName = "Technical user";break;  
+		   case "TCU":displayName = "Technical user";break; 
+		   case "DADM":displayName = "Document Administrator";break;
+		   case "PADM":displayName = "Policy Administrator";break;
 		   }		 
 		 
 		   SOAPElement attribute = claims.addChildElement("Attribute", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
@@ -181,18 +183,16 @@ public class Iti40RequestGenerator {
 		 byte[] decoded = Base64.getDecoder().decode(token);
 		 token = new String(decoded);*/
 		 if (token.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")) token = token.substring("<?xml version=\"1.0\" encoding=\"UTF-8\"?>".length());
-		 log.debug("Decoded Token:"+token);
+		 log.debug("Decoded IDP Token:"+token);
 		 
 		 MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
 		 SOAPMessage message = factory.createMessage(new MimeHeaders(), new ByteArrayInputStream(BASE_MSG().getBytes(Charset.forName("UTF-8"))));
 
 		 message.getSOAPHeader().addChildElement("MessageID","wsa","http://www.w3.org/2005/08/addressing").addTextNode(UUID.randomUUID().toString());
 		 Element elem = addSecurityHeader(token);
-		 log.debug("elem="+elem);
-
-		 Node node = message.getSOAPHeader().getOwnerDocument().importNode(elem, true);
-		 log.debug("node="+node);
 		 
+		 Node node = message.getSOAPHeader().getOwnerDocument().importNode(elem, true);
+		 		 
 		 message.getSOAPHeader().addChildElement("Security", "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd").appendChild(node);
 		 
 		 SOAPElement claims = (SOAPElement) message.getSOAPBody().getElementsByTagNameNS("http://docs.oasis-open.org/ws-sx/ws-trust/200512", "Claims").item(0);
@@ -216,7 +216,7 @@ public class Iti40RequestGenerator {
 			 addOrganization(claims, request.getOrganizationID(), request.getOrganizationName());
 		 }
 		 		 
-		 log.debug("SEND:"+message.toString());
+		 log.debug("Sending Assertion Request: "+message.toString());
 		 
 		 message.saveChanges();
 		 				 

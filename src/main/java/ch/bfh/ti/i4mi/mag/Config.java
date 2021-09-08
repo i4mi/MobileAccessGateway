@@ -20,6 +20,7 @@ import org.apache.camel.support.jsse.KeyManagersParameters;
 import org.apache.camel.support.jsse.KeyStoreParameters;
 import org.apache.camel.support.jsse.SSLContextParameters;
 import org.apache.camel.support.jsse.TrustManagersParameters;
+import org.openehealth.ipf.commons.audit.AuditContext;
 import org.openehealth.ipf.commons.audit.CustomTlsParameters;
 import org.openehealth.ipf.commons.audit.DefaultAuditContext;
 import org.openehealth.ipf.commons.audit.types.AuditSource;
@@ -226,10 +227,10 @@ public class Config {
     
     	return scp;
     }
-       
+            
     @Bean(name = "myAuditContext")
     @ConfigurationProperties(prefix = "mag.audit")
-    public DefaultAuditContext getAuditContext() {
+    public AuditContext getAuditContext() {
     	DefaultAuditContext context = new DefaultAuditContext();
     	if (this.auditTlsEnabled) {
     	    context.setTlsParameters(new TlsParameterTest(getAuditSSLContext()));

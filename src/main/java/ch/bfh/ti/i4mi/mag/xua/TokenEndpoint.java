@@ -28,11 +28,14 @@ import org.ehcache.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * OAuth2 code to token exchange operation
  * @author alexander kreutz
  *
  */
+@Slf4j
 public class TokenEndpoint {
 		
 	@Autowired
@@ -88,8 +91,9 @@ public class TokenEndpoint {
 		}
 							
 		String assertion = request.getAssertion();
+		log.debug("Assertion for token: "+assertion);
 		String encoded = Base64.getEncoder().encodeToString(assertion.getBytes("UTF-8"));
-		//String token = "IHE-SAML "+encoded;
+		log.debug("Encoded token: "+encoded);
 		
 		OAuth2TokenResponse result = new OAuth2TokenResponse();
 		result.setAccess_token(encoded);
