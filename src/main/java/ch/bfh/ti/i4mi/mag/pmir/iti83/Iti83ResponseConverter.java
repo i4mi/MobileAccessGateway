@@ -18,8 +18,10 @@ package ch.bfh.ti.i4mi.mag.pmir.iti83;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -28,6 +30,8 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
 import org.openehealth.ipf.commons.ihe.fhir.translation.FhirTranslator;
 import org.openehealth.ipf.commons.ihe.fhir.translation.ToFhirTranslator;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
@@ -37,6 +41,7 @@ import org.springframework.stereotype.Component;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.mhd.Utils;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import net.ihe.gazelle.hl7v3.datatypes.CS;
 import net.ihe.gazelle.hl7v3.datatypes.II;
@@ -77,6 +82,8 @@ public class Iti83ResponseConverter implements ToFhirTranslator<byte[]> {
 	    content = content.replace("xmlns:xmlns","xmlns:xxxxx");
 		PRPAIN201310UV02Type msg = HL7V3Transformer.unmarshallMessage(PRPAIN201310UV02Type.class, new ByteArrayInputStream(content.getBytes()));
 		
+		Parameters query = (Parameters) parameters.get(Utils.KEPT_BODY);
+		List<Type> targetSystemList = (List<Type>) query.getParameters("targetSystem");	
 		Parameters response = new Parameters();
 		
 		PRPAIN201310UV02MFMIMT700711UV01ControlActProcess controlAct = msg.getControlActProcess();
@@ -88,6 +95,15 @@ public class Iti83ResponseConverter implements ToFhirTranslator<byte[]> {
 		}
 		if ("AE".equals(queryResponseCode)) {
 			throw new InvalidRequestException("sourceIdentifier Assigning Authority not found", error(IssueType.INVALID, "sourceIdentifier Assigning Authority not found"));
+		}
+		
+		Set<String> acceptedTargetSystem = new HashSet<String>();
+		Set<String> noDuplicates = new HashSet<String>();
+		if (targetSystemList != null) {
+			for (Type targetSystemType : targetSystemList) {
+				UriType targetSystem = (UriType) targetSystemType;
+				acceptedTargetSystem.add(targetSystem.getValue());
+			}
 		}
 		
 		List<PRPAIN201310UV02MFMIMT700711UV01Subject1> subjects = controlAct.getSubject();
@@ -104,7 +120,11 @@ public class Iti83ResponseConverter implements ToFhirTranslator<byte[]> {
 			for (II ii : ids) {
 				String root = ii.getRoot();
 				String extension = ii.getExtension();
-				response.addParameter().setName("targetIdentifier").setValue((new Identifier()).setSystem("urn:oid:"+root).setValue(extension));
+				
+				if (!noDuplicates.contains(root) && (acceptedTargetSystem.isEmpty() || acceptedTargetSystem.contains("urn:oid:"+root))) {
+				  response.addParameter().setName("targetIdentifier").setValue((new Identifier()).setSystem("urn:oid:"+root).setValue(extension));
+				  noDuplicates.add(root);
+				}
 				if (!targetIdAdded && root.equals(config.getOidMpiPid())) {
 					response.addParameter().setName("targetId").setValue(patientRefCreator.createPatientReference(root, extension));
 					targetIdAdded = true;
