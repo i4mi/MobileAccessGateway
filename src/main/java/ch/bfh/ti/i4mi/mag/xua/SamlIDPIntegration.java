@@ -377,6 +377,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        metadataGenerator.setKeyManager(keyManager());
 	        Collection<String> bindings = new ArrayList<String>();
 	        bindings.add("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact");
+	        // Uncomment to use HTTP-Artificat
 	        //metadataGenerator.setBindingsSSO(bindings);
 	        return metadataGenerator;
 	    }

@@ -65,7 +65,7 @@ class Iti93RouteBuilder extends RouteBuilder {
                 "&outInterceptors=#soapRequestLogger" + 
                 "&outFaultInterceptors=#soapRequestLogger";
         
-        from("pmir-iti93:stub?audit=false&auditContext=#myAuditContext").routeId("pmir-feed")
+        from("pmir-iti93:stub?audit=true&auditContext=#myAuditContext").routeId("pmir-feed")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 .process(AuthTokenConverter.addWsHeader())

@@ -180,6 +180,7 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 			    for (Identifier id : in.getIdentifier()) {
 			    	patient.addId(patientIdentifier(id));
 			    }
+			    
 		    	
 		    	for (HumanName name : in.getName()) {		    				    	
 					patientPerson.addName(transform(name));	

@@ -23,6 +23,8 @@ import org.apache.camel.support.jsse.TrustManagersParameters;
 import org.openehealth.ipf.commons.audit.AuditContext;
 import org.openehealth.ipf.commons.audit.CustomTlsParameters;
 import org.openehealth.ipf.commons.audit.DefaultAuditContext;
+import org.openehealth.ipf.commons.audit.protocol.TLSSyslogSenderImpl;
+import org.openehealth.ipf.commons.audit.protocol.TLSSyslogSenderImpl.SocketTestPolicy;
 import org.openehealth.ipf.commons.audit.types.AuditSource;
 import org.openehealth.ipf.commons.ihe.ws.cxf.audit.AbstractAuditInterceptor;
 import org.openehealth.ipf.commons.ihe.ws.cxf.payload.InPayloadLoggerInterceptor;
@@ -35,6 +37,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 
+import ch.bfh.ti.i4mi.mag.audit.TLSCloseSocket;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import lombok.Data;
@@ -203,7 +206,7 @@ public class Config {
     	scp.setKeyManagers(kmp);
     	scp.setTrustManagers(tmp);
     	scp.setCertAlias(certAlias);
-    
+       
     	return scp;
     }
        
@@ -224,7 +227,8 @@ public class Config {
     	scp.setKeyManagers(kmp);
     	scp.setTrustManagers(tmp);
     	scp.setCertAlias(certAlias);
-    
+        //scp.setClientParameters(null);
+        //scp.setSessionTimeout("60");
     	return scp;
     }
             
@@ -235,6 +239,7 @@ public class Config {
     	if (this.auditTlsEnabled) {
     	    context.setTlsParameters(new TlsParameterTest(getAuditSSLContext()));
     	}
+    	//context.setAuditTransmissionProtocol(new TLSCloseSocket(context.getTlsParameters()));
     	//CustomTlsParameters p = new CustomTlsParameters();
     	
     	//p.setKeyStoreFile("270.jks");

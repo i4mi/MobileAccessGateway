@@ -54,7 +54,7 @@ class Iti83RouteBuilder extends RouteBuilder {
 	                "?secure=%s", this.config.getIti45HostUrl(), this.config.isPixHttps() ? "true" : "false")
 	                +
 	                //"&sslContextParameters=#pixContext" +
-	                "&audit=false" +
+	                "&audit=true" +
 	                "&auditContext=#myAuditContext" +
 	                "&inInterceptors=#soapResponseLogger" + 
 	                "&inFaultInterceptors=#soapResponseLogger"+
