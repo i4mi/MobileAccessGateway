@@ -177,10 +177,10 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	case YEAR: fhirPrecision = TemporalPrecisionEnum.YEAR;break;
     	case DAY: fhirPrecision = TemporalPrecisionEnum.DAY;break;
     	// There is no mapping for HOUR
-    	case HOUR: fhirPrecision = TemporalPrecisionEnum.MINUTE;break;
-    	case MINUTE: fhirPrecision = TemporalPrecisionEnum.MINUTE;break;
-    	case SECOND: fhirPrecision = TemporalPrecisionEnum.SECOND;break;
-    	default: fhirPrecision = TemporalPrecisionEnum.MILLI;break;
+    	//case HOUR: fhirPrecision = TemporalPrecisionEnum.MINUTE;break;
+    	//case MINUTE: fhirPrecision = TemporalPrecisionEnum.MINUTE;break;
+    	//case SECOND: fhirPrecision = TemporalPrecisionEnum.SECOND;break;
+    	default: fhirPrecision = TemporalPrecisionEnum.DAY;break;
     	}
     	return new DateType(date, fhirPrecision);
     }

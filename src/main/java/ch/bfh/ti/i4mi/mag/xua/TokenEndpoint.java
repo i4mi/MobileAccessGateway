@@ -26,12 +26,16 @@ import org.apache.camel.Body;
 import org.apache.camel.Header;
 import org.ehcache.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * OAuth2 code to token exchange operation
  * @author alexander kreutz
  *
  */
+@Slf4j
 public class TokenEndpoint {
 		
 	@Autowired
@@ -39,6 +43,9 @@ public class TokenEndpoint {
 	
 	@Autowired
 	private ClientValidationService clients;
+	
+	@Value("${mag.iua.sp.disable-code-challenge:false}")
+	private boolean disableCodeChallenge;
 	
 	private long defaultTimeout = 1000l * 60l;
 	
@@ -65,7 +72,9 @@ public class TokenEndpoint {
 		require(code, "code");
 		require(clientId, "client_id");
 		require(redirectUri, "redirect_uri");
-		require(codeVerifier, "code_verifier");
+		if (!disableCodeChallenge) {
+		  require(codeVerifier, "code_verifier");
+		}
 	    
 		AuthenticationRequest request = codeToToken.get(code);
 		
@@ -76,12 +85,15 @@ public class TokenEndpoint {
 		mustMatch(redirectUri, request.getRedirect_uri(), "redirect_uri");
 		
 		if (!clients.isValidSecret(clientId, clientSecret)) throw new AuthException(400, "access_denied", "Wrong client_secret");
-												
-		if (!sha256ThenBase64(codeVerifier).equals(request.getCode_challenge())) throw new AuthException(400, "access_denied", "Code challenge failed.");    			  
+							
+		if (!disableCodeChallenge) {
+		  if (!sha256ThenBase64(codeVerifier).equals(request.getCode_challenge())) throw new AuthException(400, "access_denied", "Code challenge failed.");
+		}
 							
 		String assertion = request.getAssertion();
+		log.debug("Assertion for token: "+assertion);
 		String encoded = Base64.getEncoder().encodeToString(assertion.getBytes("UTF-8"));
-		//String token = "IHE-SAML "+encoded;
+		log.debug("Encoded token: "+encoded);
 		
 		OAuth2TokenResponse result = new OAuth2TokenResponse();
 		result.setAccess_token(encoded);

@@ -59,7 +59,7 @@ mag:
     audit-enterprise-site-id: 1.3.6.1.4.1.21367.2017.2.7.109
     audit-repository-host: 147.135.232.177
     audit-repository-port: 3001
-    audit-repostiory-transport: UDP             
+    audit-repository-transport: UDP             
 
 # https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#server-properties
 

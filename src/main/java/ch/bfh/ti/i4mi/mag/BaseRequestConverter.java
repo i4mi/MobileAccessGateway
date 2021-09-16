@@ -99,7 +99,9 @@ public class BaseRequestConverter {
 		
 		MultiValueMap<String, String> vals = UriComponentsBuilder.fromUriString(targetRef).build().getQueryParams();
 		if (vals.containsKey("identifier")) {
-			String[] identifier = vals.getFirst("identifier").split("\\|");
+			String ids = vals.getFirst("identifier");
+			if (ids == null) return null;
+			String[] identifier = ids.split("\\|");
 			if (identifier.length == 2) {
 				return new Identifiable(identifier[1], new AssigningAuthority(getScheme(identifier[0])));
 			}

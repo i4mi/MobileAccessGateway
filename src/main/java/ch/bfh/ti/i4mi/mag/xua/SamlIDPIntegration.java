@@ -34,6 +34,7 @@ import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.parse.StaticBasicParserPool;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -63,6 +64,7 @@ import org.springframework.security.saml.metadata.ExtendedMetadataDelegate;
 import org.springframework.security.saml.metadata.MetadataDisplayFilter;
 import org.springframework.security.saml.metadata.MetadataGenerator;
 import org.springframework.security.saml.metadata.MetadataGeneratorFilter;
+import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.parser.ParserPoolHolder;
 import org.springframework.security.saml.processor.HTTPArtifactBinding;
 import org.springframework.security.saml.processor.HTTPPAOS11Binding;
@@ -73,6 +75,7 @@ import org.springframework.security.saml.processor.SAMLBinding;
 import org.springframework.security.saml.processor.SAMLProcessorImpl;
 import org.springframework.security.saml.util.VelocityFactory;
 import org.springframework.security.saml.websso.ArtifactResolutionProfile;
+import org.springframework.security.saml.websso.ArtifactResolutionProfileBase;
 import org.springframework.security.saml.websso.ArtifactResolutionProfileImpl;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
 import org.springframework.security.saml.websso.SingleLogoutProfileImpl;
@@ -219,7 +222,11 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    // Logger for SAML messages and events
 	    @Bean
 	    public SAMLDefaultLogger samlLogger() {
-	        return new SAMLDefaultLogger();
+	        SAMLDefaultLogger log = new SAMLDefaultLogger();
+	        log.setLogMessagesOnException(true);
+	        log.setLogAllMessages(true);
+	        log.setLogErrors(true);
+	        return log;
 	    }
 	 
 	    // SAML 2.0 WebSSO Assertion Consumer
@@ -286,7 +293,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    @Bean
 	    public WebSSOProfileOptions defaultWebSSOProfileOptions() {
 	        WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
-	        webSSOProfileOptions.setIncludeScoping(false);
+	        webSSOProfileOptions.setIncludeScoping(false);	       
 	        return webSSOProfileOptions;
 	    }
 	 
@@ -307,6 +314,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 		    extendedMetadata.setSigningAlgorithm("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
 		    extendedMetadata.setSignMetadata(true);
 		    extendedMetadata.setEcpEnabled(true);
+		    extendedMetadata.setRequireArtifactResolveSigned(false);
 		    return extendedMetadata;
 	    }
 	    
@@ -347,6 +355,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        providers.add(ssoCircleExtendedMetadataProvider());
 	        return new CachingMetadataManager(providers);
 	    }
+	    	   
 	 
 	    @Value("${mag.iua.sp.entity-id}")
 	    private String entityId;
@@ -354,23 +363,30 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    @Value("${mag.baseurl}")
 	    private String baseUrl;
 	    
+	    @Value("${server.servlet.context-path:/}")
+	    private String context;
+	    
 	    // Filter automatically generates default SP metadata
 	    @Bean
 	    public MetadataGenerator metadataGenerator() {
 	        MetadataGenerator metadataGenerator = new MetadataGenerator();
 	        metadataGenerator.setEntityId(entityId);
-	        metadataGenerator.setEntityBaseURL(baseUrl);
+	        metadataGenerator.setEntityBaseURL(baseUrl+(context.equals("/")?"":context));
 	        metadataGenerator.setExtendedMetadata(extendedMetadata());
 	        metadataGenerator.setIncludeDiscoveryExtension(false);
-	        metadataGenerator.setKeyManager(keyManager()); 
+	        metadataGenerator.setKeyManager(keyManager());
+	        Collection<String> bindings = new ArrayList<String>();
+	        bindings.add("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact");
+	        // Uncomment to use HTTP-Artificat
+	        //metadataGenerator.setBindingsSSO(bindings);
 	        return metadataGenerator;
 	    }
-	 
+	    
 	    // The filter is waiting for connections on URL suffixed with filterSuffix
 	    // and presents SP metadata there
 	    @Bean
 	    public MetadataDisplayFilter metadataDisplayFilter() {
-	        return new MetadataDisplayFilter();
+	        return new MetadataDisplayFilter();	        
 	    }
 	     
 	    // Handler deciding where to redirect user after successful login
@@ -453,15 +469,19 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    }
 		
 	    // Bindings
-	    private ArtifactResolutionProfile artifactResolutionProfile() {
+	    private ArtifactResolutionProfile artifactResolutionProfile() throws MetadataProviderException {
 	        final ArtifactResolutionProfileImpl artifactResolutionProfile = 
 	        		new ArtifactResolutionProfileImpl(httpClient());
 	        artifactResolutionProfile.setProcessor(new SAMLProcessorImpl(soapBinding()));
+	        MetadataManager metadataManager = metadata();
+	        metadataManager.refreshMetadata();
+	        artifactResolutionProfile.setMetadata(metadataManager);
 	        return artifactResolutionProfile;
+	        
 	    }
 	    
 	    @Bean
-	    public HTTPArtifactBinding artifactBinding(ParserPool parserPool, VelocityEngine velocityEngine) {
+	    public HTTPArtifactBinding artifactBinding(ParserPool parserPool, VelocityEngine velocityEngine) throws MetadataProviderException {
 	        return new HTTPArtifactBinding(parserPool, velocityEngine, artifactResolutionProfile());
 	    }
 	 
@@ -492,11 +512,11 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    
 	    // Processor
 		@Bean
-		public SAMLProcessorImpl processor() {
+		public SAMLProcessorImpl processor() throws MetadataProviderException {
 			Collection<SAMLBinding> bindings = new ArrayList<SAMLBinding>();
-			bindings.add(httpRedirectDeflateBinding());
-			bindings.add(httpPostBinding());
 			bindings.add(artifactBinding(parserPool(), velocityEngine()));
+			bindings.add(httpPostBinding());
+			bindings.add(httpRedirectDeflateBinding());			
 			bindings.add(httpSOAP11Binding());
 			bindings.add(httpPAOS11Binding());
 			return new SAMLProcessorImpl(bindings);

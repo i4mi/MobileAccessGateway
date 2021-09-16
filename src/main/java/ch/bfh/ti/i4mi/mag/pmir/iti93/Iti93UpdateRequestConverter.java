@@ -19,8 +19,10 @@ package ch.bfh.ti.i4mi.mag.pmir.iti93;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -170,9 +172,19 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 			  patientPerson.setClassCode(EntityClass.PSN);
 			  patientPerson.setDeterminerCode(EntityDeterminer.INSTANCE);
 			  patientPerson.setAsOtherIDs(new ArrayList());
+			  
+			  List<II> orgIds = new ArrayList<II>();
+			  Set<String> mainIds = new HashSet<String>();
+		      Organization managingOrg = getManagingOrganization(in);
+		      for (Identifier id : managingOrg.getIdentifier()) {
+		        	orgIds.add(new II(getScheme(id.getSystem()), null));
+		        	mainIds.add(id.getSystem());
+		      }
+			  
+			  
 			  // TODO How is the correct mapping done?
 			    for (Identifier id : in.getIdentifier()) {	
-			    	boolean isOwn = ("urn:oid:"+config.getCustodianOid()).equals(id.getSystem());
+			    	boolean isOwn = mainIds.contains(id.getSystem());
 					if (isOwn) patient.addId(patientIdentifierUpd(id) );
 					else {
 					PRPAMT201302UV02OtherIDs asOtherIDs = new PRPAMT201302UV02OtherIDs();
@@ -219,11 +231,7 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 					patientPerson.addTelecom(transform(contactPoint));
 		        }
 		        
-		        List<II> orgIds = new ArrayList<II>();
-		        Organization managingOrg = getManagingOrganization(in);
-		        for (Identifier id : managingOrg.getIdentifier()) {
-		        	orgIds.add(new II(getScheme(id.getSystem()), null));
-		        }
+		        
 		        
 		        if (in.hasDeceasedBooleanType()) {
 		          patientPerson.setDeceasedInd(new BL(in.getDeceasedBooleanType().getValue()));

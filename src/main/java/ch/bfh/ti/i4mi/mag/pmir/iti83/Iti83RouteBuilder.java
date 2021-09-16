@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
+import ch.bfh.ti.i4mi.mag.mhd.Utils;
 import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,7 +54,7 @@ class Iti83RouteBuilder extends RouteBuilder {
 	                "?secure=%s", this.config.getIti45HostUrl(), this.config.isPixHttps() ? "true" : "false")
 	                +
 	                //"&sslContextParameters=#pixContext" +
-	                "&audit=false" +
+	                "&audit=true" +
 	                "&auditContext=#myAuditContext" +
 	                "&inInterceptors=#soapResponseLogger" + 
 	                "&inFaultInterceptors=#soapResponseLogger"+
@@ -64,9 +65,11 @@ class Iti83RouteBuilder extends RouteBuilder {
 				// pass back errors to the endpoint
 				.errorHandler(noErrorHandler())
 				.process(AuthTokenConverter.addWsHeader())
+				.process(Utils.keepBody())
 				.bean(Iti83RequestConverter.class)
 				.doTry()
-				  .to(xds45Endpoint)										
+				  .to(xds45Endpoint)	
+				  .process(Utils.keptBodyToHeader())
 				  .process(translateToFhir(converter , byte[].class))
 				.doCatch(javax.xml.ws.soap.SOAPFaultException.class)
 				  .setBody(simple("${exception}"))

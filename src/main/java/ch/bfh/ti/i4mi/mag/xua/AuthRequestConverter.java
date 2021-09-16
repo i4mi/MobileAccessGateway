@@ -16,6 +16,7 @@
 
 package ch.bfh.ti.i4mi.mag.xua;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import javax.ws.rs.BadRequestException;
@@ -24,6 +25,7 @@ import org.apache.camel.Body;
 import org.apache.camel.Header;
 import org.apache.camel.Headers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -42,12 +44,15 @@ public class AuthRequestConverter {
 	public final static String RESOURCE_ID = "person_id=";
 	public final static String ROLE = "subject_role=";
 	public final static String PRINCIPAL_ID = "principal_id=";
-	public final static String PRINCIPAL_NAME = "principa=";
+	public final static String PRINCIPAL_NAME = "principal=";
 	public final static String ORGANIZATION_ID = "group_id=";
 	public final static String ORGANIZATION_NAME = "group=";
 	
 	@Autowired
 	private ClientValidationService clients;
+	
+	@Value("${mag.iua.sp.disable-code-challenge:false}")
+	private boolean disableCodeChallenge;
 	
 	public AuthenticationRequest buildAuthenticationRequest(
 			@Header("scope") String scope, 						
@@ -63,8 +68,10 @@ public class AuthRequestConverter {
 			System.out.println("HEADER: "+entry.getKey()+" = "+(entry.getValue()!=null?entry.getValue().toString():"null"));
 		}*/		
 		if (redirect_uri == null) throw new BadRequestException("redirect_uri is missing!");
-		if (codeChallengeMethod==null || !codeChallengeMethod.equals("S256")) throw new BadRequestException("code_challenge_method must be 'S256'");
-		if (codeChallenge==null || codeChallenge.trim().length()==0) throw new BadRequestException("code_challenge is missing!");			
+		if (!disableCodeChallenge) {
+		  if (codeChallengeMethod==null || !codeChallengeMethod.equals("S256")) throw new BadRequestException("code_challenge_method must be 'S256'");
+		  if (codeChallenge==null || codeChallenge.trim().length()==0) throw new BadRequestException("code_challenge is missing!");
+		}
 		
 		if (tokenType!=null && !tokenType.equals("Bearer")) throw new BadRequestException("token_type must be Bearer");
 		
@@ -93,6 +100,10 @@ public class AuthRequestConverter {
 		return buildAssertionRequestFromIdp(authorization, request.getScope());		
 	}
 	
+	private String decode(String in) {
+		return java.net.URLDecoder.decode(in, StandardCharsets.UTF_8);
+	}
+	
 	public AssertionRequest buildAssertionRequestFromIdp(@Body String authorization, @Header("scope") String scope) throws AuthException {
         								
 		if (authorization == null) throw new AuthException(400, "invalid_request", "missing IDP token");
@@ -104,9 +115,9 @@ public class AuthRequestConverter {
 		  if (scopePart.startsWith(RESOURCE_ID)) result.setResourceId(scopePart.substring(RESOURCE_ID.length()));
           if (scopePart.startsWith(ROLE)) result.setRole(token(scopePart.substring(ROLE.length()),"urn:oid:2.16.756.5.30.1.127.3.10.6"));
           if (scopePart.startsWith(PRINCIPAL_ID)) result.setPrincipalID(scopePart.substring(PRINCIPAL_ID.length()));
-          if (scopePart.startsWith(PRINCIPAL_NAME)) result.setPrincipalName(scopePart.substring(PRINCIPAL_NAME.length()));
+          if (scopePart.startsWith(PRINCIPAL_NAME)) result.setPrincipalName(decode(scopePart.substring(PRINCIPAL_NAME.length())));
           if (scopePart.startsWith(ORGANIZATION_ID)) result.addOrganizationID(scopePart.substring(ORGANIZATION_ID.length()));
-          if (scopePart.startsWith(ORGANIZATION_NAME)) result.addOrganizationName(scopePart.substring(ORGANIZATION_NAME.length()));
+          if (scopePart.startsWith(ORGANIZATION_NAME)) result.addOrganizationName(decode(scopePart.substring(ORGANIZATION_NAME.length())));
 		}
 				
 		result.setSamlToken(authorization);

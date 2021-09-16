@@ -16,6 +16,9 @@
 
 package ch.bfh.ti.i4mi.mag.mhd.iti65;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,6 +206,8 @@ public class Iti65RequestConverter {
                 Attachment attachment = documentReference.getContentFirstRep().getAttachment();
                 if (attachment.hasData()) {
                 	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(attachment.getData(),attachment.getContentType())));
+                    entry.setSize((long) attachment.getData().length);
+                    entry.setHash(SHAsum(attachment.getData()));
                 } else if (attachment.hasUrl()) {
                     String contentURL = attachment.getUrl();                
 	                Resource binaryContent = resources.get(contentURL);
@@ -211,6 +216,8 @@ public class Iti65RequestConverter {
 	                	Binary binary = (Binary) binaryContent;	         
 	                	if (binary.hasContentType() && !binary.getContentType().equals(contentType)) throw new InvalidRequestException("ContentType in Binary and in DocumentReference must match");
 	                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(binary.getData(),contentType)));
+	                	entry.setSize((long) binary.getData().length);
+	                    entry.setHash(SHAsum(binary.getData()));
 	                	Identifier masterIdentifier = documentReference.getMasterIdentifier();
 	                    binary.setUserData("masterIdentifier", noPrefix(masterIdentifier.getValue()));	                	
                     }
@@ -414,7 +421,9 @@ public class Iti65RequestConverter {
 			
 			MultiValueMap<String, String> vals = UriComponentsBuilder.fromUriString(targetRef).build().getQueryParams();
 			if (vals.containsKey("identifier")) {
-				String[] identifier = vals.getFirst("identifier").split("\\|");
+				String ids = vals.getFirst("identifier");
+				if (ids == null) return null;
+				String[] identifier = ids.split("\\|");
 				if (identifier.length == 2) {
 					return new Identifiable(identifier[1], new AssigningAuthority(noPrefix(identifier[0])));
 				}
@@ -717,7 +726,7 @@ public class Iti65RequestConverter {
 				 entry.setLegalAuthenticator(transform((Practitioner) authenticator));	
 			 } else if (authenticator instanceof PractitionerRole) {
 				 Practitioner practitioner = (Practitioner) findResource(((PractitionerRole) authenticator).getPractitioner(), reference.getContained());
-				 if (practitioner != null) entry.setLegalAuthenticator(transform((Practitioner) authenticator));
+				 if (practitioner != null) entry.setLegalAuthenticator(transform(practitioner));
 			 } else throw new InvalidRequestException("No authenticator of type Organization supported.");			
 		}
 		             
@@ -1001,6 +1010,21 @@ public class Iti65RequestConverter {
 		
     	//return null;
     }
+	
+	public String SHAsum(byte[] convertme) {
+		try {
+	    MessageDigest md = MessageDigest.getInstance("SHA-1"); 
+	    return byteArray2Hex(md.digest(convertme));
+		} catch (NoSuchAlgorithmException e) { return ""; }
+	}
+
+	private  String byteArray2Hex(final byte[] hash) {
+	    Formatter formatter = new Formatter();
+	    for (byte b : hash) {
+	        formatter.format("%02x", b);
+	    }
+	    return formatter.toString();
+	}
 	
 	
 }

@@ -19,6 +19,7 @@ package ch.bfh.ti.i4mi.mag.xua;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 
+import javax.xml.XMLConstants;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
@@ -52,7 +53,11 @@ public class AssertionExtractor {
 		log.debug("NODE: "+node.toString());
 		
 		StringWriter writer = new StringWriter();
-		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		TransformerFactory factory = TransformerFactory.newInstance();
+		//factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "all");
+		//factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "all");
+		
+		Transformer transformer = factory.newTransformer();
         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 		transformer.transform(new DOMSource(node), new StreamResult(writer));
 		
