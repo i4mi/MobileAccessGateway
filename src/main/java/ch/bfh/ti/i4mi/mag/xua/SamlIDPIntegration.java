@@ -17,6 +17,7 @@
 
 package ch.bfh.ti.i4mi.mag.xua;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,6 +28,8 @@ import java.util.Timer;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.velocity.app.VelocityEngine;
+import org.opensaml.saml2.metadata.provider.AbstractReloadingMetadataProvider;
+import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
 import org.opensaml.saml2.metadata.provider.HTTPMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
@@ -232,7 +235,9 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    // SAML 2.0 WebSSO Assertion Consumer
 	    @Bean
 	    public WebSSOProfileConsumer webSSOprofileConsumer() {
-	        return new WebSSOProfileConsumerImpl();
+	        WebSSOProfileConsumerImpl ret = new WebSSOProfileConsumerImpl();
+	        ret.setReleaseDOM(false);
+	        return ret;
 	    }
 	 
 	    // SAML 2.0 Holder-of-Key WebSSO Assertion Consumer
@@ -273,8 +278,14 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    @Value("${mag.iua.idp.key-alias}")
 	    private String keyAlias;
 	    
+	    @Value("${mag.iua.idp.tls-key-alias:}")
+	    private String tlsKeyAlias;
+	    
 	    @Value("${mag.iua.idp.key-password}")
 	    private String keyPassword;
+	    
+	    @Value("${mag.iua.idp.tls-key-password:}")
+	    private String tlsKeyPassword;
 	    
 	    // Central storage of cryptographic keys
 	    @Bean	    
@@ -285,6 +296,9 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        String storePass = keystorePass;
 	        Map<String, String> passwords = new HashMap<String, String>();
 	        passwords.put(keyAlias, keyPassword);
+	        if (tlsKeyAlias != null && tlsKeyAlias.length()>0) {
+	          passwords.put(tlsKeyAlias, tlsKeyPassword);
+	        }
 	        String defaultKey = keyAlias;
 	        return new JKSKeyManager(storeFile, storePass, passwords, defaultKey);
 	    	
@@ -293,7 +307,8 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    @Bean
 	    public WebSSOProfileOptions defaultWebSSOProfileOptions() {
 	        WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
-	        webSSOProfileOptions.setIncludeScoping(false);	       
+	        webSSOProfileOptions.setIncludeScoping(false);	
+	       
 	        return webSSOProfileOptions;
 	    }
 	 
@@ -304,6 +319,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        SAMLEntryPoint samlEntryPoint = new SAMLEntryPoint();
 	        samlEntryPoint.setDefaultProfileOptions(defaultWebSSOProfileOptions());
 	        return samlEntryPoint;
+	      
 	    }
 	    
 	    // Setup advanced info about metadata
@@ -314,7 +330,11 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 		    extendedMetadata.setSigningAlgorithm("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
 		    extendedMetadata.setSignMetadata(true);
 		    extendedMetadata.setEcpEnabled(true);
-		    extendedMetadata.setRequireArtifactResolveSigned(false);
+		    
+		    extendedMetadata.setRequireArtifactResolveSigned(true);
+		    if (tlsKeyAlias != null && tlsKeyAlias.length()>0) {
+		      extendedMetadata.setTlsKey(tlsKeyAlias);
+		    }
 		    return extendedMetadata;
 	    }
 	    
@@ -334,11 +354,17 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 		public ExtendedMetadataDelegate ssoCircleExtendedMetadataProvider()
 				throws MetadataProviderException {
 			String idpSSOCircleMetadataURL = metadataUrl;
-			HTTPMetadataProvider httpMetadataProvider = new HTTPMetadataProvider(
+			AbstractReloadingMetadataProvider prov;
+			if (metadataUrl.startsWith("http:") || metadataUrl.startsWith("https:")) {
+			        prov = new HTTPMetadataProvider(
 					this.backgroundTaskTimer, httpClient(), idpSSOCircleMetadataURL);
-			httpMetadataProvider.setParserPool(parserPool());
+			
+			} else {
+				prov = new FilesystemMetadataProvider(new File(metadataUrl));
+			}
+			prov.setParserPool(parserPool());
 			ExtendedMetadataDelegate extendedMetadataDelegate = 
-					new ExtendedMetadataDelegate(httpMetadataProvider, extendedMetadata());
+					new ExtendedMetadataDelegate(prov, extendedMetadata());
 			extendedMetadataDelegate.setMetadataTrustCheck(true);
 			extendedMetadataDelegate.setMetadataRequireSignature(false);
 			backgroundTaskTimer.purge();
@@ -378,8 +404,10 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        Collection<String> bindings = new ArrayList<String>();
 	        bindings.add("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact");
 	        // Uncomment to use HTTP-Artificat
-	        //metadataGenerator.setBindingsSSO(bindings);
+	        metadataGenerator.setBindingsSSO(bindings);
 	        return metadataGenerator;
+	        
+	       
 	    }
 	    
 	    // The filter is waiting for connections on URL suffixed with filterSuffix

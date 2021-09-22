@@ -51,7 +51,7 @@ public class AssertionRequest {
 	private List<String> organizationName;
 	
 	@Getter @Setter
-	private String samlToken;
+	private Object samlToken;
 	
 	public void addOrganizationID(String orgId) {
 		if (organizationID==null) organizationID = new ArrayList<String>();
