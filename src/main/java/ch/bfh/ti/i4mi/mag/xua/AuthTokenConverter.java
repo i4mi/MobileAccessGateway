@@ -26,6 +26,7 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
+import org.apache.camel.Message;
 //import org.apache.camel.Header;
 import org.apache.camel.Processor;
 import org.apache.camel.util.CastUtils;
@@ -34,10 +35,13 @@ import org.apache.cxf.headers.Header;
 import org.apache.cxf.headers.Header.Direction;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.openehealth.ipf.commons.ihe.ws.cxf.audit.AbstractAuditInterceptor;
+import org.openehealth.ipf.commons.ihe.ws.cxf.audit.AuditInRequestInterceptor;
+import org.openehealth.ipf.commons.ihe.ws.cxf.audit.AuditOutRequestInterceptor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 
 /**
  * Use IHE-SAML Header from request as SOAP wsse Security Header
@@ -109,11 +113,12 @@ public class AuthTokenConverter {
                 
                 String userName = alias+"<"+user+"@"+issuer+">";                
                                
-				newHeader = new SoapHeader(new QName("soapHeader"), headerDocument);
+				newHeader = new SoapHeader(new QName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Security"), headerDocument);
 				newHeader.setDirection(Direction.DIRECTION_OUT);
 
 				soapHeaders.add(newHeader);
-																				
+				Message msg = exchange.getMessage();
+				
 				exchange.getMessage().setHeader(OUTGOING_SOAP_HEADERS, soapHeaders);
 				exchange.setProperty("UserName", userName);
 				

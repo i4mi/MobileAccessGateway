@@ -33,6 +33,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.camel.Body;
 import org.apache.cxf.staxutils.StaxUtils;
+import org.opensaml.saml2.core.Assertion;
 import org.springframework.beans.factory.annotation.Value;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -177,24 +178,30 @@ public class Iti40RequestGenerator {
 	
 	 public SOAPMessage buildAssertion(@Body AssertionRequest request) throws SOAPException, IOException, XMLStreamException, AuthException {
 		 		 		
-		 String token = request.getSamlToken();
+		 Object token = request.getSamlToken();
 		 if (token == null) throw new AuthException(400, "server_error", "No SAML token found");
+		 log.info(token.getClass().getSimpleName());
 		 /*if (token.startsWith("IHE-SAML ")) token = token.substring("IHE-SAML ".length());			
 		 byte[] decoded = Base64.getDecoder().decode(token);
 		 token = new String(decoded);*/
-		 if (token.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")) token = token.substring("<?xml version=\"1.0\" encoding=\"UTF-8\"?>".length());
-		 log.debug("Decoded IDP Token:"+token);
+		 if (token instanceof String && token.toString().startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")) token = token.toString().substring("<?xml version=\"1.0\" encoding=\"UTF-8\"?>".length());
+		 log.info("Decoded IDP Token:"+token);
 		 
 		 MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
 		 SOAPMessage message = factory.createMessage(new MimeHeaders(), new ByteArrayInputStream(BASE_MSG().getBytes(Charset.forName("UTF-8"))));
 
 		 message.getSOAPHeader().addChildElement("MessageID","wsa","http://www.w3.org/2005/08/addressing").addTextNode(UUID.randomUUID().toString());
-		 Element elem = addSecurityHeader(token);
-		 
-		 Node node = message.getSOAPHeader().getOwnerDocument().importNode(elem, true);
-		 		 
-		 message.getSOAPHeader().addChildElement("Security", "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd").appendChild(node);
-		 
+		 if (token instanceof String) {
+		     Element elem = addSecurityHeader(token.toString());
+		     Node node = message.getSOAPHeader().getOwnerDocument().importNode(elem, true);	 
+	    	 message.getSOAPHeader().addChildElement("Security", "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd").appendChild(node);
+		 } else {
+			
+			 Element elem = ((Element) token);
+			 Node node = message.getSOAPHeader().getOwnerDocument().importNode(elem, true);
+			 message.getSOAPHeader().addChildElement("Security", "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd").appendChild(node);
+			 
+		 }
 		 SOAPElement claims = (SOAPElement) message.getSOAPBody().getElementsByTagNameNS("http://docs.oasis-open.org/ws-sx/ws-trust/200512", "Claims").item(0);
 		 if (request.getResourceId() != null) {
 		     addResourceId(claims, request.getResourceId()); // format "761337610435200998^^^&2.16.756.5.30.1.127.3.10.3&ISO"

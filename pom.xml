@@ -140,6 +140,10 @@
             <artifactId>ipf-platform-camel-ihe-hl7v3</artifactId>            
         </dependency>
 
+        <dependency>
+            <groupId>org.openehealth.ipf.commons</groupId>
+            <artifactId>ipf-commons-ihe-xua</artifactId>            
+        </dependency>
 		<!-- nsatisfied dependency expressed through field 'config'; nested exception 
 			is org.springframework.boot.context.properties.ConfigurationPropertiesBindException: 
 			Error creating bean with name 'ipf.fhir-org.openehealth.ipf.boot.fhir.IpfFhirConfigurationProperties': 

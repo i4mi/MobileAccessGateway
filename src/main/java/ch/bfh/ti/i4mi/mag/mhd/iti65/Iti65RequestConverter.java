@@ -18,6 +18,7 @@ package ch.bfh.ti.i4mi.mag.mhd.iti65;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
@@ -222,7 +223,6 @@ public class Iti65RequestConverter {
 	                    binary.setUserData("masterIdentifier", noPrefix(masterIdentifier.getValue()));	                	
                     }
                 }
-             
                 builder.withDocument(doc);
 			}
 		}
@@ -579,7 +579,7 @@ public class Iti65RequestConverter {
 	private  void processDocumentManifest(ListResource manifest, SubmissionSet submissionSet) {
 		
 		for (Identifier id : manifest.getIdentifier()) {
-			if (id.getUse().equals(Identifier.IdentifierUse.OFFICIAL)) {
+			if (id.getUse() == null ||  id.getUse().equals(Identifier.IdentifierUse.OFFICIAL)) {
 							
 			} else if (id.getUse().equals(Identifier.IdentifierUse.USUAL)) {
 				String uniqueId = noPrefix(id.getValue());				
@@ -820,6 +820,16 @@ public class Iti65RequestConverter {
         // practiceSettingCode -> context.practiceSetting CodeableConcept [0..1]
         entry.setPracticeSettingCode(transformCodeableConcept(context.getPracticeSetting()));
         
+        Extension originalRole = reference.getExtensionByUrl("http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-author-authorrole");
+        if (originalRole != null) {
+        	if (originalRole.getValue() instanceof Coding) {
+        		Coding value = (Coding) originalRole.getValue();
+        		String system = noPrefix(value.getSystem());
+        		String code = value.getCode();
+        		entry.setExtraMetadata(Collections.singletonMap("urn:e-health-suisse:2020:originalProviderRole", Collections.singletonList(code+"^^^&"+system+"&ISO")));
+        	}
+        }
+        		
        
         // sourcePatientId and sourcePatientInfo -> context.sourcePatientInfo
         // Reference(Patient) [0..1] Contained Patient Resource with
