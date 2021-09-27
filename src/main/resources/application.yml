@@ -77,6 +77,9 @@ server:
   port: 9091 # Application listening port for HTTPS
   http:
     port: 9090 # Application listening port for HTTP. Remove line to disable.
+  servlet:
+    session:
+      timeout: 1m
 
 logging:
   level:

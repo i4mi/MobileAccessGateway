@@ -308,7 +308,8 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    public WebSSOProfileOptions defaultWebSSOProfileOptions() {
 	        WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
 	        webSSOProfileOptions.setIncludeScoping(false);	
-	       
+	        //webSSOProfileOptions.setForceAuthN(true);
+	        webSSOProfileOptions.setPassive(false);
 	        return webSSOProfileOptions;
 	    }
 	 
