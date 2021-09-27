@@ -37,13 +37,11 @@ import org.apache.cxf.staxutils.StaxUtils;
 import org.openehealth.ipf.commons.ihe.ws.cxf.audit.AbstractAuditInterceptor;
 import org.openehealth.ipf.commons.ihe.ws.cxf.audit.AuditInRequestInterceptor;
 import org.openehealth.ipf.commons.ihe.ws.cxf.audit.AuditOutRequestInterceptor;
-import org.openehealth.ipf.commons.ihe.xua.BasicXuaProcessor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import ch.bfh.ti.i4mi.mag.audit.MyXuaProcessor;
 
 /**
  * Use IHE-SAML Header from request as SOAP wsse Security Header
