@@ -19,8 +19,8 @@
 
 		<java.version>11</java.version>
 
-		<ipf-version>4.1.0</ipf-version>
-		<camel-version>3.7.0</camel-version>
+		<ipf-version>4.2-SNAPSHOT</ipf-version>
+		<camel-version>3.11.2</camel-version>
 		<start-class>ch.bfh.ti.i4mi.mag.MobileAccessGateway</start-class>
 	</properties>
 
@@ -209,7 +209,7 @@
         <dependency>
           <groupId>org.apache.camel</groupId>
           <artifactId>camel-jackson</artifactId>
-          <version>3.5.0</version>        
+          <version>${camel-version}</version>
         </dependency>
         
         <dependency>

@@ -16,17 +16,15 @@
 
 package ch.bfh.ti.i4mi.mag;
 
+import java.util.ArrayList;
+
 import org.apache.camel.support.jsse.KeyManagersParameters;
 import org.apache.camel.support.jsse.KeyStoreParameters;
 import org.apache.camel.support.jsse.SSLContextParameters;
 import org.apache.camel.support.jsse.TrustManagersParameters;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.openehealth.ipf.commons.audit.AuditContext;
-import org.openehealth.ipf.commons.audit.CustomTlsParameters;
 import org.openehealth.ipf.commons.audit.DefaultAuditContext;
-import org.openehealth.ipf.commons.audit.protocol.TLSSyslogSenderImpl;
-import org.openehealth.ipf.commons.audit.protocol.TLSSyslogSenderImpl.SocketTestPolicy;
-import org.openehealth.ipf.commons.audit.types.AuditSource;
-import org.openehealth.ipf.commons.ihe.ws.cxf.audit.AbstractAuditInterceptor;
 import org.openehealth.ipf.commons.ihe.ws.cxf.payload.InPayloadLoggerInterceptor;
 import org.openehealth.ipf.commons.ihe.ws.cxf.payload.OutPayloadLoggerInterceptor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,10 +32,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.web.DefaultSecurityFilterChain;
-import org.springframework.security.web.SecurityFilterChain;
 
-import ch.bfh.ti.i4mi.mag.audit.TLSCloseSocket;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
+import ca.uhn.fhir.rest.server.ResourceBinding;
+import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
+import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import lombok.Data;
@@ -167,6 +168,7 @@ public class Config {
      */
     public String getUriPatientEndpoint() { return baseurl+"/fhir/Patient"; };
    
+    public String getUriFhirEndpoint() { return baseurl+"/fhir"; };
     
    
     @Value("${mag.client-ssl.key-store:}")
@@ -290,6 +292,22 @@ public class Config {
     public PatientReferenceCreator getPatientReferenceCreator() {
     	return new PatientReferenceCreator();
     }
-            
-    
+
+    @Bean
+    public IServerConformanceProvider<IBaseConformance> serverConformanceProvider(FhirContext fhirContext,
+            RestfulServerConfiguration theServerConfiguration) {
+        return new ServerCapabilityStatementProvider(fhirContext, theServerConfiguration);
+    }
+
+    // use to fix https://github.com/i4mi/MobileAccessGateway/issues/56, however we have the CapabilityStatement not filled out anymore
+    @SuppressWarnings("unchecked")
+	@Bean
+    public RestfulServerConfiguration serverConfiguration() {
+        RestfulServerConfiguration config = new RestfulServerConfiguration();
+        config.setResourceBindings(new ArrayList<ResourceBinding>());
+        config.setServerBindings(new ArrayList());
+        config.setServerAddressStrategy(new HardcodedServerAddressStrategy(getUriFhirEndpoint()));
+        return config;
+    }
+
 }
