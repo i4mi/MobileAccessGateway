@@ -274,6 +274,7 @@ public class Config {
     public FilterRegistrationBean<Filter> corsFilterRegistration() {
         var frb = new FilterRegistrationBean<>();
         // Overwirte cors, otherwise we cannot access /camel/ via javascript
+        // need to crosscheck with ch.bfh.ti.i4mi.mag.xuaSamlIDPIntegration
         frb.addUrlPatterns("/fhir/*", "/camel/*");
         frb.setFilter(new CorsFilter(request -> defaultCorsConfiguration()));
         return frb;
