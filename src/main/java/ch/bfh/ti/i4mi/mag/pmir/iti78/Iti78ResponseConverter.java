@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
+import ch.bfh.ti.i4mi.mag.pmir.BasePMIRResponseConverter;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import net.ihe.gazelle.hl7v3.coctmt030007UV.COCTMT030007UVPerson;
 import net.ihe.gazelle.hl7v3.datatypes.AD;
@@ -57,6 +58,7 @@ import net.ihe.gazelle.hl7v3.datatypes.AdxpStreetName;
 import net.ihe.gazelle.hl7v3.datatypes.BL;
 import net.ihe.gazelle.hl7v3.datatypes.CE;
 import net.ihe.gazelle.hl7v3.datatypes.CS;
+import net.ihe.gazelle.hl7v3.datatypes.ED;
 import net.ihe.gazelle.hl7v3.datatypes.EN;
 import net.ihe.gazelle.hl7v3.datatypes.ENXP;
 import net.ihe.gazelle.hl7v3.datatypes.EnFamily;
@@ -71,6 +73,8 @@ import net.ihe.gazelle.hl7v3.datatypes.PN;
 import net.ihe.gazelle.hl7v3.datatypes.ST;
 import net.ihe.gazelle.hl7v3.datatypes.TEL;
 import net.ihe.gazelle.hl7v3.datatypes.TS;
+import net.ihe.gazelle.hl7v3.mccimt000300UV01.MCCIMT000300UV01Acknowledgement;
+import net.ihe.gazelle.hl7v3.mccimt000300UV01.MCCIMT000300UV01AcknowledgementDetail;
 import net.ihe.gazelle.hl7v3.prpain201306UV02.PRPAIN201306UV02MFMIMT700711UV01ControlActProcess;
 import net.ihe.gazelle.hl7v3.prpain201306UV02.PRPAIN201306UV02MFMIMT700711UV01RegistrationEvent;
 import net.ihe.gazelle.hl7v3.prpain201306UV02.PRPAIN201306UV02MFMIMT700711UV01Subject1;
@@ -89,7 +93,7 @@ import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
  *
  */
 @Component
-public class Iti78ResponseConverter implements ToFhirTranslator<byte[]> {
+public class Iti78ResponseConverter extends BasePMIRResponseConverter implements ToFhirTranslator<byte[]> {
 
 	@Autowired
 	PatientReferenceCreator patientRefCreator;
@@ -119,6 +123,7 @@ public class Iti78ResponseConverter implements ToFhirTranslator<byte[]> {
 		return in.getListStringValues().get(0);
 	}
 	
+		
 	public String val(List<? extends ST> in) {
 		if (in == null || in.isEmpty()) return null;
 		String result = null;
@@ -218,14 +223,20 @@ public class Iti78ResponseConverter implements ToFhirTranslator<byte[]> {
         PRPAIN201306UV02Type msg = HL7V3Transformer.unmarshallMessage(PRPAIN201306UV02Type.class, new ByteArrayInputStream(content.getBytes()));
       
 		PRPAIN201306UV02MFMIMT700711UV01ControlActProcess controlAct = msg.getControlActProcess();
-				
+		List<MCCIMT000300UV01Acknowledgement> acks = msg.getAcknowledgement();
+		String errtext = "";
+		for (MCCIMT000300UV01Acknowledgement ack : acks) {
+			for (MCCIMT000300UV01AcknowledgementDetail ackDetail : ack.getAcknowledgementDetail()) {
+				if (ackDetail.getText() != null) errtext+=toText(ackDetail.getText());
+			}
+		}
 		// OK NF AE
 		String queryResponseCode = controlAct.getQueryAck().getQueryResponseCode().getCode();
 		if ("NF".equals(queryResponseCode)) {			
-			throw new ResourceNotFoundException("sourceIdentifier Patient Identifier not found", error(IssueType.NOTFOUND, "sourceIdentifier Patient Identifier not found"));
+			throw new ResourceNotFoundException("sourceIdentifier Patient Identifier not found", error(IssueType.NOTFOUND, errtext.length()>0 ? errtext : "sourceIdentifier Patient Identifier not found"));
 		}
 		if ("AE".equals(queryResponseCode)) {
-			throw new InvalidRequestException("sourceIdentifier Assigning Authority not found", error(IssueType.INVALID, "sourceIdentifier Assigning Authority not found"));
+			throw new InvalidRequestException("sourceIdentifier Assigning Authority not found", error(IssueType.INVALID, errtext.length()>0 ? errtext : "sourceIdentifier Assigning Authority not found"));
 		}
 		
 		List<PRPAIN201306UV02MFMIMT700711UV01Subject1> subjects = controlAct.getSubject();
