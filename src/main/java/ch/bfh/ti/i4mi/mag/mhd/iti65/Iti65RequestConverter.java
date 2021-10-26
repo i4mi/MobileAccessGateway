@@ -217,8 +217,11 @@ public class Iti65RequestConverter {
 	                	Binary binary = (Binary) binaryContent;	         
 	                	if (binary.hasContentType() && !binary.getContentType().equals(contentType)) throw new InvalidRequestException("ContentType in Binary and in DocumentReference must match");
 	                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(binary.getData(),contentType)));
-	                	entry.setSize((long) binary.getData().length);
-	                    entry.setHash(SHAsum(binary.getData()));
+	
+	// CARA PMP "text": "The provided size metadata does not match the content in document '%s' [IHE ITI Technical Framework Volume 2b (3.41.4.1.3)]."
+	// FIXME: Assuming if this needs to be set we have to calculated it not in the base64 encoded but directly on the binary encoding 
+	//                	entry.setSize((long) binary.getData().length);
+	//                    entry.setHash(SHAsum(binary.getData()));
 	                	Identifier masterIdentifier = documentReference.getMasterIdentifier();
 	                    binary.setUserData("masterIdentifier", noPrefix(masterIdentifier.getValue()));	                	
                     }
@@ -979,6 +982,12 @@ public class Iti65RequestConverter {
 		if (author == null || author.getReference() == null) {
 		    if (authorRole!=null) {
 	            Author result = new Author();
+	            Person person = new Person();
+	            // CARA PMP 
+	            // At least an authorPerson, authorTelecommunication, or authorInstitution sub-attribute must be present 
+	            // Either authorPerson, authorInstitution or authorTelecom shall be specified in the SubmissionSet [IHE ITI Technical Framework Volume 3 (4.2.3.1.4)].
+	            person.setName(transform(new HumanName().setFamily("---")));
+	            result.setAuthorPerson(person);
 	            result.getAuthorRole().add(authorRole);
 	            return result;
 		    }

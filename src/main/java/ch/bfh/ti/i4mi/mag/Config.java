@@ -16,28 +16,37 @@
 
 package ch.bfh.ti.i4mi.mag;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import javax.servlet.Filter;
+
 import org.apache.camel.support.jsse.KeyManagersParameters;
 import org.apache.camel.support.jsse.KeyStoreParameters;
 import org.apache.camel.support.jsse.SSLContextParameters;
 import org.apache.camel.support.jsse.TrustManagersParameters;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.openehealth.ipf.commons.audit.AuditContext;
-import org.openehealth.ipf.commons.audit.CustomTlsParameters;
 import org.openehealth.ipf.commons.audit.DefaultAuditContext;
-import org.openehealth.ipf.commons.audit.protocol.TLSSyslogSenderImpl;
-import org.openehealth.ipf.commons.audit.protocol.TLSSyslogSenderImpl.SocketTestPolicy;
-import org.openehealth.ipf.commons.audit.types.AuditSource;
-import org.openehealth.ipf.commons.ihe.ws.cxf.audit.AbstractAuditInterceptor;
 import org.openehealth.ipf.commons.ihe.ws.cxf.payload.InPayloadLoggerInterceptor;
 import org.openehealth.ipf.commons.ihe.ws.cxf.payload.OutPayloadLoggerInterceptor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.web.DefaultSecurityFilterChain;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.filter.CorsFilter;
 
-import ch.bfh.ti.i4mi.mag.audit.TLSCloseSocket;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
+import ca.uhn.fhir.rest.server.ResourceBinding;
+import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
+import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import lombok.Data;
@@ -53,10 +62,6 @@ import lombok.Data;
 @Data
 public class Config {
 
-  
-   // --------------------------------------
-   // XDS Configuration
-   // ---------------------------------------
 
    /**
     * Use HTTPS for XDS ?
@@ -167,6 +172,7 @@ public class Config {
      */
     public String getUriPatientEndpoint() { return baseurl+"/fhir/Patient"; };
    
+    public String getUriFhirEndpoint() { return baseurl+"/fhir"; };
     
    
     @Value("${mag.client-ssl.key-store:}")
@@ -261,6 +267,32 @@ public class Config {
             	    	
         return context;	
     }
+    
+    @Bean
+    @ConditionalOnMissingBean(name = "corsFilterRegistration")
+    @ConditionalOnWebApplication
+    public FilterRegistrationBean<Filter> corsFilterRegistration() {
+        var frb = new FilterRegistrationBean<>();
+        // Overwirte cors, otherwise we cannot access /camel/ via javascript
+        // need to crosscheck with ch.bfh.ti.i4mi.mag.xuaSamlIDPIntegration
+        frb.addUrlPatterns("/fhir/*", "/camel/*");
+        frb.setFilter(new CorsFilter(request -> defaultCorsConfiguration()));
+        return frb;
+    }
+
+    private static CorsConfiguration defaultCorsConfiguration() {
+        var cors = new CorsConfiguration();
+        cors.addAllowedOrigin("*");
+        cors.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+        // A comma separated list of allowed headers when making a non simple CORS request.
+        cors.setAllowedHeaders(Arrays.asList("Origin", "Accept", "Content-Type",
+                "Access-Control-Request-Method", "Access-Control-Request-Headers", "Authorization",
+                "Prefer", "If-Match", "If-None-Match", "If-Modified-Since", "If-None-Exist"));
+        cors.setExposedHeaders(Arrays.asList("Location", "Content-Location", "ETag", "Last-Modified"));
+        cors.setMaxAge(300L);
+        return cors;
+    }
+
         
     // ---------------------------------------------
     // Logging configuration
@@ -290,6 +322,22 @@ public class Config {
     public PatientReferenceCreator getPatientReferenceCreator() {
     	return new PatientReferenceCreator();
     }
-            
-    
+
+    @Bean
+    public IServerConformanceProvider<IBaseConformance> serverConformanceProvider(FhirContext fhirContext,
+            RestfulServerConfiguration theServerConfiguration) {
+        return new ServerCapabilityStatementProvider(fhirContext, theServerConfiguration);
+    }
+
+    // use to fix https://github.com/i4mi/MobileAccessGateway/issues/56, however we have the CapabilityStatement not filled out anymore
+    @SuppressWarnings("unchecked")
+	@Bean
+    public RestfulServerConfiguration serverConfiguration() {
+        RestfulServerConfiguration config = new RestfulServerConfiguration();
+        config.setResourceBindings(new ArrayList<ResourceBinding>());
+        config.setServerBindings(new ArrayList());
+        config.setServerAddressStrategy(new HardcodedServerAddressStrategy(getUriFhirEndpoint()));
+        return config;
+    }
+
 }
