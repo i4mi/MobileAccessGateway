@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
+import ch.bfh.ti.i4mi.mag.pmir.BasePMIRResponseConverter;
 import net.ihe.gazelle.hl7v3.datatypes.CE;
 import net.ihe.gazelle.hl7v3.datatypes.CS;
 import net.ihe.gazelle.hl7v3.datatypes.ED;
@@ -56,7 +57,7 @@ import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
  *
  */
 @Component
-public class Iti93ResponseConverter implements ToFhirTranslator<byte[]> {
+public class Iti93ResponseConverter extends BasePMIRResponseConverter implements ToFhirTranslator<byte[]> {
 
 	@Autowired
 	private Config config;
@@ -121,13 +122,5 @@ public class Iti93ResponseConverter implements ToFhirTranslator<byte[]> {
 		return new Coding(code.getCodeSystem(),code.getCode(),code.getDisplayName());
 	}
 	
-	public String toText(ED in) {
-		StringBuffer result = new StringBuffer();
-		for (java.io.Serializable obj : in.getMixed()) {
-			if (obj instanceof String) {
-				result.append((String) obj);
-			}
-		}
-		return result.toString();
-	}
+	
 }

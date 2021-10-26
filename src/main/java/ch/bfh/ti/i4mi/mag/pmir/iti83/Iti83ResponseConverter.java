@@ -26,9 +26,7 @@ import java.util.Set;
 import javax.xml.bind.JAXBException;
 
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
-import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
@@ -42,9 +40,12 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
+import ch.bfh.ti.i4mi.mag.pmir.BasePMIRResponseConverter;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import net.ihe.gazelle.hl7v3.datatypes.CS;
 import net.ihe.gazelle.hl7v3.datatypes.II;
+import net.ihe.gazelle.hl7v3.mccimt000300UV01.MCCIMT000300UV01Acknowledgement;
+import net.ihe.gazelle.hl7v3.mccimt000300UV01.MCCIMT000300UV01AcknowledgementDetail;
 import net.ihe.gazelle.hl7v3.prpain201310UV02.PRPAIN201310UV02MFMIMT700711UV01ControlActProcess;
 import net.ihe.gazelle.hl7v3.prpain201310UV02.PRPAIN201310UV02MFMIMT700711UV01Subject1;
 import net.ihe.gazelle.hl7v3.prpain201310UV02.PRPAIN201310UV02Type;
@@ -56,7 +57,7 @@ import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
  *
  */
 @Component
-public class Iti83ResponseConverter implements ToFhirTranslator<byte[]> {
+public class Iti83ResponseConverter extends BasePMIRResponseConverter implements ToFhirTranslator<byte[]> {
 
 	@Autowired
 	PatientReferenceCreator patientRefCreator;
@@ -64,16 +65,6 @@ public class Iti83ResponseConverter implements ToFhirTranslator<byte[]> {
 	@Autowired
 	private Config config;
 
-	public OperationOutcome error(IssueType type, String diagnostics) {
-		OperationOutcome result = new OperationOutcome();
-		
-		OperationOutcomeIssueComponent issue = result.addIssue();
-		issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
-		issue.setCode(type);
-		issue.setDiagnostics(diagnostics);
-		return result;
-	}
-	
 	public Parameters translateToFhir(byte[] input, Map<String, Object> parameters)  {
 		try {
 			
@@ -87,14 +78,20 @@ public class Iti83ResponseConverter implements ToFhirTranslator<byte[]> {
 		Parameters response = new Parameters();
 		
 		PRPAIN201310UV02MFMIMT700711UV01ControlActProcess controlAct = msg.getControlActProcess();
-				
+		List<MCCIMT000300UV01Acknowledgement> acks = msg.getAcknowledgement();
+		String errtext = "";
+		for (MCCIMT000300UV01Acknowledgement ack : acks) {
+			for (MCCIMT000300UV01AcknowledgementDetail ackDetail : ack.getAcknowledgementDetail()) {
+				if (ackDetail.getText() != null) errtext+=toText(ackDetail.getText());
+			}
+		}
 		// OK NF AE
 		String queryResponseCode = controlAct.getQueryAck().getQueryResponseCode().getCode();
 		if ("NF".equals(queryResponseCode)) {			
-			throw new ResourceNotFoundException("sourceIdentifier Patient Identifier not found", error(IssueType.NOTFOUND, "sourceIdentifier Patient Identifier not found"));
+			throw new ResourceNotFoundException("sourceIdentifier Patient Identifier not found", error(IssueType.NOTFOUND, errtext.length()>0 ? errtext : "sourceIdentifier Patient Identifier not found"));
 		}
 		if ("AE".equals(queryResponseCode)) {
-			throw new InvalidRequestException("sourceIdentifier Assigning Authority not found", error(IssueType.INVALID, "sourceIdentifier Assigning Authority not found"));
+			throw new InvalidRequestException("sourceIdentifier Assigning Authority not found", error(IssueType.INVALID, errtext.length()>0 ? errtext : "sourceIdentifier Assigning Authority not found"));
 		}
 		
 		Set<String> acceptedTargetSystem = new HashSet<String>();
