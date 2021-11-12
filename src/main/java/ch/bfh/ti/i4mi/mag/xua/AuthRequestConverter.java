@@ -97,15 +97,19 @@ public class AuthRequestConverter {
 		if (auth == null) throw new AuthException(400, "access_denied", "authentication failed");
 		Object authorization = auth.getPrincipal();
 						
-		return buildAssertionRequestFromIdp(authorization, request.getScope());		
+		return buildAssertionRequestInternal(authorization, request.getScope());		
 	}
 	
 	private String decode(String in) {
 		return java.net.URLDecoder.decode(in, StandardCharsets.UTF_8);
 	}
 	
-	public AssertionRequest buildAssertionRequestFromIdp(@Body Object authorization, @Header("scope") String scope) throws AuthException {
-        								
+	public AssertionRequest buildAssertionRequestFromIdp(@Body String authorization, @Header("scope") String scope) throws AuthException {
+		return buildAssertionRequestInternal(authorization, scope);
+	}
+		
+	private AssertionRequest buildAssertionRequestInternal(Object authorization, String scope) throws AuthException {
+		
 		if (authorization == null) throw new AuthException(400, "invalid_request", "missing IDP token");
 		if (scope == null || scope.length()==0) throw new AuthException(400, "invalid_request", "missing scope parameter");
 		AssertionRequest result = new AssertionRequest();		
