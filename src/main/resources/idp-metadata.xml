@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     This is example metadata only. Do *NOT* supply it as is without review,
+     and do *NOT* provide it in real time to your partners.
+
+     This metadata is not dynamic - it will not change as your configuration changes.
+-->
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:shibmd="urn:mace:shibboleth:metadata:1.0" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui" entityID="https://ehealthsuisse.ihe-europe.net/idp/shibboleth">
+
+    <IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol urn:oasis:names:tc:SAML:1.1:protocol urn:mace:shibboleth:1.0">
+
+        <Extensions>
+            <shibmd:Scope regexp="false">ihe-europe.net</shibmd:Scope>
+<!--
+    Fill in the details for your IdP here 
+
+            <mdui:UIInfo>
+                <mdui:DisplayName xml:lang="en">A Name for the IdP at ehealthsuisse.ihe-europe.net</mdui:DisplayName>
+                <mdui:Description xml:lang="en">Enter a description of your IdP at ehealthsuisse.ihe-europe.net</mdui:Description>
+                <mdui:Logo height="80" width="80">https://ehealthsuisse.ihe-europe.net/Path/To/Logo.png</mdui:Logo>
+            </mdui:UIInfo>
+-->
+        </Extensions>
+<KeyDescriptor use="signing">
+            <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+                <X509Data>
+                    <X509Certificate>
+MIIDjTCCAvagAwIBAgICAI0wDQYJKoZIhvcNAQENBQAwRTELMAkGA1UEBhMCQ0gx
+DDAKBgNVBAoMA0lIRTEoMCYGA1UEAwwfZWhlYWx0aHN1aXNzZS5paGUtZXVyb3Bl
+Lm5ldCBDQTAeFw0xOTA0MDExMjQxMThaFw0yOTA0MDExMjQxMThaMCkxCzAJBgNV
+BAYTAkNIMQwwCgYDVQQKDANJSEUxDDAKBgNVBAMMA0lEUDCBnzANBgkqhkiG9w0B
+AQEFAAOBjQAwgYkCgYEAhmmz4AEhbH+80Nf5QLjvP9/Cukcvrk5ONVZ9hQjz2OeB
+GBiW6TdKrwX6GIY0ue6zN6mRFuRycKi4A0aVWsO+s4ByQPsnnXx4JKXYGkoSny7h
+gyxHxsEHiBZlMQLoqJ3jKYAR1SgLfdBEghAaDFEKF8hp8hwBMAp/WJY7eaZpXS0C
+AwEAAaOCAaYwggGiMB0GA1UdEQQWMBSCEmlkcC5paGUtZXVyb3BlLm5ldDBKBgNV
+HR8EQzBBMD+gPaA7hjlodHRwczovL2VoZWFsdGhzdWlzc2UuaWhlLWV1cm9wZS5u
+ZXQvZ3NzL2NybC8yMi9jYWNybC5jcmwwSAYJYIZIAYb4QgEEBDsWOWh0dHBzOi8v
+ZWhlYWx0aHN1aXNzZS5paGUtZXVyb3BlLm5ldC9nc3MvY3JsLzIyL2NhY3JsLmNy
+bDBIBglghkgBhvhCAQMEOxY5aHR0cHM6Ly9laGVhbHRoc3Vpc3NlLmloZS1ldXJv
+cGUubmV0L2dzcy9jcmwvMjIvY2FjcmwuY3JsMAkGA1UdEwQCMAAwDgYDVR0PAQH/
+BAQDAgTwMBEGCWCGSAGG+EIBAQQEAwIF4DAdBgNVHQ4EFgQU4Kj/ojx2cO5W9/hO
+lSFUVh8jT1gwHwYDVR0jBBgwFoAUKJfv3d4xWGxW8oZG4hHkPjhxXy8wMwYDVR0l
+BCwwKgYIKwYBBQUHAwIGCCsGAQUFBwMEBgorBgEEAYI3FAICBggrBgEFBQcDATAN
+BgkqhkiG9w0BAQ0FAAOBgQAvAQf3kRfC5hMAWFuKZKV7fOLklivFoELOl96i9O29
+i5wCEeiClubfH9X7nnfvKukhWdi0MFkRZqgLRXN1iDY6iKC6MnZHTUN6qgskn6m3
+S0rsRXN8/My/EM+lmcFR1/IWhHtW+aERI0XoXR8GrY/QSmn3TWgHfO6qLdrUEfvV
+ew==
+</X509Certificate>
+</X509Data>
+</KeyInfo>
+        </KeyDescriptor>
+
+        <ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding" Location="https://ehealthsuisse.ihe-europe.net:4443/idp/profile/SAML1/SOAP/ArtifactResolution" index="1"/>
+        <ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://ehealthsuisse.ihe-europe.net:4443/idp/profile/SAML2/SOAP/ArtifactResolution" index="2"/>
+
+        <!--
+        <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://ehealthsuisse.ihe-europe.net:4443/idp/profile/SAML2/Redirect/SLO"/>
+        <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://ehealthsuisse.ihe-europe.net:4443/idp/profile/SAML2/POST/SLO"/>
+        <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="https://ehealthsuisse.ihe-europe.net:4443/idp/profile/SAML2/POST-SimpleSign/SLO"/>
+        <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://ehealthsuisse.ihe-europe.net:4443:8443/idp/profile/SAML2/SOAP/SLO"/>
+        -->
+
+        <SingleSignOnService Binding="urn:mace:shibboleth:1.0:profiles:AuthnRequest" Location="https://ehealthsuisse.ihe-europe.net:4443/idp/profile/Shibboleth/SSO"/>
+        <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://ehealthsuisse.ihe-europe.net:4443/idp/profile/SAML2/POST/SSO"/>
+        <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="https://ehealthsuisse.ihe-europe.net:4443/idp/profile/SAML2/POST-SimpleSign/SSO"/>
+        <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://ehealthsuisse.ihe-europe.net:4443/idp/profile/SAML2/Redirect/SSO"/>
+	<SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://ehealthsuisse.ihe-europe.net:4443/idp/profile/SAML2/SOAP/ECP"/>
+
+    </IDPSSODescriptor>
+
+
+    <AttributeAuthorityDescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:1.1:protocol">
+
+	<Extensions>
+            <shibmd:Scope regexp="false">ihe-europe.net</shibmd:Scope>
+        </Extensions>
+<KeyDescriptor use="signing">
+            <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+                <X509Data>
+                    <X509Certificate>
+MIIDjTCCAvagAwIBAgICAI0wDQYJKoZIhvcNAQENBQAwRTELMAkGA1UEBhMCQ0gx
+DDAKBgNVBAoMA0lIRTEoMCYGA1UEAwwfZWhlYWx0aHN1aXNzZS5paGUtZXVyb3Bl
+Lm5ldCBDQTAeFw0xOTA0MDExMjQxMThaFw0yOTA0MDExMjQxMThaMCkxCzAJBgNV
+BAYTAkNIMQwwCgYDVQQKDANJSEUxDDAKBgNVBAMMA0lEUDCBnzANBgkqhkiG9w0B
+AQEFAAOBjQAwgYkCgYEAhmmz4AEhbH+80Nf5QLjvP9/Cukcvrk5ONVZ9hQjz2OeB
+GBiW6TdKrwX6GIY0ue6zN6mRFuRycKi4A0aVWsO+s4ByQPsnnXx4JKXYGkoSny7h
+gyxHxsEHiBZlMQLoqJ3jKYAR1SgLfdBEghAaDFEKF8hp8hwBMAp/WJY7eaZpXS0C
+AwEAAaOCAaYwggGiMB0GA1UdEQQWMBSCEmlkcC5paGUtZXVyb3BlLm5ldDBKBgNV
+HR8EQzBBMD+gPaA7hjlodHRwczovL2VoZWFsdGhzdWlzc2UuaWhlLWV1cm9wZS5u
+ZXQvZ3NzL2NybC8yMi9jYWNybC5jcmwwSAYJYIZIAYb4QgEEBDsWOWh0dHBzOi8v
+ZWhlYWx0aHN1aXNzZS5paGUtZXVyb3BlLm5ldC9nc3MvY3JsLzIyL2NhY3JsLmNy
+bDBIBglghkgBhvhCAQMEOxY5aHR0cHM6Ly9laGVhbHRoc3Vpc3NlLmloZS1ldXJv
+cGUubmV0L2dzcy9jcmwvMjIvY2FjcmwuY3JsMAkGA1UdEwQCMAAwDgYDVR0PAQH/
+BAQDAgTwMBEGCWCGSAGG+EIBAQQEAwIF4DAdBgNVHQ4EFgQU4Kj/ojx2cO5W9/hO
+lSFUVh8jT1gwHwYDVR0jBBgwFoAUKJfv3d4xWGxW8oZG4hHkPjhxXy8wMwYDVR0l
+BCwwKgYIKwYBBQUHAwIGCCsGAQUFBwMEBgorBgEEAYI3FAICBggrBgEFBQcDATAN
+BgkqhkiG9w0BAQ0FAAOBgQAvAQf3kRfC5hMAWFuKZKV7fOLklivFoELOl96i9O29
+i5wCEeiClubfH9X7nnfvKukhWdi0MFkRZqgLRXN1iDY6iKC6MnZHTUN6qgskn6m3
+S0rsRXN8/My/EM+lmcFR1/IWhHtW+aERI0XoXR8GrY/QSmn3TWgHfO6qLdrUEfvV
+ew==
+</X509Certificate>
+</X509Data>
+</KeyInfo>
+        </KeyDescriptor>
+        <AttributeService Binding="urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding" Location="https://ehealthsuisse.ihe-europe.net:4443/idp/profile/SAML1/SOAP/AttributeQuery"/>
+        <AttributeService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://ehealthsuisse.ihe-europe.net:4443/idp/profile/SAML2/SOAP/AttributeQuery"/>
+        <!-- If you uncomment the above you should add urn:oasis:names:tc:SAML:2.0:protocol to the protocolSupportEnumeration above -->
+
+    </AttributeAuthorityDescriptor>
+
+</EntityDescriptor>
