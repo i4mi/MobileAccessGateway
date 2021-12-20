@@ -18,6 +18,7 @@
 package ch.bfh.ti.i4mi.mag.xua;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -359,7 +360,9 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 			if (metadataUrl.startsWith("http:") || metadataUrl.startsWith("https:")) {
 			        prov = new HTTPMetadataProvider(
 					this.backgroundTaskTimer, httpClient(), idpSSOCircleMetadataURL);
-			
+			} else if (metadataUrl.startsWith("classpath:")) {
+				 URL fileUrl = getClass().getResource(metadataUrl.substring("classpath:".length()));
+				 prov = new FilesystemMetadataProvider(new File(fileUrl.getFile()));
 			} else {
 				prov = new FilesystemMetadataProvider(new File(metadataUrl));
 			}
@@ -398,7 +401,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    public MetadataGenerator metadataGenerator() {
 	        MetadataGenerator metadataGenerator = new MetadataGenerator();
 	        metadataGenerator.setEntityId(entityId);
-	        metadataGenerator.setEntityBaseURL(baseUrl+(context.equals("/")?"":context));
+	        metadataGenerator.setEntityBaseURL(baseUrl);//+(context.equals("/")?"":context));
 	        metadataGenerator.setExtendedMetadata(extendedMetadata());
 	        metadataGenerator.setIncludeDiscoveryExtension(false);
 	        metadataGenerator.setKeyManager(keyManager());

@@ -56,6 +56,11 @@ public class AuthTokenConverter {
 			byte[] decoded = Base64.getDecoder().decode(base64Token);
 			return new String(decoded);
 		}
+		if (token != null && token.startsWith("Bearer ")) {
+			String base64Token = token.substring("Bearer ".length());
+			byte[] decoded = Base64.getDecoder().decode(base64Token);
+			return new String(decoded);
+		}
 		return null;
 	}
 

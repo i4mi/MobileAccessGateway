@@ -99,7 +99,7 @@ public class TokenEndpoint {
 		result.setAccess_token(encoded);
 		result.setExpires_in(defaultTimeout);
 		result.setScope(request.getScope());
-		result.setToken_type("IHE-SAML" /*request.getToken_type()*/);
+		result.setToken_type("Bearer" /*request.getToken_type()*/);
 		return result;
 				
 	}
@@ -125,7 +125,7 @@ public class TokenEndpoint {
 		result.setAccess_token(encoded);
 		result.setExpires_in(defaultTimeout);
 		result.setScope(scope);
-		result.setToken_type("IHE-SAML" /*request.getToken_type()*/);
+		result.setToken_type("Bearer" /*request.getToken_type()*/);
 		return result;
 				
 	}
