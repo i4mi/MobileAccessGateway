@@ -19,7 +19,7 @@
 
 		<java.version>11</java.version>
 
-		<ipf-version>4.2-SNAPSHOT</ipf-version>
+		<ipf-version>4.2.0</ipf-version>
 		<camel-version>3.11.2</camel-version>
 		<start-class>ch.bfh.ti.i4mi.mag.MobileAccessGateway</start-class>
 	</properties>
