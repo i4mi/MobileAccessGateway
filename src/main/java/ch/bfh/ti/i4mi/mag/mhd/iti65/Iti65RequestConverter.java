@@ -18,6 +18,7 @@ package ch.bfh.ti.i4mi.mag.mhd.iti65;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -207,8 +208,9 @@ public class Iti65RequestConverter {
                 Attachment attachment = documentReference.getContentFirstRep().getAttachment();
                 if (attachment.hasData()) {
                 	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(attachment.getData(),attachment.getContentType())));
-                    entry.setSize((long) attachment.getData().length);
-                    entry.setHash(SHAsum(attachment.getData()));
+                	byte[] decoded = Base64.getDecoder().decode(attachment.getData());
+                    entry.setSize((long) decoded.length);
+                    entry.setHash(SHAsum(decoded));
                 } else if (attachment.hasUrl()) {
                     String contentURL = attachment.getUrl();                
 	                Resource binaryContent = resources.get(contentURL);
@@ -217,11 +219,9 @@ public class Iti65RequestConverter {
 	                	Binary binary = (Binary) binaryContent;	         
 	                	if (binary.hasContentType() && !binary.getContentType().equals(contentType)) throw new InvalidRequestException("ContentType in Binary and in DocumentReference must match");
 	                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(binary.getData(),contentType)));
-	
-	// CARA PMP "text": "The provided size metadata does not match the content in document '%s' [IHE ITI Technical Framework Volume 2b (3.41.4.1.3)]."
-	// FIXME: Assuming if this needs to be set we have to calculated it not in the base64 encoded but directly on the binary encoding 
-	//                	entry.setSize((long) binary.getData().length);
-	//                    entry.setHash(SHAsum(binary.getData()));
+	                	byte[] decoded = Base64.getDecoder().decode(binary.getData());
+	                    entry.setSize((long) decoded.length);
+	                    entry.setHash(SHAsum(decoded));	
 	                	Identifier masterIdentifier = documentReference.getMasterIdentifier();
 	                    binary.setUserData("masterIdentifier", noPrefix(masterIdentifier.getValue()));	                	
                     }
