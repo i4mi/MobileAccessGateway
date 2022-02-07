@@ -23,6 +23,7 @@ import java.net.URLEncoder;
 import org.apache.camel.Body;
 import org.apache.camel.Header;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.cxf.binding.soap.SoapFault;
 import org.ehcache.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -62,6 +63,20 @@ public class AuthResponseConverter {
 		
 		returnurl += "error="+URLEncoder.encode(exception.getError(), "UTF-8");
 		returnurl += "&error_description="+URLEncoder.encode(exception.getMessage(), "UTF-8");
+		if (state != null) returnurl += "&state="+URLEncoder.encode(state, "UTF-8");
+		
+		return returnurl;
+	}
+	
+	public String handlesoaperror(@Header("oauthrequest") AuthenticationRequest request, @Body SoapFault exception) throws UnsupportedEncodingException{
+		System.out.println("CALLED SOAP ERROR HANDLER");
+		String returnurl = request.getRedirect_uri();
+		String state = request.getState();		
+		
+		if (returnurl.indexOf("?")<0) returnurl += "?"; else returnurl += "&";
+		
+		returnurl += "error="+URLEncoder.encode(exception.getCode(), "UTF-8");
+		returnurl += "&error_description="+URLEncoder.encode("Assertion Provider: "+exception.getMessage(), "UTF-8");
 		if (state != null) returnurl += "&state="+URLEncoder.encode(state, "UTF-8");
 		
 		return returnurl;

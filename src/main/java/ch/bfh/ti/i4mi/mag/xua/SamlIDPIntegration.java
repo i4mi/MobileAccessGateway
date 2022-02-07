@@ -103,6 +103,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -140,8 +141,9 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
     		.logout()
     			.disable();	
 		
-		http.sessionManagement()
-	        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+		http.sessionManagement()		    
+	        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+	        .sessionFixation().none();
 		
 		//http.cors().and().csrf().disable();
 		
@@ -463,7 +465,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 		    	SimpleUrlAuthenticationFailureHandler failureHandler =
 		    			new SimpleUrlAuthenticationFailureHandler();
 		    	failureHandler.setUseForward(false);
-		    	// TDODO failureHandler.setDefaultFailureUrl("/error");
+		    	failureHandler.setDefaultFailureUrl("/not-authenticated.html");
 		    	return failureHandler;
 	    }
 	     
@@ -482,7 +484,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        SAMLProcessingFilter samlWebSSOProcessingFilter = new SAMLProcessingFilter();
 	        samlWebSSOProcessingFilter.setAuthenticationManager(authenticationManager());
 	        samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler());
-	        samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
+	        samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());	        	       
 	        return samlWebSSOProcessingFilter;
 	    }
 	     
