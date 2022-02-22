@@ -62,10 +62,10 @@ To create a new docker image run:
 
 ```
 mvn clean package
-docker build -t gateway:v020
+docker build -t mag:v030 .
 ```
 
-Where "gateway" is the image name and v020 is the version. Then push to a registry.
+Where "mag" is the image name and v030 is the version. Then push to a registry.
 
 ### Creating a configuration
 - Create an empty folder ("**myconfig**" in this example) and copy the contents of the example-config directory.

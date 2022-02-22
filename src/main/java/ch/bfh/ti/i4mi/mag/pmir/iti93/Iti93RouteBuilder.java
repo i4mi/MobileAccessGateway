@@ -25,6 +25,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
@@ -74,7 +75,7 @@ class Iti93RouteBuilder extends RouteBuilder {
                 .doTry()
                   .to(xds44Endpoint)
                   .process(Utils.keptBodyToHeader())
-                  .process(translateToFhir(converter , byte[].class))
+                  .process(translateToFhir(converter, byte[].class))
             	.doCatch(javax.xml.ws.soap.SOAPFaultException.class)
 				  .setBody(simple("${exception}"))
 				  .bean(BaseResponseConverter.class, "errorFromException")

@@ -233,7 +233,8 @@ public class Iti78ResponseConverter extends BasePMIRResponseConverter implements
 		// OK NF AE
 		String queryResponseCode = controlAct.getQueryAck().getQueryResponseCode().getCode();
 		if ("NF".equals(queryResponseCode)) {			
-			throw new ResourceNotFoundException("sourceIdentifier Patient Identifier not found", error(IssueType.NOTFOUND, errtext.length()>0 ? errtext : "sourceIdentifier Patient Identifier not found"));
+			// NF (data found, no errors) is returned in QueryAck.queryResponseCode (control act wrapper)
+			// throw new ResourceNotFoundException("sourceIdentifier Patient Identifier not found", error(IssueType.NOTFOUND, errtext.length()>0 ? errtext : "sourceIdentifier Patient Identifier not found"));
 		}
 		if ("AE".equals(queryResponseCode)) {
 			throw new InvalidRequestException("sourceIdentifier Assigning Authority not found", error(IssueType.INVALID, errtext.length()>0 ? errtext : "sourceIdentifier Assigning Authority not found"));

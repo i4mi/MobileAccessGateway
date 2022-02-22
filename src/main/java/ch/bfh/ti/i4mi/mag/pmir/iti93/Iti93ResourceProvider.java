@@ -21,10 +21,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DocumentManifest;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.openehealth.ipf.commons.ihe.fhir.AbstractPlainProvider;
 
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 /**
@@ -52,4 +60,28 @@ public class Iti93ResourceProvider extends AbstractPlainProvider {
         
         return this.requestResource(content, null, IBaseBundle.class, httpServletRequest, httpServletResponse, requestDetails);
     }
+    
+    
+    /**
+     * Handles Conditional update according to https://profiles.ihe.net/ITI/PIXm/ITI-104.html
+     *
+     * @param id resource ID
+     * @param httpServletRequest servlet request
+     * @param httpServletResponse servlet response
+     * @param requestDetails      request details
+     * @return {@link DocumentManifest} resource
+     */
+    @SuppressWarnings("unused")
+    @Update()
+    public MethodOutcome patientUpdate(
+            @ResourceParam Patient thePatient,
+            @IdParam IdType theId, 
+            @ConditionalUrlParam String theConditional,
+            RequestDetails requestDetails,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse) {
+     
+      return requestAction(thePatient, null, httpServletRequest, httpServletResponse, requestDetails);
+    }
+
 }

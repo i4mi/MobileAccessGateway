@@ -87,6 +87,7 @@ import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
 /**
  * ITI-93 Patient Feed (add a new patient)
+ * 
  * @author alexander kreutz
  *
  */
@@ -94,7 +95,7 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 
 	@Autowired
 	protected Config config;
-	
+
 	/**
 	 * add a new patient
 	 * @param header
@@ -102,7 +103,7 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 	 * @return
 	 * @throws JAXBException
 	 */
-	public String doCreate(MessageHeader header, Map<String, BundleEntryComponent> entriesByReference) throws JAXBException {
+	public String doCreate(Patient in, String method, Identifier identifier) throws JAXBException {
 		PRPAIN201301UV02Type resultMsg = new PRPAIN201301UV02Type();		
 		  resultMsg.setITSVersion("XML_1.0");
 		  //String UUID.randomUUID().toString();
@@ -139,15 +140,6 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 		  controlActProcess.setMoodCode(XActMoodIntentEvent.EVN); 
 		  controlActProcess.setCode(new CD("PRPA_TE201301UV02",null,"2.16.840.1.113883.1.18")); 
 		
-		  for (BundleEntryComponent entry : entriesByReference.values()) {
-			  //BundleEntryComponent entry = entriesByReference.get(ref.getReference());
-		  	    	
-	    	if (entry.getResource() instanceof Patient) {
-	    		HTTPVerb method = entry.getRequest().getMethod();
-		    	if (method == null) throw new InvalidRequestException("HTTP verb missing in Bundle for Patient resource.");
-		    			    			    	
-		    	Patient in = (Patient) entry.getResource();
-		    	
 		    			    			    	
 		    	PRPAIN201301UV02MFMIMT700701UV01Subject1 subject = new PRPAIN201301UV02MFMIMT700701UV01Subject1();		    	
 			  controlActProcess.addSubject(subject);
@@ -175,6 +167,8 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 			  patient.setPatientPerson(patientPerson);
 			  patientPerson.setClassCode(EntityClass.PSN);
 			  patientPerson.setDeterminerCode(EntityDeterminer.INSTANCE);
+			  
+			  patient.addId(patientIdentifier(identifier));
 		    	
 			  // TODO How is the correct mapping done?
 			    for (Identifier id : in.getIdentifier()) {
@@ -209,8 +203,15 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 		        List<II> orgIds = new ArrayList<II>();
 		        Organization managingOrg = getManagingOrganization(in);
 		        // NULL POINTER CHECK
-		        for (Identifier id : managingOrg.getIdentifier()) {
-		        	orgIds.add(new II(getScheme(id.getSystem()), null));
+		        if (managingOrg!=null) {
+    		        for (Identifier id : managingOrg.getIdentifier()) {
+    		        	orgIds.add(new II(getScheme(id.getSystem()), null));
+    		        }
+		        } else {
+		    		Reference org = in.getManagingOrganization();
+		    		if (org != null && org.getIdentifier()!=null) {
+    		        	orgIds.add(new II(getScheme(org.getIdentifier().getSystem()), null));
+		    		}
 		        }
 		        
 		        if (in.hasDeceasedBooleanType()) {
@@ -245,31 +246,32 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 		        				
 				providerOrganization.setId(orgIds);
 				ON name = null;
-				if (managingOrg.hasName()) {	
+				if (managingOrg !=null && managingOrg.hasName()) {	
 					name = new ON();
 					name.setMixed(Collections.singletonList(managingOrg.getName()));
 					providerOrganization.setName(Collections.singletonList(name));
 				}
-								
-				COCTMT150003UV03ContactParty contactParty = new COCTMT150003UV03ContactParty();
-				contactParty.setClassCode(RoleClassContact.CON);
-                for (ContactPoint contactPoint : managingOrg.getTelecom()) {
-                	contactParty.addTelecom(transform(contactPoint));
-				}		
-                if (managingOrg.hasAddress()) contactParty.setAddr(new ArrayList<AD>());
-                for (Address address : managingOrg.getAddress()) {
-                	contactParty.addAddr(transform(address));
+				if (managingOrg != null) {
+    				COCTMT150003UV03ContactParty contactParty = new COCTMT150003UV03ContactParty();
+    				contactParty.setClassCode(RoleClassContact.CON);
+                    for (ContactPoint contactPoint : managingOrg.getTelecom()) {
+                    	contactParty.addTelecom(transform(contactPoint));
+    				}		
+                    if (managingOrg.hasAddress()) {
+                    	contactParty.setAddr(new ArrayList<AD>());
+                        for (Address address : managingOrg.getAddress()) {
+                        	contactParty.addAddr(transform(address));
+                        }
+                    if (managingOrg.hasContact()) {
+                    	OrganizationContactComponent occ = managingOrg.getContactFirstRep();
+                    	COCTMT150003UV03Person contactPerson = new COCTMT150003UV03Person();
+                    	contactPerson.setClassCode(EntityClass.PSN);
+                    	contactPerson.setDeterminerCode(EntityDeterminer.INSTANCE);
+                        if (occ.hasName()) contactPerson.setName(Collections.singletonList(transform(occ.getName())));                    
+        				contactParty.setContactPerson(contactPerson);	
+                    }
+                    providerOrganization.setContactParty(Collections.singletonList(contactParty));
                 }
-                if (managingOrg.hasContact()) {
-                	OrganizationContactComponent occ = managingOrg.getContactFirstRep();
-                	COCTMT150003UV03Person contactPerson = new COCTMT150003UV03Person();
-                	contactPerson.setClassCode(EntityClass.PSN);
-                	contactPerson.setDeterminerCode(EntityDeterminer.INSTANCE);
-                    if (occ.hasName()) contactPerson.setName(Collections.singletonList(transform(occ.getName())));                    
-    				contactParty.setContactPerson(contactPerson);	
-                }
-                
-				providerOrganization.setContactParty(Collections.singletonList(contactParty));
 				
 				MFMIMT700701UV01Custodian custodian = new MFMIMT700701UV01Custodian();
 				registrationEvent.setCustodian(custodian );
@@ -292,10 +294,7 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 				if (managingOrg.hasName()) {	
 				  assignedOrganization.setName(Collections.singletonList(name));
 				}
-	    	}
-	    	
-	    	
-	    }
+			}
 	    
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();	    
 	    HL7V3Transformer.marshallMessage(PRPAIN201301UV02Type.class, out, resultMsg);
@@ -304,40 +303,44 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 	    
 	    return outArray;
 	}
-	
+
 	Organization getManagingOrganization(Patient in) {
 		return getManagingOrganization(in, null);
 	}
-	
+
 	Organization getManagingOrganization(Patient in, List<Resource> container) {
 		Reference org = in.getManagingOrganization();
-		if (org == null) return null;		
-        String targetRef = org.getReference();		
-		List<Resource> resources = container != null ? container : in.getContained();		
-		for (Resource resource : resources) {			
+		if (org == null)
+			return null;
+		String targetRef = org.getReference();
+		List<Resource> resources = container != null ? container : in.getContained();
+		for (Resource resource : resources) {
 			if (targetRef.equals(resource.getId()) && resource instanceof Organization) {
-                return (Organization) resource;
+				return (Organization) resource;
 			}
 		}
 		return null;
 	}
-	
+
 	Patient findPatient(Reference ref, Map<String, BundleEntryComponent> entriesbyReference, Patient current) {
 		BundleEntryComponent entry = entriesbyReference.get(ref.getReference());
-		if (entry != null) return (Patient) entry.getResource();
+		if (entry != null)
+			return (Patient) entry.getResource();
 		for (Resource res : current.getContained()) {
-			if (ref.getReference().equals(res.getId())) return (Patient) res;
+			if (ref.getReference().equals(res.getId()))
+				return (Patient) res;
 		}
 		return null;
 	}
-	
+
 	public II patientIdentifier(Identifier id) {
 		String assigner = null;
-		if (id.hasAssigner()) assigner = id.getAssigner().getDisplay();
-		return new II(getScheme(id.getSystem()),id.getValue(), assigner);
+		if (id.hasAssigner())
+			assigner = id.getAssigner().getDisplay();
+		return new II(getScheme(id.getSystem()), id.getValue(), assigner);
 	}
-	
+
 	public PRPAMT201302UV02PatientId patientIdentifierUpd(Identifier id) {
-		return new PRPAMT201302UV02PatientId(getScheme(id.getSystem()),id.getValue());
+		return new PRPAMT201302UV02PatientId(getScheme(id.getSystem()), id.getValue());
 	}
 }
