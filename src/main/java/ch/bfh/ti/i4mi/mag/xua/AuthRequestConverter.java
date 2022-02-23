@@ -125,8 +125,7 @@ public class AuthRequestConverter {
 		}
 				
 		result.setSamlToken(authorization);
-		System.out.println("Auth:"+result.getSamlToken());
-		
+				
 		return result;
 	}
 	

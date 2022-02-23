@@ -54,7 +54,7 @@ public class AuthResponseConverter {
 	}
 	
 	public String handleerror(@Header("oauthrequest") AuthenticationRequest request, @Body AuthException exception) throws UnsupportedEncodingException{
-		System.out.println("CALLED ERROR HANDLER");
+		
 		String returnurl = request.getRedirect_uri();
 		String state = request.getState();		
 		

@@ -33,8 +33,7 @@ public class IDPAssertionDetailsService implements SAMLUserDetailsService {
 
 	@Override
 	public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
-		//System.out.println("DOM="+credential.getAuthenticationAssertion().getDOM());
-		//return credential.getAuthenticationAssertion().getDOM();
+		
 		try {
 		   //return XMLHelper.nodeToString(SAMLUtil.marshallMessage(credential.getAuthenticationAssertion()));
 		   return SAMLUtil.marshallMessage(credential.getAuthenticationAssertion());

@@ -68,7 +68,7 @@ public class Iti93ResponseConverter extends BasePMIRResponseConverter implements
 	public Bundle translateToFhir(byte[] input, Map<String, Object> parameters)  {
 		try {
 			
-			System.out.println(new String(input));
+			
 			
 			// FIX for xmlns:xmlns
 			String content = new String(input);

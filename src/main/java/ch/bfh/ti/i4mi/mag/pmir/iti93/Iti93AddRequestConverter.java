@@ -299,9 +299,9 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 	    
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();	    
 	    HL7V3Transformer.marshallMessage(PRPAIN201301UV02Type.class, out, resultMsg);
-	    System.out.println("POST CONVERT");
+	    
 	    String outArray = new String(out.toByteArray()); 
-	    System.out.println(outArray);
+	    
 	    return outArray;
 	}
 	
