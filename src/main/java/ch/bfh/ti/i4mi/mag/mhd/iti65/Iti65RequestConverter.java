@@ -208,9 +208,10 @@ public class Iti65RequestConverter {
                 Attachment attachment = documentReference.getContentFirstRep().getAttachment();
                 if (attachment.hasData()) {
                 	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(attachment.getData(),attachment.getContentType())));
-                	byte[] decoded = Base64.getDecoder().decode(attachment.getData());
-                    entry.setSize((long) decoded.length);
-                    entry.setHash(SHAsum(decoded));
+// caused by: java.lang.IllegalArgumentException: Illegal base64 character 25
+//                	byte[] decoded = Base64.getDecoder().decode(attachment.getData());
+//                    entry.setSize((long) decoded.length);
+ //                   entry.setHash(SHAsum(decoded));
                 } else if (attachment.hasUrl()) {
                     String contentURL = attachment.getUrl();                
 	                Resource binaryContent = resources.get(contentURL);
@@ -219,9 +220,10 @@ public class Iti65RequestConverter {
 	                	Binary binary = (Binary) binaryContent;	         
 	                	if (binary.hasContentType() && !binary.getContentType().equals(contentType)) throw new InvalidRequestException("ContentType in Binary and in DocumentReference must match");
 	                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(binary.getData(),contentType)));
-	                	byte[] decoded = Base64.getDecoder().decode(binary.getData());
-	                    entry.setSize((long) decoded.length);
-	                    entry.setHash(SHAsum(decoded));	
+// caused by: java.lang.IllegalArgumentException: Illegal base64 character 25
+//	                	byte[] decoded = Base64.getDecoder().decode(binary.getData());
+//	                    entry.setSize((long) decoded.length);
+//	                    entry.setHash(SHAsum(decoded));	
 	                	Identifier masterIdentifier = documentReference.getMasterIdentifier();
 	                    binary.setUserData("masterIdentifier", noPrefix(masterIdentifier.getValue()));	                	
                     }
