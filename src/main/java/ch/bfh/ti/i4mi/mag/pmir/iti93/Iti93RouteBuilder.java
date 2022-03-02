@@ -87,8 +87,7 @@ class Iti93RouteBuilder extends RouteBuilder {
         @Override
         public Object evaluate(Exchange exchange) {
             Bundle requestBundle = exchange.getIn().getBody(Bundle.class);
-
-            System.out.println(requestBundle.getEntry().size());
+            
             Bundle responseBundle = new Bundle()
                     .setType(Bundle.BundleType.TRANSACTIONRESPONSE)
                     .setTotal(requestBundle.getTotal());

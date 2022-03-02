@@ -102,8 +102,7 @@ public class AuthTokenConverter {
 			if (converted != null) {				               
 			    if (converted.startsWith("<?xml")) converted = converted.substring(converted.indexOf(">")+1);		
 				converted = "<wsse:Security xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">"+converted+"</wsse:Security>";
-
-				//System.out.println(converted);
+				
 				List<SoapHeader> soapHeaders = CastUtils.cast((List<?>) exchange.getIn().getHeader(Header.HEADER_LIST));
 				SoapHeader newHeader;
 

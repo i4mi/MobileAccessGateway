@@ -82,7 +82,7 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                     
                     documentManifest.setCode(new CodeableConcept(new Coding("http://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes","submissionset","Submission Set")));
                     targetList.put(documentManifest.getId(), documentManifest);
-                    System.out.println("PUT="+documentManifest.getId());
+                    
                     list.add(documentManifest);
                     // limitedMetadata -> meta.profile canonical [0..*]       
                     if (submissionSet.isLimitedMetadata()) {

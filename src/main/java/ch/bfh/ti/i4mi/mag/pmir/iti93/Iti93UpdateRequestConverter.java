@@ -320,9 +320,9 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 	    
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();	    
 	    HL7V3Transformer.marshallMessage(PRPAIN201302UV02Type.class, out, resultMsg);
-	    System.out.println("POST CONVERT");
+	    
 	    String outArray = new String(out.toByteArray()); 
-	    System.out.println(outArray);
+	    
 	    return outArray;
 	}
 }

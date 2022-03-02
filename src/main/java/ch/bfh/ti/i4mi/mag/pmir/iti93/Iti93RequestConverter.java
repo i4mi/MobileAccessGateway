@@ -143,7 +143,7 @@ public class Iti93RequestConverter extends Iti93MergeRequestConverter {
 		Map<String, BundleEntryComponent> entriesByReference = new HashMap<String, BundleEntryComponent>();
 		for (BundleEntryComponent entry : requestBundle.getEntry()) {	    	
 	    	if (entry.getResource() instanceof Patient) {
-	    		System.out.println("REG:"+entry.getResource().getIdElement().getIdPart());
+	    		
 	    		entriesByReference.put("Patient/"+entry.getResource().getIdElement().getIdPart(), entry);
 	    		if (firstEntry == null) firstEntry = entry;
 	    	}
