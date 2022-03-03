@@ -53,6 +53,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.ReferenceId;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Telecom;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
+import org.owasp.esapi.codecs.Hex;
 
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseQueryResponseConverter;
@@ -221,10 +222,9 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                         attachment.setSize(documentEntry.getSize().intValue());
                     }
 
-                    // on the data prior to base64 encoding, if the data is base64 encoded.
-                    // TODO: hash -> content.attachment.hash string [0..1]
+                    // on the data prior to base64 encoding, if the data is base64 encoded.                   
                     if (documentEntry.getHash()!=null) {
-                    	attachment.setHash(documentEntry.getHash().getBytes());
+                    	attachment.setHash(Hex.fromHex(documentEntry.getHash()));
                     }
 
                     // comments -> content.attachment.title string [0..1]

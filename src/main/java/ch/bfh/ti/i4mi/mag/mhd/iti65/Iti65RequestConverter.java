@@ -16,6 +16,7 @@
 
 package ch.bfh.ti.i4mi.mag.mhd.iti65;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -28,6 +29,7 @@ import java.util.Map;
 import javax.activation.DataHandler;
 
 import org.apache.camel.Body;
+import org.apache.commons.codec.binary.Hex;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Attachment;
@@ -208,7 +210,7 @@ public class Iti65RequestConverter {
                 Attachment attachment = documentReference.getContentFirstRep().getAttachment();
                 if (attachment.hasData()) {
                 	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(attachment.getData(),attachment.getContentType())));
-                	byte[] decoded = Base64.getDecoder().decode(attachment.getData());
+                	byte[] decoded = attachment.getData();
                     entry.setSize((long) decoded.length);
                     entry.setHash(SHAsum(decoded));
                 } else if (attachment.hasUrl()) {
@@ -219,7 +221,7 @@ public class Iti65RequestConverter {
 	                	Binary binary = (Binary) binaryContent;	         
 	                	if (binary.hasContentType() && !binary.getContentType().equals(contentType)) throw new InvalidRequestException("ContentType in Binary and in DocumentReference must match");
 	                	doc.setDataHandler(new DataHandler(new ByteArrayDataSource(binary.getData(),contentType)));
-	                	byte[] decoded = Base64.getDecoder().decode(binary.getData());
+	                	byte[] decoded = binary.getData();	                	
 	                    entry.setSize((long) decoded.length);
 	                    entry.setHash(SHAsum(decoded));	
 	                	Identifier masterIdentifier = documentReference.getMasterIdentifier();
@@ -759,7 +761,7 @@ public class Iti65RequestConverter {
         // on the data prior to base64 encoding, if the data is base64 encoded.
         // hash -> content.attachment.hash string [0..1]
         byte[] hash = attachment.getHash();
-        if (hash != null) entry.setHash(new String(hash));
+        if (hash != null) entry.setHash(Hex.encodeHexString(hash));
 
         // comments -> content.attachment.title string [0..1]
         String comments = attachment.getTitle();
@@ -1031,19 +1033,25 @@ public class Iti65RequestConverter {
     }
 	
 	public String SHAsum(byte[] convertme) {
-		try {
+		try {			
 	    MessageDigest md = MessageDigest.getInstance("SHA-1"); 
-	    return byteArray2Hex(md.digest(convertme));
+	    return Hex.encodeHexString(md.digest(convertme));
 		} catch (NoSuchAlgorithmException e) { return ""; }
 	}
 
-	private  String byteArray2Hex(final byte[] hash) {
+	/*private  String byteArray2Hex(final byte[] hash) {
 	    Formatter formatter = new Formatter();
 	    for (byte b : hash) {
 	        formatter.format("%02x", b);
 	    }
 	    return formatter.toString();
+	}*/
+	/*
+	private String base64ToHex(String input) {
+		byte[] decoded = Base64.getDecoder().decode(input);
+		return Hex.encodeHexString(decoded);
 	}
+	*/
 	
 	
 }
