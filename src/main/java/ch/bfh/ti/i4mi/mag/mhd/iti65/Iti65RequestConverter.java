@@ -676,11 +676,14 @@ public class Iti65RequestConverter {
 	 * @param reference
 	 * @param entry
 	 */
-	private  void processDocumentReference(DocumentReference reference, DocumentEntry entry) {
+	public  void processDocumentReference(DocumentReference reference, DocumentEntry entry) {
 		
-        entry.assignEntryUuid();
-        reference.setId(entry.getEntryUuid());
-        
+		if (reference.getIdElement()!=null) {
+			entry.setEntryUuid(reference.getIdElement().getIdPart());
+		} else {
+			entry.assignEntryUuid();
+			reference.setId(entry.getEntryUuid());
+		}
         Identifier masterIdentifier = reference.getMasterIdentifier();
         entry.setUniqueId(noPrefix(masterIdentifier.getValue()));
                
@@ -834,7 +837,15 @@ public class Iti65RequestConverter {
         		entry.setExtraMetadata(Collections.singletonMap("urn:e-health-suisse:2020:originalProviderRole", Collections.singletonList(code+"^^^&"+system+"&ISO")));
         	}
         }
-        		
+
+        Extension deletionStatus = reference.getExtensionByUrl("http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-deletionstatus");
+        if (deletionStatus != null) {
+        	if (deletionStatus.getValue() instanceof Coding) {
+        		Coding value = (Coding) deletionStatus.getValue();
+        		String code = value.getCode();
+        		entry.setExtraMetadata(Collections.singletonMap("urn:e-health-suisse:2019:deletionStatus", Collections.singletonList("urn:e-health-suisse:2019:deletionStatus:"+code)));
+        	}
+        }
        
         // sourcePatientId and sourcePatientInfo -> context.sourcePatientInfo
         // Reference(Patient) [0..1] Contained Patient Resource with

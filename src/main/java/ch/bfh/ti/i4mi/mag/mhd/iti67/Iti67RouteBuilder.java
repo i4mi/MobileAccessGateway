@@ -18,9 +18,12 @@ package ch.bfh.ti.i4mi.mag.mhd.iti67;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
+import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.openehealth.ipf.commons.ihe.fhir.Constants;
+import org.openehealth.ipf.commons.ihe.fhir.iti67_v401.Iti67RequestUpdateConverter;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
+import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.rs.RegistryRequestType;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
@@ -57,17 +60,42 @@ class Iti67RouteBuilder extends RouteBuilder {
                 "&inFaultInterceptors=#soapResponseLogger"+
                 "&outInterceptors=#soapRequestLogger" + 
                 "&outFaultInterceptors=#soapRequestLogger";
-        from("mhd-iti67:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentreference-adapter")
+        final String endpoint57 = String.format("xds-iti57://%s" +
+                "?secure=%s", this.config.getIti57HostUrl(), this.config.isHttps() ? "true" : "false")
+                +
+                "&audit=true" +
+                "&auditContext=#myAuditContext" +
+         //       "&sslContextParameters=#pixContext" +
+                "&inInterceptors=#soapResponseLogger" + 
+                "&inFaultInterceptors=#soapResponseLogger"+
+                "&outInterceptors=#soapRequestLogger" + 
+                "&outFaultInterceptors=#soapRequestLogger";
+        
+        // xds-iti57:serviceName[?parameters]
+
+        from("mhd-iti67-v401:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentreference-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(AuthTokenConverter.addWsHeader()).choice()
-               .when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())
-                   .bean(Utils.class,"searchParameterToBody")                
-//                   .bean((isPharm ? Pharm1RequestConverter.class : Iti67RequestConverter.class)).endChoice()
-               .bean(Iti67RequestConverter.class).endChoice()
-               .when(header("FhirHttpUri").isNotNull())
-                   .bean(IdRequestConverter.class).endChoice().end()
-               .to(endpoint)
-               .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class));
+                .process(AuthTokenConverter.addWsHeader())
+                .choice()
+                  .when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())
+                    .bean(Utils.class,"searchParameterToBody")
+                    .bean(Iti67RequestConverter.class)
+                    .to(endpoint)
+                    .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class))
+                    .endChoice()
+                  .when(PredicateBuilder.and(header("FhirHttpUri").isNotNull(),header("FhirHttpMethod").isEqualTo("GET")))
+                    .bean(IdRequestConverter.class)
+                    .bean(Iti67RequestConverter.class)
+                    .to(endpoint)
+                    .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class))
+                    .endChoice()
+                  .when(PredicateBuilder.and(header("FhirHttpUri").isNotNull(),header("FhirHttpMethod").isEqualTo("PUT")))
+                    .bean(Iti67RequestUpdateConverter.class)
+                    .convertBodyTo(RegistryRequestType.class)
+                    .to(endpoint57)
+//                    .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class))
+                    .endChoice()
+                .end();
     }
 }
