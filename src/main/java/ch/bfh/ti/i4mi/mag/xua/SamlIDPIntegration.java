@@ -28,6 +28,8 @@ import java.util.Timer;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
+import org.apache.http.client.params.ClientPNames;
 import org.apache.velocity.app.VelocityEngine;
 import org.opensaml.saml2.metadata.provider.AbstractReloadingMetadataProvider;
 import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
@@ -50,6 +52,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.saml.SAMLAuthenticationProvider;
 import org.springframework.security.saml.SAMLBootstrap;
 import org.springframework.security.saml.SAMLDiscovery;
@@ -77,6 +80,7 @@ import org.springframework.security.saml.processor.HTTPRedirectDeflateBinding;
 import org.springframework.security.saml.processor.HTTPSOAP11Binding;
 import org.springframework.security.saml.processor.SAMLBinding;
 import org.springframework.security.saml.processor.SAMLProcessorImpl;
+import org.springframework.security.saml.storage.EmptyStorageFactory;
 import org.springframework.security.saml.util.VelocityFactory;
 import org.springframework.security.saml.websso.ArtifactResolutionProfile;
 import org.springframework.security.saml.websso.ArtifactResolutionProfileBase;
@@ -99,6 +103,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -135,6 +140,12 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 		http
     		.logout()
     			.disable();	
+		
+		http.sessionManagement()		    
+	        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+	        .sessionFixation().none();
+		
+		//http.cors().and().csrf().disable();
 		
 		http.cors().disable();
 		http.csrf().disable();
@@ -198,7 +209,10 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    // Bindings, encoders and decoders used for creating and parsing messages
 	    @Bean
 	    public HttpClient httpClient() {
-	        return new HttpClient(this.multiThreadedHttpConnectionManager);
+	        HttpClient result = new HttpClient(this.multiThreadedHttpConnectionManager);
+	        result.getParams().setParameter(ClientPNames.COOKIE_POLICY,
+	                CookiePolicy.BROWSER_COMPATIBILITY);
+	        return result;
 	    }
 	 
 	    // SAML Authentication Provider responsible for validating of received SAML
@@ -214,13 +228,15 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    // Provider of default SAML Context
 	    @Bean
 	    public SAMLContextProviderImpl contextProvider() {
-	        return new SAMLContextProviderImpl();
+	    	SAMLContextProviderImpl result = new SAMLContextProviderImpl();
+	    	//result.setStorageFactory(new EmptyStorageFactory());
+	    	return result;
 	    }
 	 
 	    // Initialization of OpenSAML library
 	    @Bean
 	    public static SAMLBootstrap sAMLBootstrap() {
-	        return new SAMLBootstrap();
+	        return new MySAMLBootstrap();
 	    }
 	 
 	    // Logger for SAML messages and events
@@ -282,11 +298,17 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    @Value("${mag.iua.idp.tls-key-alias:}")
 	    private String tlsKeyAlias;
 	    
+	    @Value("${mag.iua.idp.sign-key-alias:}")
+	    private String signKeyAlias;
+	    
 	    @Value("${mag.iua.idp.key-password}")
 	    private String keyPassword;
 	    
 	    @Value("${mag.iua.idp.tls-key-password:}")
 	    private String tlsKeyPassword;
+	    
+	    @Value("${mag.iua.idp.sign-key-password:}")
+	    private String signKeyPassword;
 	    
 	    // Central storage of cryptographic keys
 	    @Bean	    
@@ -297,6 +319,9 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        String storePass = keystorePass;
 	        Map<String, String> passwords = new HashMap<String, String>();
 	        passwords.put(keyAlias, keyPassword);
+	        if (signKeyAlias != null && signKeyAlias.length()>0) {
+	          passwords.put(signKeyAlias, signKeyPassword);
+	        }
 	        if (tlsKeyAlias != null && tlsKeyAlias.length()>0) {
 	          passwords.put(tlsKeyAlias, tlsKeyPassword);
 	        }
@@ -330,12 +355,16 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 		    ExtendedMetadata extendedMetadata = new ExtendedMetadata();
 		    extendedMetadata.setIdpDiscoveryEnabled(false);		    
 		    extendedMetadata.setSigningAlgorithm("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
+		    extendedMetadata.setDigestMethodAlgorithm("http://www.w3.org/2001/04/xmlenc#sha512");
 		    extendedMetadata.setSignMetadata(true);
-		    extendedMetadata.setEcpEnabled(true);
+		    extendedMetadata.setEcpEnabled(true);		    
 		    
 		    extendedMetadata.setRequireArtifactResolveSigned(true);
 		    if (tlsKeyAlias != null && tlsKeyAlias.length()>0) {
 		      extendedMetadata.setTlsKey(tlsKeyAlias);
+		    }
+		    if (signKeyAlias != null && signKeyAlias.length()>0) {
+		      extendedMetadata.setSigningKey(signKeyAlias);
 		    }
 		    return extendedMetadata;
 	    }
@@ -436,7 +465,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 		    	SimpleUrlAuthenticationFailureHandler failureHandler =
 		    			new SimpleUrlAuthenticationFailureHandler();
 		    	failureHandler.setUseForward(false);
-		    	// TDODO failureHandler.setDefaultFailureUrl("/error");
+		    	failureHandler.setDefaultFailureUrl("/not-authenticated.html");
 		    	return failureHandler;
 	    }
 	     
@@ -455,7 +484,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        SAMLProcessingFilter samlWebSSOProcessingFilter = new SAMLProcessingFilter();
 	        samlWebSSOProcessingFilter.setAuthenticationManager(authenticationManager());
 	        samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler());
-	        samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
+	        samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());	        	       
 	        return samlWebSSOProcessingFilter;
 	    }
 	     
