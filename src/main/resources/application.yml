@@ -68,7 +68,7 @@ mag:
 # https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#server-properties
 
 server:
-  max-http-header-size: 10000
+  max-http-header-size: 15000
   ssl:
     key-store: classpath:example-server-certificate.p12    
     key-store-password: a1b2c3    
@@ -83,7 +83,6 @@ server:
   error:
     whitelabel:
       enabled: false
-
 logging:
   level:
     root: info

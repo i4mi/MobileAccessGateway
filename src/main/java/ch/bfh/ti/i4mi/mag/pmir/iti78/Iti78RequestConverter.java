@@ -374,11 +374,11 @@ public class Iti78RequestConverter extends PMIRRequestConverter {
 		  }
 		  
 		  ByteArrayOutputStream out = new ByteArrayOutputStream();
-		  System.out.println("PRE CONVERT");
+		  
 		  HL7V3Transformer.marshallMessage(PRPAIN201305UV02Type.class, out, resultMsg);
-		  System.out.println("POST CONVERT");
+		  
 		  String outArray = new String(out.toByteArray()); 
-		  System.out.println(outArray);
+		  
 		  return outArray;
 	     
 	  }

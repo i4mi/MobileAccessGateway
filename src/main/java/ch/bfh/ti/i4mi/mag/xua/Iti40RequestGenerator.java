@@ -229,9 +229,5 @@ public class Iti40RequestGenerator {
 		 				 
 		 return message;
 	 }
-	 
-	 public String test(@Body String in) {
-		 System.out.println(in);
-		 return in;
-	 }
+	 	 
 }
