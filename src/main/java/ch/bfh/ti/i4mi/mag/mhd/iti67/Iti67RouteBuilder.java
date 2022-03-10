@@ -23,6 +23,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.openehealth.ipf.commons.ihe.fhir.Constants;
 import org.openehealth.ipf.commons.ihe.fhir.iti67_v401.Iti67RequestUpdateConverter;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
+import org.openehealth.ipf.commons.ihe.xds.core.responses.Response;
 import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.rs.RegistryRequestType;
 import org.springframework.stereotype.Component;
 
@@ -94,7 +95,7 @@ class Iti67RouteBuilder extends RouteBuilder {
                     .bean(Iti67RequestUpdateConverter.class)
                     .convertBodyTo(RegistryRequestType.class)
                     .to(endpoint57)
-//                    .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class))
+                    .process(translateToFhir(new Iti67FromIti57ResponseConverter(config), Response.class))
                     .endChoice()
                 .end();
     }

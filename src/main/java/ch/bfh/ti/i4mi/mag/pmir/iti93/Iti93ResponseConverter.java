@@ -21,11 +21,13 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.MessageHeader.ResponseType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.openehealth.ipf.commons.ihe.fhir.translation.ToFhirTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ import org.springframework.stereotype.Component;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.mhd.Utils;
 import ch.bfh.ti.i4mi.mag.pmir.BasePMIRResponseConverter;
 import net.ihe.gazelle.hl7v3.datatypes.CE;
 import net.ihe.gazelle.hl7v3.datatypes.CS;
@@ -55,10 +58,10 @@ public class Iti93ResponseConverter extends BasePMIRResponseConverter implements
 	/**
 	 * translate ITI-44 response to ITI-93 response
 	 */
-	public MethodOutcome translateToFhir(byte[] input, Map<String, Object> parameters)  {
+	public Object translateToFhir(byte[] input, Map<String, Object> parameters)  {
 		try {
 			
-			
+			Patient request = (Patient) parameters.get(Utils.KEPT_BODY);
 			
 			// FIX for xmlns:xmlns
 			String content = new String(input);
@@ -78,7 +81,7 @@ public class Iti93ResponseConverter extends BasePMIRResponseConverter implements
 					return new MethodOutcome(outcome).setCreated(false);
 				}
 			}
-			return null; // FIXME patietn
+			return request; // FIXME patietn
 		} catch (JAXBException e) {
 			throw new InvalidRequestException("failed parsing response");
 		}
