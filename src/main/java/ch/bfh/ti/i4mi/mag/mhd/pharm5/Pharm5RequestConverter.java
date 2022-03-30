@@ -17,10 +17,12 @@
 package ch.bfh.ti.i4mi.mag.mhd.pharm5;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.camel.Body;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Type;
@@ -29,6 +31,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntryType;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.QueryRegistry;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindMedicationListQuery;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryReturnType;
@@ -44,6 +47,14 @@ import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
  */
 public class Pharm5RequestConverter extends BaseRequestConverter {
 
+	
+	public  Timestamp timestampFromDate(Type date) {
+    	if (date == null) return null; 
+    	String dateString = date.primitiveValue();
+    	if (dateString==null) return null;
+    	dateString = dateString.replaceAll("[T\\-:]","");    	
+    	return Timestamp.fromHL7(dateString);
+    }
     /**
      * convert PHARM-5 request to CMPD Pharm-1
      * 
@@ -79,6 +90,26 @@ public class Pharm5RequestConverter extends BaseRequestConverter {
                 throw new InvalidRequestException("Missing OID for patient");
             query.setPatientId(new Identifiable(patIdentifier.getValue(), new AssigningAuthority(system.substring(8))));
         }
+        
+        // patient or patient.identifier --> $XDSDocumentEntryPatientId
+
+        Type serviceStartFrom = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_START_FROM);
+        if (serviceStartFrom != null) {
+        	query.getServiceStart().setFrom(timestampFromDate(serviceStartFrom));
+        }
+        Type serviceStartTo = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_START_TO);
+        if (serviceStartTo != null) {
+        	query.getServiceStart().setTo(timestampFromDate(serviceStartTo));
+        }
+        Type serviceEndFrom = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_END_FROM);
+        if (serviceEndFrom != null) {
+        	query.getServiceEnd().setFrom(timestampFromDate(serviceEndFrom));
+        }
+        Type serviceEndTo = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_END_TO);
+        if (serviceEndTo != null) {
+        	query.getServiceEnd().setTo(timestampFromDate(serviceEndTo));
+        }
+
 
         List<Type> formatTypes = searchParameter.getParameters(Pharm5Constants.PHARM5_FORMAT);
         if (formatTypes!=null && formatTypes.size()>0) {

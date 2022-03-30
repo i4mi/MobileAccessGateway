@@ -63,6 +63,9 @@ public class SchemeMapper {
 	 * @return
 	 */
 	public String getScheme(String system) {
+		if (system==null) {
+			return null;
+		}
 		String scheme = systemToScheme.get(system);
 		if (scheme != null) return scheme;
 		if (system.startsWith("urn:oid:")) {

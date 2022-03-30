@@ -56,6 +56,10 @@ public class Pharm5ResourceProvider extends AbstractPlainProvider {
             @OperationParam(name = Pharm5Constants.PHARM5_PATIENT_IDENTIFIER) TokenParam patientIdentifier,
             @OperationParam(name = Pharm5Constants.PHARM5_STATUS) StringParam status,
             @OperationParam(name = Pharm5Constants.PHARM5_FORMAT) TokenParam format,
+            @OperationParam(name = Pharm5Constants.PHARM5_SERVICE_START_FROM) StringParam serviceStartFrom,
+            @OperationParam(name = Pharm5Constants.PHARM5_SERVICE_START_TO) StringParam serviceStartTo,
+            @OperationParam(name = Pharm5Constants.PHARM5_SERVICE_END_FROM) StringParam serviceEndFrom,
+            @OperationParam(name = Pharm5Constants.PHARM5_SERVICE_END_TO) StringParam serviceEndTo,
             RequestDetails requestDetails,
             HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
@@ -84,6 +88,18 @@ public class Pharm5ResourceProvider extends AbstractPlainProvider {
         if (formatCoding!=null) {
           inParams.addParameter().setName(Pharm5Constants.PHARM5_FORMAT).setValue(formatCoding);
         }
+        if (serviceStartFrom!=null) {
+          inParams.addParameter().setName(Pharm5Constants.PHARM5_SERVICE_START_FROM).setValue(new StringType(serviceStartFrom.getValue()));
+        }
+        if (serviceStartTo!=null) {
+            inParams.addParameter().setName(Pharm5Constants.PHARM5_SERVICE_START_TO).setValue(new StringType(serviceStartTo.getValue()));
+          }
+        if (serviceEndFrom!=null) {
+            inParams.addParameter().setName(Pharm5Constants.PHARM5_SERVICE_END_FROM).setValue(new StringType(serviceEndFrom.getValue()));
+          }
+        if (serviceEndTo!=null) {
+            inParams.addParameter().setName(Pharm5Constants.PHARM5_SERVICE_END_TO).setValue(new StringType(serviceEndTo.getValue()));
+          }
         
         return requestBundleProvider(inParams, null, ResourceType.DocumentReference.name(),
                 httpServletRequest, httpServletResponse, requestDetails);

@@ -29,10 +29,18 @@ public interface Pharm5Constants {
     final String PHARM5_STATUS = "status";
     final String PHARM5_PATIENT_IDENTIFIER = "patient.identifier";
     final String PHARM5_FORMAT = "format";
+    final String PHARM5_SERVICE_START_FROM = "serviceStartFrom";
+    final String PHARM5_SERVICE_START_TO = "serviceStartTo";
+    final String PHARM5_SERVICE_END_FROM = "serviceEndFrom";
+    final String PHARM5_SERVICE_END_TO = "serviceEndTo";
 
     // needs to be extended
     Set<String> PHARM5_PARAMETERS = new HashSet<>(Arrays.asList(
             PHARM5_STATUS,
             PHARM5_PATIENT_IDENTIFIER,
-            PHARM5_FORMAT));
+            PHARM5_FORMAT,
+            PHARM5_SERVICE_START_FROM,
+            PHARM5_SERVICE_START_TO,
+            PHARM5_SERVICE_END_FROM,
+            PHARM5_SERVICE_END_TO));
 }

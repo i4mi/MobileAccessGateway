@@ -19,6 +19,7 @@ package ch.bfh.ti.i4mi.mag.xua;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
+import org.apache.cxf.binding.soap.SoapFault;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -78,6 +79,11 @@ public class Iti71RouteBuilder extends RouteBuilder {
 		.doCatch(AuthException.class)	
 		    .setBody(simple("${exception}"))
 			.setHeader("Location").method(AuthResponseConverter.class, "handleerror")
+			.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(302))
+			.setBody(constant(null))
+		.doCatch(SoapFault.class)
+			.setBody(simple("${exception}"))
+			.setHeader("Location").method(AuthResponseConverter.class, "handlesoaperror")
 			.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(302))
 			.setBody(constant(null))
 		.end();
