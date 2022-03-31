@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
 public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter { 
 
-	public String doUpdate(MessageHeader header, Map<String, BundleEntryComponent> entriesByReference) throws JAXBException {
+	public String doUpdate(Patient in, Identifier identifier) throws JAXBException {
 		PRPAIN201302UV02Type resultMsg = new PRPAIN201302UV02Type();		
 		  resultMsg.setITSVersion("XML_1.0");
 		  //String UUID.randomUUID().toString();
@@ -133,15 +133,7 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 		  controlActProcess.setClassCode(ActClassControlAct.CACT); 
 		  controlActProcess.setMoodCode(XActMoodIntentEvent.EVN); 
 		  controlActProcess.setCode(new CD("PRPA_TE201302UV02","2.16.840.1.113883.1.18", null)); 
-		
-		  for (BundleEntryComponent entry : entriesByReference.values()) {
-			  //BundleEntryComponent entry = entriesByReference.get(ref.getReference());
-		  	    	
-	    	if (entry.getResource() instanceof Patient) {
-	    		HTTPVerb method = entry.getRequest().getMethod();
-		    	if (method == null) throw new InvalidRequestException("HTTP verb missing in Bundle for Patient resource.");
-		    			    			    	
-		    	Patient in = (Patient) entry.getResource();
+				
 		    			    			    	
 		    	PRPAIN201302UV02MFMIMT700701UV01Subject1 subject = new PRPAIN201302UV02MFMIMT700701UV01Subject1();		    	
 			  controlActProcess.addSubject(subject);
@@ -172,14 +164,23 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 			  patientPerson.setClassCode(EntityClass.PSN);
 			  patientPerson.setDeterminerCode(EntityDeterminer.INSTANCE);
 			  patientPerson.setAsOtherIDs(new ArrayList());
-			  
-			  List<II> orgIds = new ArrayList<II>();
+			  			  
+		      List<II> orgIds = new ArrayList<II>();
 			  Set<String> mainIds = new HashSet<String>();
-		      Organization managingOrg = getManagingOrganization(in);
-		      for (Identifier id : managingOrg.getIdentifier()) {
-		        	orgIds.add(new II(getScheme(id.getSystem()), null));
-		        	mainIds.add(id.getSystem());
-		      }
+		        Organization managingOrg = getManagingOrganization(in);
+		        // NULL POINTER CHECK
+		        if (managingOrg!=null) {
+  		        for (Identifier id : managingOrg.getIdentifier()) {
+  		        	orgIds.add(new II(getScheme(id.getSystem()), null));
+  		        	mainIds.add(id.getSystem());
+  		        }
+		        } else {
+		    		Reference org = in.getManagingOrganization();
+		    		if (org != null && org.getIdentifier()!=null) {
+  		        	orgIds.add(new II(getScheme(org.getIdentifier().getSystem()), null));
+  		        	mainIds.add(org.getIdentifier().getSystem());
+		    		}
+		        }
 			  
 			  
 			  // TODO How is the correct mapping done?
@@ -304,7 +305,7 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 			    custIds.add(new II(getScheme(config.getCustodianOid()), null));
 				
 				assignedEntity.setId(custIds);
-				//assignedEntity.setId(orgIds);								
+				//assignedEntity.setId(orgIds);
 				
 				COCTMT090003UV01Organization assignedOrganization = new COCTMT090003UV01Organization();
 				assignedEntity.setAssignedOrganization(assignedOrganization );
@@ -313,10 +314,7 @@ public class Iti93UpdateRequestConverter extends Iti93AddRequestConverter {
 				if (managingOrg.hasName()) {	
 				  assignedOrganization.setName(Collections.singletonList(name));
 				}
-	    	}
-	    	
-	    	
-	    }
+			
 	    
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();	    
 	    HL7V3Transformer.marshallMessage(PRPAIN201302UV02Type.class, out, resultMsg);

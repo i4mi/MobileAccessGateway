@@ -103,7 +103,8 @@ public class Iti93AddRequestConverter extends PMIRRequestConverter {
 	 * @return
 	 * @throws JAXBException
 	 */
-	public String doCreate(Patient in, String method, Identifier identifier) throws JAXBException {
+	public String doCreate(Patient in, Identifier identifier) throws JAXBException {
+		
 		PRPAIN201301UV02Type resultMsg = new PRPAIN201301UV02Type();		
 		  resultMsg.setITSVersion("XML_1.0");
 		  //String UUID.randomUUID().toString();

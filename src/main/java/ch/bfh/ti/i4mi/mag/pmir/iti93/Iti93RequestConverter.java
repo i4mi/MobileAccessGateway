@@ -24,6 +24,7 @@ import org.apache.camel.Body;
 import org.apache.camel.Header;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Patient.LinkType;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -54,7 +55,14 @@ public class Iti93RequestConverter extends Iti93MergeRequestConverter {
 			Identifier identifier = new Identifier();
 			identifier.setSystem(tokenParamDecoded.substring(0, index));
 			identifier.setValue(tokenParamDecoded.substring(index+1));
-			return doCreate(patient, method, identifier);
+			if (patient.hasLink()) {
+				for (var link : patient.getLink()) {
+					if(Patient.LinkType.REPLACEDBY.equals(link.getType())) {
+						return doMerge(patient, identifier, link.getOther());
+					}
+				}
+			}
+			return doCreate(patient, identifier);
 		}
 		throw new InvalidRequestException("missing conditional update query");
 	}

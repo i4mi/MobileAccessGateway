@@ -71,7 +71,7 @@ public class Iti93ResponseConverter extends BasePMIRResponseConverter implements
 									
 			
 			for (net.ihe.gazelle.hl7v3.mccimt000200UV01.MCCIMT000200UV01Acknowledgement akk : msg.getAcknowledgement()) {
-				CS code = akk.getTypeCode();
+				CS code = akk.getTypeCode();			
 				if (!code.getCode().equals("AA") && !code.getCode().equals("CA")) {
 					OperationOutcome outcome = new OperationOutcome();
 					for (MCCIMT000200UV01AcknowledgementDetail detail : akk.getAcknowledgementDetail()) {

@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.openehealth.ipf.commons.ihe.fhir.AbstractPlainProvider;
 
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -51,7 +52,7 @@ public class Iti93ResourceProvider extends AbstractPlainProvider {
     /**
      * /$process-message
      */
-    @Operation(name = Iti93Constants.PMIR_OPERATION_NAME, idempotent = false, returnParameters = {@OperationParam(name = "return", type = Bundle.class, max = 1)})
+    /*@Operation(name = Iti93Constants.PMIR_OPERATION_NAME, idempotent = false, returnParameters = {@OperationParam(name = "return", type = Bundle.class, max = 1)})
     public IBaseBundle processMessage(
         @OperationParam(name = "content", min = 1, max = 1) Bundle content,
         RequestDetails requestDetails,
@@ -59,7 +60,7 @@ public class Iti93ResourceProvider extends AbstractPlainProvider {
         HttpServletResponse httpServletResponse) {
         
         return this.requestResource(content, null, IBaseBundle.class, httpServletRequest, httpServletResponse, requestDetails);
-    }
+    }*/
     
     
     /**
@@ -83,5 +84,6 @@ public class Iti93ResourceProvider extends AbstractPlainProvider {
      
       return requestAction(thePatient, null, httpServletRequest, httpServletResponse, requestDetails);
     }
-
+    
+   
 }

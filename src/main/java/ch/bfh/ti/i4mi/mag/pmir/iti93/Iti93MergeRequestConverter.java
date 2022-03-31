@@ -138,8 +138,7 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 	 * @return
 	 * @throws JAXBException
 	 */
-	public String doMerge(MessageHeader header, Map<String, BundleEntryComponent> entriesByReference) throws JAXBException {
-
+	public String doMerge(Patient in, Identifier replaced, Reference survivor) throws JAXBException {		 
 		 PRPAIN201304UV02Type resultMsg = new PRPAIN201304UV02Type();
 		  resultMsg.setITSVersion("XML_1.0");
 		  //String UUID.randomUUID().toString();
@@ -176,30 +175,9 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 		  controlActProcess.setMoodCode(XActMoodIntentEvent.EVN); // ???
 		  controlActProcess.setCode(new CD("PRPA_TE201304UV02","2.16.840.1.113883.1.18", null)); // ???
 
-		  for (BundleEntryComponent entry : entriesByReference.values()) {
-			  //BundleEntryComponent entry = entriesByReference.get(ref.getReference());
-
-	    		HTTPVerb method = entry.getRequest().getMethod();
-		    	if (method == null) throw new InvalidRequestException("HTTP verb missing in Bundle for Patient resource.");
-
-		    	Patient basePatient = (Patient) entry.getResource();
-		    	Patient in = null;
-
-		    	List<Patient> replaced = new ArrayList<Patient>();
-
-		    	for (PatientLinkComponent linked : basePatient.getLink()) {
-		    		if (linked.getType().equals(LinkType.REPLACEDBY)) {
-		    			Reference other = linked.getOther();
-		    			Patient otherPatient = findPatient(other, entriesByReference, basePatient);
-		    			in = otherPatient;
-		    			replaced.add(basePatient);
-		    		} else if (linked.getType().equals(LinkType.REPLACES)) {
-		    			Reference other = linked.getOther();
-		    			Patient otherPatient = findPatient(other, entriesByReference, basePatient);
-		    			in = basePatient;
-		    			replaced.add(otherPatient);
-		    		}
-		    	}
+		
+			    		
+				    
 
 		    	if (in==null || replaced.isEmpty()) throw new InvalidRequestException("Cannot determine Patients to merge");
 
@@ -217,7 +195,7 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 			  List<MFMIMT700701UV01ReplacementOf> replacementOfList = new ArrayList<MFMIMT700701UV01ReplacementOf>();
 			  registrationEvent.setReplacementOf(replacementOfList);
 
-			  for (Patient replacedPatient : replaced) {
+			 
 			    MFMIMT700701UV01ReplacementOf replacementOf = new MFMIMT700701UV01ReplacementOf();
 			    MFMIMT700701UV01PriorRegistration priorRegistration = new MFMIMT700701UV01PriorRegistration();
 			    replacementOf.setPriorRegistration(priorRegistration );
@@ -232,22 +210,21 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 			    MFMIMT700701UV01PriorRegisteredRole priorRegisteredRole = new MFMIMT700701UV01PriorRegisteredRole();
 				subject1.setPriorRegisteredRole(priorRegisteredRole );
 				priorRegisteredRole.setClassCode("PAT");
-
-				for (Identifier id : replacedPatient.getIdentifier()) {
-					priorRegisteredRole.addId(patientIdentifier(id));
-			    }
+				
+				priorRegisteredRole.addId(patientIdentifier(replaced));
+			    
 
 			    replacementOfList.add(replacementOf);
-			  }
+			 
 
 
-			  PRPAIN201304UV02MFMIMT700701UV01Subject2 subject1 = new PRPAIN201304UV02MFMIMT700701UV01Subject2();
-			  registrationEvent.setSubject1(subject1);
-			  subject1.setTypeCode(ParticipationTargetSubject.SBJ);
+			  PRPAIN201304UV02MFMIMT700701UV01Subject2 subject2 = new PRPAIN201304UV02MFMIMT700701UV01Subject2();
+			  registrationEvent.setSubject1(subject2);
+			  subject2.setTypeCode(ParticipationTargetSubject.SBJ);
 
 			  PRPAMT201303UV02Patient patient = new PRPAMT201303UV02Patient();
 			  patient.setClassCode("PAT");
-			  subject1.setPatient(patient);
+			  subject2.setPatient(patient);
 
 			  PRPAMT201302UV02PatientStatusCode statusCode = new PRPAMT201302UV02PatientStatusCode("active", null, null);
 			  patient.setStatusCode(statusCode); //???
@@ -261,19 +238,25 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 			  patientPerson.setClassCode(EntityClass.PSN);
 			  patientPerson.setDeterminerCode(EntityDeterminer.INSTANCE);
 			  patient.setPatientPerson(patientPerson );
-			  Organization managingOrg = getManagingOrganization(in, basePatient.getContained());
-			  for (Identifier id : managingOrg.getIdentifier()) {
-					orgIds.add(new II(getScheme(id.getSystem()), null));
-					mainIds.add(id.getSystem());
+			  Organization managingOrg = getManagingOrganization(in, in.getContained());
+			  if (managingOrg != null) {
+				  for (Identifier id : managingOrg.getIdentifier()) {
+						orgIds.add(new II(getScheme(id.getSystem()), null));
+						mainIds.add(id.getSystem());
+				  }
 			  }
-			  if (managingOrg==null) managingOrg = getManagingOrganization(basePatient, basePatient.getContained());
-			  if (managingOrg==null)  throw new InvalidRequestException("Cannot determine managingOrganization");
+			  //if (managingOrg==null) managingOrg = getManagingOrganization(basePatient, basePatient.getContained());
+			  //if (managingOrg==null)  throw new InvalidRequestException("Cannot determine managingOrganization");
 
 			  // TODO How is the correct mapping done?
-			    for (Identifier id : in.getIdentifier()) {
-			    	PRPAMT201302UV02PatientId patientId = new PRPAMT201302UV02PatientId(getScheme(id.getSystem()),id.getValue());
-					patient.addId(patientId );
-			    }
+			    Identifier id = survivor.getIdentifier();
+			    PRPAMT201302UV02PatientId patientId = new PRPAMT201302UV02PatientId(getScheme(id.getSystem()),id.getValue());
+				patient.addId(patientId );
+			    
+				//for (Identifier id : in.getIdentifier()) {
+			    //	PRPAMT201302UV02PatientId patientId = new PRPAMT201302UV02PatientId(getScheme(id.getSystem()),id.getValue());
+				//	patient.addId(patientId );
+			    //}
 
 		    	for (HumanName name : in.getName()) {
 					patientPerson.addName(transform(name));
@@ -298,11 +281,11 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 					contactParty.addTelecom(transform(contactPoint));
 			   	}
 
-			   	if (managingOrg.hasAddress()) contactParty.setAddr(new ArrayList<AD>());
+			   	if (managingOrg!=null && managingOrg.hasAddress()) contactParty.setAddr(new ArrayList<AD>());
 			   	for (Address address : managingOrg.getAddress()) {
 					contactParty.addAddr(transform(address));
 			   	}
-			   	if (managingOrg.hasContact()) {
+			   	if (managingOrg!=null && managingOrg.hasContact()) {
 					OrganizationContactComponent occ = managingOrg.getContactFirstRep();
 					COCTMT150003UV03Person contactPerson = new COCTMT150003UV03Person();
 					contactPerson.setClassCode(EntityClass.PSN);
@@ -372,12 +355,12 @@ public class Iti93MergeRequestConverter extends Iti93UpdateRequestConverter {
 				assignedEntity.setAssignedOrganization(assignedOrganization );
 				assignedOrganization.setClassCode(EntityClassOrganization.ORG);
 				assignedOrganization.setDeterminerCode(EntityDeterminer.INSTANCE);
-				if (managingOrg.hasName()) {
+				if (managingOrg != null && managingOrg.hasName()) {
 					ON onName = new ON();
 					onName.setMixed(Collections.singletonList(managingOrg.getName()));
 				  assignedOrganization.setName(Collections.singletonList(onName));
 				}
-	    	}
+	    
 
 
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
