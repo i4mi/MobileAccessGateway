@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.pmir.iti93;
+package ch.bfh.ti.i4mi.mag.pmir.iti104;
 
 import java.io.ByteArrayInputStream;
 import java.util.Map;
@@ -45,18 +45,18 @@ import net.ihe.gazelle.hl7v3.mccimt000200UV01.MCCIMT000200UV01AcknowledgementDet
 import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
 /**
- * ITI-93 from ITI-44 response converter
+ * ITI-104 from ITI-44 response converter
  * @author alexander kreutz
  *
  */
 @Component
-public class Iti93ResponseConverter extends BasePMIRResponseConverter implements ToFhirTranslator<byte[]> {
+public class Iti104ResponseConverter extends BasePMIRResponseConverter implements ToFhirTranslator<byte[]> {
 
 	@Autowired
 	private Config config;
 	
 	/**
-	 * translate ITI-44 response to ITI-93 response
+	 * translate ITI-44 response to ITI-104 response
 	 */
 	public Object translateToFhir(byte[] input, Map<String, Object> parameters)  {
 		try {

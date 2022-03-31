@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.pmir.iti93;
+package ch.bfh.ti.i4mi.mag.pmir.iti104;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,24 +45,11 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
  *  
  * @author Oliver Egger
  */
-public class Iti93ResourceProvider extends AbstractPlainProvider {
+public class Iti104ResourceProvider extends AbstractPlainProvider {
     
     private static final long serialVersionUID = -8350324564184569852L;
-
-    /**
-     * /$process-message
-     */
-    /*@Operation(name = Iti93Constants.PMIR_OPERATION_NAME, idempotent = false, returnParameters = {@OperationParam(name = "return", type = Bundle.class, max = 1)})
-    public IBaseBundle processMessage(
-        @OperationParam(name = "content", min = 1, max = 1) Bundle content,
-        RequestDetails requestDetails,
-        HttpServletRequest httpServletRequest,
-        HttpServletResponse httpServletResponse) {
-        
-        return this.requestResource(content, null, IBaseBundle.class, httpServletRequest, httpServletResponse, requestDetails);
-    }*/
-    
-    
+  
+   
     /**
      * Handles Conditional update according to https://profiles.ihe.net/ITI/PIXm/ITI-104.html
      *

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.pmir.iti93;
+package ch.bfh.ti.i4mi.mag.pmir.iti104;
 
 import java.nio.charset.StandardCharsets;
 
@@ -29,11 +29,11 @@ import org.hl7.fhir.r4.model.Patient.LinkType;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 /**
- * ITI-93 to ITI-44 request converter
+ * ITI-104 to ITI-44 request converter
  * @author alexander kreutz
  *
  */
-public class Iti93RequestConverter extends Iti93MergeRequestConverter {
+public class Iti104RequestConverter extends Iti104MergeRequestConverter {
 
 	
 	private String decode(String in) {
@@ -41,12 +41,12 @@ public class Iti93RequestConverter extends Iti93MergeRequestConverter {
 	}
 
     /**
-     * convert ITI-93 to ITI-44 request
+     * convert ITI-104 to ITI-44 request
      * @param requestBundle
      * @return
      * @throws JAXBException
      */
-	public String iti93ToIti44Converter(@Body Patient patient, @Header("FhirHttpQuery") String query, @Header("FhirHttpMethod") String method) throws JAXBException {
+	public String iti104ToIti44Converter(@Body Patient patient, @Header("FhirHttpQuery") String query, @Header("FhirHttpMethod") String method) throws JAXBException {
 		
 		if (query.startsWith("identifier=")) {
 			String tokenParam = query.substring(11);

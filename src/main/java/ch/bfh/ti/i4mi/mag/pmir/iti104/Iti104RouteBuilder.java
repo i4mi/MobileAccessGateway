@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.pmir.iti93;
+package ch.bfh.ti.i4mi.mag.pmir.iti104;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
@@ -38,22 +38,22 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-class Iti93RouteBuilder extends RouteBuilder {
+class Iti104RouteBuilder extends RouteBuilder {
 
 	private final Config config;
 	
 	@Autowired
-	Iti93ResponseConverter converter;
+	Iti104ResponseConverter converter;
 	
-    public Iti93RouteBuilder(final Config config) {
+    public Iti104RouteBuilder(final Config config) {
         super();
         this.config = config;
-        log.debug("Iti93RouteBuilder initialized");
+        log.debug("Iti104RouteBuilder initialized");
     }
 
     @Override
     public void configure() throws Exception {
-        log.debug("Iti93RouteBuilder configure");
+        log.debug("Iti104RouteBuilder configure");
         
         final String xds44Endpoint = String.format("pixv3-iti44://%s" +
                 "?secure=%s", this.config.getIti44HostUrl(), this.config.isPixHttps() ? "true" : "false")
@@ -66,12 +66,12 @@ class Iti93RouteBuilder extends RouteBuilder {
                 "&outInterceptors=#soapRequestLogger" + 
                 "&outFaultInterceptors=#soapRequestLogger";
         
-        from("pmir-iti93:stub?audit=true&auditContext=#myAuditContext").routeId("pmir-feed")
+        from("pmir-iti104:stub?audit=true&auditContext=#myAuditContext").routeId("iti104-feed")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 .process(AuthTokenConverter.addWsHeader())
                 .process(Utils.keepBody())
-                .bean(Iti93RequestConverter.class)
+                .bean(Iti104RequestConverter.class)
                 .doTry()
                   .to(xds44Endpoint)
                   .process(Utils.keptBodyToHeader())

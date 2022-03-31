@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.pmir.iti93;
+package ch.bfh.ti.i4mi.mag.pmir.iti104;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +26,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Audit dataset for ITI-93 transaction
+ * Audit dataset for ITI-104 transaction
  * @author alexander kreutz
  *
  */
-public class Iti93AuditDataset extends FhirAuditDataset {
+public class Iti104AuditDataset extends FhirAuditDataset {
 
     // Document manifest unique ID
     @Getter @Setter
@@ -42,7 +42,7 @@ public class Iti93AuditDataset extends FhirAuditDataset {
     @Getter
     private List<Identifier> patients = new ArrayList<Identifier>();
 
-    public Iti93AuditDataset() {
+    public Iti104AuditDataset() {
         super(true);
     }
 

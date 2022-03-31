@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.pmir.iti93;
+package ch.bfh.ti.i4mi.mag.pmir.iti104;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -86,12 +86,12 @@ import net.ihe.gazelle.hl7v3.voc.XActMoodIntentEvent;
 import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
 /**
- * ITI-93 Patient Feed (add a new patient)
+ * ITI-104 Patient Identity Feed (add a new patient)
  * 
  * @author alexander kreutz
  *
  */
-public class Iti93AddRequestConverter extends PMIRRequestConverter {
+public class Iti104AddRequestConverter extends PMIRRequestConverter {
 
 	@Autowired
 	protected Config config;

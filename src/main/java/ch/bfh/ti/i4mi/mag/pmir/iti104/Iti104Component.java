@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.pmir.iti93;
+package ch.bfh.ti.i4mi.mag.pmir.iti104;
 
-import static ch.bfh.ti.i4mi.mag.pmir.iti93.PMIR.Interactions.ITI_93;
+import static ch.bfh.ti.i4mi.mag.pmir.iti104.PMIR.Interactions.ITI_104;
 
 import org.apache.camel.CamelContext;
 import org.openehealth.ipf.commons.ihe.fhir.audit.FhirQueryAuditDataset;
@@ -24,23 +24,23 @@ import org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirComponent;
 import org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirEndpointConfiguration;
 
 /**
- * Component for PMIR(ITI-93)
+ * Component for PMIR(ITI-104)
  *
  */
-public class Iti93Component extends FhirComponent<Iti93AuditDataset> {
+public class Iti104Component extends FhirComponent<Iti104AuditDataset> {
 
 
-    public Iti93Component() {
-        super(ITI_93);
+    public Iti104Component() {
+        super(ITI_104);
     }
 
-    public Iti93Component(CamelContext context) {
-        super(context, ITI_93);
+    public Iti104Component(CamelContext context) {
+        super(context, ITI_104);
     }
 
     @Override
-    protected Iti93Endpoint doCreateEndpoint(String uri, FhirEndpointConfiguration<Iti93AuditDataset> config) {
-        return new Iti93Endpoint(uri, this, config);
+    protected Iti104Endpoint doCreateEndpoint(String uri, FhirEndpointConfiguration<Iti104AuditDataset> config) {
+        return new Iti104Endpoint(uri, this, config);
     }
 
 }

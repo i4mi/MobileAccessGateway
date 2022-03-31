@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package ch.bfh.ti.i4mi.mag.pmir.iti93;
+package ch.bfh.ti.i4mi.mag.pmir.iti104;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,12 +33,12 @@ import lombok.Getter;
 public class PMIR implements IntegrationProfile {
 
     @AllArgsConstructor
-    public enum Interactions implements FhirInteractionId<Iti93AuditDataset> {
+    public enum Interactions implements FhirInteractionId<Iti104AuditDataset> {
 
-        ITI_93(ITI_93_CONFIG);
+        ITI_104(ITI_104_CONFIG);
 
         @Getter
-        FhirTransactionConfiguration<Iti93AuditDataset> fhirTransactionConfiguration;
+        FhirTransactionConfiguration<Iti104AuditDataset> fhirTransactionConfiguration;
     }
 
     @Override
@@ -46,5 +46,5 @@ public class PMIR implements IntegrationProfile {
         return Arrays.asList(Interactions.values());
     }
 
-    private static final Iti93TransactionConfiguration ITI_93_CONFIG = new Iti93TransactionConfiguration();
+    private static final Iti104TransactionConfiguration ITI_104_CONFIG = new Iti104TransactionConfiguration();
 }

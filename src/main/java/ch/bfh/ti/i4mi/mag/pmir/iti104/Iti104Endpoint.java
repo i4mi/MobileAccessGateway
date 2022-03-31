@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.pmir.iti93;
+package ch.bfh.ti.i4mi.mag.pmir.iti104;
 
 import org.apache.camel.spi.UriEndpoint;
 import org.openehealth.ipf.commons.ihe.fhir.audit.FhirQueryAuditDataset;
@@ -23,18 +23,18 @@ import org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirEndpoint;
 import org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirEndpointConfiguration;
 
 /**
- * PMIR Mobile Patient Identity Feed endpoint (ITI-93)
+ * Patient Identity Feed FHIR endpoint (ITI-104)
  *
  */
-@UriEndpoint(scheme = "pmir-iti93", title = "ITI-93 PMIR", syntax = "pmir-iti93:host:port", consumerClass = FhirConsumer.class, label = "http")
-public class Iti93Endpoint extends FhirEndpoint<Iti93AuditDataset, Iti93Component> {
+@UriEndpoint(scheme = "pmir-iti104", title = "ITI-104 PMIR", syntax = "pmir-iti104:host:port", consumerClass = FhirConsumer.class, label = "http")
+public class Iti104Endpoint extends FhirEndpoint<Iti104AuditDataset, Iti104Component> {
 
-    public Iti93Endpoint(String uri, Iti93Component fhirComponent, FhirEndpointConfiguration<Iti93AuditDataset> config) {
+    public Iti104Endpoint(String uri, Iti104Component fhirComponent, FhirEndpointConfiguration<Iti104AuditDataset> config) {
         super(uri, fhirComponent, config);
     }
 
     @Override
     protected String createEndpointUri() {
-        return "pmir-iti93:" + "not-implemented yet";
+        return "pmir-iti104:" + "not-implemented yet";
     }
 }

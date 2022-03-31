@@ -7,6 +7,6 @@
 #    KIND, either express or implied. See the License for the specific
 #    language governing permissions and limitations under the License.
 
-# Camel registration for the pmir-iti93 component
+# Camel registration for the pmir-iti104 component
  
-class=ch.bfh.ti.i4mi.mag.pmir.iti93.Iti93Component
+class=ch.bfh.ti.i4mi.mag.pmir.iti104.Iti104Component

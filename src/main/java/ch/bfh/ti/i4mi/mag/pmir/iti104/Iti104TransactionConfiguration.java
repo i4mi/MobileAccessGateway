@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.bfh.ti.i4mi.mag.pmir.iti93;
+package ch.bfh.ti.i4mi.mag.pmir.iti104;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 
@@ -22,20 +22,20 @@ import org.openehealth.ipf.commons.ihe.fhir.FhirTransactionValidator;
 import org.openehealth.ipf.commons.ihe.fhir.audit.FhirQueryAuditDataset;
 
 /**
- * Standard Configuration for Iti93Component. Lazy-loading of results is by default not supported.
+ * Standard Configuration for Iti104Component. Lazy-loading of results is by default not supported.
  *
  */
-public class Iti93TransactionConfiguration extends FhirTransactionConfiguration<Iti93AuditDataset> {
+public class Iti104TransactionConfiguration extends FhirTransactionConfiguration<Iti104AuditDataset> {
 
-    public Iti93TransactionConfiguration() {
+    public Iti104TransactionConfiguration() {
         super( 
-                "pmir-iti93",
-                "PMIR Mobile Patient Identity Feed",
+                "pmir-iti104",
+                "Patient Identity Feed FHIR",
                 false,
-                new Iti93AuditStrategy(false),
-                new Iti93AuditStrategy(true),
+                new Iti104AuditStrategy(false),
+                new Iti104AuditStrategy(true),
                 FhirVersionEnum.R4,
-                new Iti93ResourceProvider(),        // Consumer side. accept $ihe-pix operation
+                new Iti104ResourceProvider(),        // Consumer side. accept $ihe-pix operation
                 null,
                 FhirTransactionValidator.NO_VALIDATION);
         setSupportsLazyLoading(false);

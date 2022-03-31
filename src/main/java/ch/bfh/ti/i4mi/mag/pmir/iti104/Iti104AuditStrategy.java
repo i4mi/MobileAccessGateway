@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.bfh.ti.i4mi.mag.pmir.iti93;
+package ch.bfh.ti.i4mi.mag.pmir.iti104;
 
 import java.util.Map;
 
@@ -39,50 +39,39 @@ import org.openehealth.ipf.commons.ihe.fhir.audit.FhirAuditStrategy;
 import org.openehealth.ipf.commons.ihe.fhir.support.OperationOutcomeOperations;
 
 /**
- * Audit strategy for ITI-93 transaction
+ * Audit strategy for ITI-104 transaction
  * @author alexander kreutz
  *
  */
-public class Iti93AuditStrategy extends FhirAuditStrategy<Iti93AuditDataset> {
+public class Iti104AuditStrategy extends FhirAuditStrategy<Iti104AuditDataset> {
 
 	//private String endpoint = "https://localhost:9091/fhir/$process-message";
 	
-    public Iti93AuditStrategy(boolean serverSide) {
+    public Iti104AuditStrategy(boolean serverSide) {
         super(serverSide, OperationOutcomeOperations.INSTANCE);        
     }
 
     @Override
-    public Iti93AuditDataset createAuditDataset() {
-        return new Iti93AuditDataset();
+    public Iti104AuditDataset createAuditDataset() {
+        return new Iti104AuditDataset();
     }
 
     @Override
-    public Iti93AuditDataset enrichAuditDatasetFromRequest(Iti93AuditDataset auditDataset, Object request, Map<String, Object> parameters) {
+    public Iti104AuditDataset enrichAuditDatasetFromRequest(Iti104AuditDataset auditDataset, Object request, Map<String, Object> parameters) {
         var dataset = super.enrichAuditDatasetFromRequest(auditDataset, request, parameters);
-        var bundle = (Bundle) request;
+        var patient = (Patient) request;
         //
-        var messageHeader = bundle.getEntry().stream()
-                .map(Bundle.BundleEntryComponent::getResource)
-                .filter(MessageHeader.class::isInstance)
-                .map(MessageHeader.class::cast)
-                .findFirst().orElseThrow(() -> new RuntimeException("ITI-93 bundle must contain MessageHeader"));
-
-        dataset.setEventUri(messageHeader.getEventUriType().asStringValue());
-        dataset.setMessageHeaderId(messageHeader.getId());
+    
+        //dataset.setEventUri(messageHeader.getEventUriType().asStringValue());
+        //dataset.setMessageHeaderId(messageHeader.getId());        
         
-        bundle.getEntry().stream()
-        .map(Bundle.BundleEntryComponent::getResource)
-        .filter(Patient.class::isInstance)
-        .map(Patient.class::cast)
-        .forEach(patient -> { 
-        	dataset.getPatients().add(patient.getIdentifierFirstRep());
-         });
-        
+        dataset.getPatients().add(patient.getIdentifierFirstRep());
+                
         return dataset;
     }
 
     @Override
-    public boolean enrichAuditDatasetFromResponse(Iti93AuditDataset auditDataset, Object response, AuditContext auditContext) {     
+    public boolean enrichAuditDatasetFromResponse(Iti104AuditDataset auditDataset, Object response, AuditContext auditContext) {     
         return super.enrichAuditDatasetFromResponse(auditDataset, response, auditContext);
     }
 
@@ -93,26 +82,13 @@ public class Iti93AuditStrategy extends FhirAuditStrategy<Iti93AuditDataset> {
      */
     @Override
     protected EventOutcomeIndicator getEventOutcomeCodeFromResource(IBaseResource resource) {
-    	if (! (resource instanceof Bundle)) return super.getEventOutcomeCodeFromResource(resource);
-        var bundle = (Bundle) resource;
-        
-        var messageHeader = bundle.getEntry().stream()
-                .map(Bundle.BundleEntryComponent::getResource)
-                .filter(MessageHeader.class::isInstance)
-                .map(MessageHeader.class::cast)
-                .findFirst().orElseThrow(() -> new RuntimeException("ITI-93 bundle must contain MessageHeader"));
-
-        ResponseType result = messageHeader.getResponse().getCode();
-        if (result == null) return EventOutcomeIndicator.MajorFailure;
-        if (result.equals(ResponseType.OK)) return EventOutcomeIndicator.Success;
-        if (result.equals(ResponseType.TRANSIENTERROR)) return EventOutcomeIndicator.MinorFailure;
-        return EventOutcomeIndicator.MajorFailure;
-        
+    	if (! (resource instanceof Patient)) return super.getEventOutcomeCodeFromResource(resource);
+    	return EventOutcomeIndicator.Success;                       
     }
     
     @Override
-    public AuditMessage[] makeAuditMessage(AuditContext auditContext, Iti93AuditDataset auditDataset) {
-    	EventType eventType = EventType.of("ITI-93", "IHE Transactions", "Mobile Patient Identity Feed"); 
+    public AuditMessage[] makeAuditMessage(AuditContext auditContext, Iti104AuditDataset auditDataset) {
+    	EventType eventType = EventType.of("ITI-104", "IHE Transactions", "Mobile Patient Identity Feed"); 
 		EventActionCode action = EventActionCode.Execute;
 		EventOutcomeIndicator outcome = auditDataset.getEventOutcomeIndicator();
 		PurposeOfUse purposesOfUse = null;
