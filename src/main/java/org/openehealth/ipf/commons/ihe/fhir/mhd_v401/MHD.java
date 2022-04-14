@@ -27,7 +27,7 @@ import org.openehealth.ipf.commons.ihe.fhir.audit.FhirQueryAuditDataset;
 import org.openehealth.ipf.commons.ihe.fhir.iti65_v401.Iti65AuditDataset;
 import org.openehealth.ipf.commons.ihe.fhir.iti65_v401.Iti65TransactionConfiguration;
 import org.openehealth.ipf.commons.ihe.fhir.iti66_v401.Iti66TransactionConfiguration;
-import org.openehealth.ipf.commons.ihe.fhir.iti67.Iti67TransactionConfiguration;
+import org.openehealth.ipf.commons.ihe.fhir.iti67_v401.Iti67TransactionConfiguration;
 import org.openehealth.ipf.commons.ihe.fhir.iti68.Iti68AuditDataset;
 import org.openehealth.ipf.commons.ihe.fhir.iti68.Iti68TransactionConfiguration;
 import org.openehealth.ipf.commons.ihe.fhir.iti68bin.Iti68BinaryTransactionConfiguration;
