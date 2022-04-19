@@ -36,8 +36,20 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public class Iti104RequestConverter extends Iti104MergeRequestConverter {
 
 	
-	private String decode(String in) {
+	private static String decode(String in) {
 		return java.net.URLDecoder.decode(in, StandardCharsets.UTF_8);
+	}
+	
+	public static Identifier identifierFromQuery(String query) {
+		if (query.startsWith("identifier=")) {
+			String tokenParam = query.substring(11);
+			String tokenParamDecoded = decode(tokenParam);
+			int index = tokenParamDecoded.indexOf("|");
+			Identifier identifier = new Identifier();
+			identifier.setSystem(tokenParamDecoded.substring(0, index));
+			identifier.setValue(tokenParamDecoded.substring(index+1));
+			return identifier;
+		} else return null;
 	}
 
     /**
@@ -47,14 +59,8 @@ public class Iti104RequestConverter extends Iti104MergeRequestConverter {
      * @throws JAXBException
      */
 	public String iti104ToIti44Converter(@Body Patient patient, @Header("FhirHttpQuery") String query, @Header("FhirHttpMethod") String method) throws JAXBException {
-		
-		if (query.startsWith("identifier=")) {
-			String tokenParam = query.substring(11);
-			String tokenParamDecoded = decode(tokenParam);
-			int index = tokenParamDecoded.indexOf("|");
-			Identifier identifier = new Identifier();
-			identifier.setSystem(tokenParamDecoded.substring(0, index));
-			identifier.setValue(tokenParamDecoded.substring(index+1));
+		Identifier identifier = identifierFromQuery(query);
+		if (identifier != null) {			
 			if (patient.hasLink()) {
 				for (var link : patient.getLink()) {
 					if(Patient.LinkType.REPLACEDBY.equals(link.getType())) {

@@ -31,6 +31,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -102,6 +103,16 @@ public class Iti78RequestConverter extends PMIRRequestConverter {
 	  public IVXBTS transform(Date date) {		   
 		   DateTimeType dt = new DateTimeType(date);
 		   return transform(dt);			
+	  }
+	  
+	  /**
+	   * test version that cuts off the time information
+	   * @param date
+	   * @return
+	   */
+	  public IVXBTS transformTest(Date date) {		   
+		   DateTimeType dt = new DateTimeType(date);
+		   return transformTest(dt);			
 	  }
 	  
 	  public IVXBTS transformDay(Date date) {		   
@@ -262,25 +273,27 @@ public class Iti78RequestConverter extends PMIRRequestConverter {
 						}
 					  					  					  	
 						  switch (prefix) {
-							case GREATERTHAN: ivlts.setLow(transform(hDate));break;
-							case LESSTHAN: ivlts.setHigh(transform(lDate));break;
+							case GREATERTHAN: ivlts.setLow(transformTest(hDate));break;
+							case LESSTHAN: ivlts.setHigh(transformTest(lDate));break;
 							case GREATERTHAN_OR_EQUALS:							
-								ivlts.setLow(transform(lDate));break;								
+								ivlts.setLow(transformTest(lDate));break;								
 							case LESSTHAN_OR_EQUALS:
-								ivlts.setHigh(transform(hDate));break;													
+								ivlts.setHigh(transformTest(hDate));break;													
 							case STARTS_AFTER:					
-								ivlts.setLow(transform(hDate));break;								
+								ivlts.setLow(transformTest(hDate));break;								
 							case ENDS_BEFORE:
-								ivlts.setHigh(transform(lDate));break;																
+								ivlts.setHigh(transformTest(lDate));break;																
 							case EQUAL:
 							case APPROXIMATE:
-								ivlts.setLow(transform(lDate));
-								ivlts.setHigh(transform(hDate));								
+								ivlts.setLow(transformTest(lDate));
+								ivlts.setHigh(transformTest(hDate));	
+								ivlts.setCenter(transform(lDate));
 								break;
 							//case NOT_EQUAL:
 							//									
 							default:throw new InvalidRequestException("Date operation not supported.");
-							}													 
+							}	
+						  
 					  
 				  }
 			  }
@@ -385,6 +398,12 @@ public class Iti78RequestConverter extends PMIRRequestConverter {
 	  
 	  public String idConverter(@Header(value = "FhirHttpUri") String fhirHttpUri) throws JAXBException {
 		   String uniqueId = fhirHttpUri.substring(fhirHttpUri.lastIndexOf("/") + 1);
+		   Iti78SearchParameters params = Iti78SearchParameters.builder()._id(new TokenParam(uniqueId)).build();
+		   return iti78ToIti47Converter(params);
+	  }
+	  
+	  public String fromMethodOutcome(MethodOutcome outcome) throws JAXBException {
+		   String uniqueId = outcome.getId().getIdPart();		   
 		   Iti78SearchParameters params = Iti78SearchParameters.builder()._id(new TokenParam(uniqueId)).build();
 		   return iti78ToIti47Converter(params);
 	  }

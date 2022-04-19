@@ -53,6 +53,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.ListResource;
@@ -389,6 +390,11 @@ public class Iti65RequestConverter {
 		return system;
 	}
 	
+	public String noBaseUrl(String in) {
+		if (in == null) return null;
+		return new IdType(in).getIdPart();		
+	}
+	
 	/**
 	 * FHIR Identifier -> XDS Identifiable
 	 * @param identifier
@@ -494,7 +500,7 @@ public class Iti65RequestConverter {
 		if (ref.hasIdentifier()) {
 			return ref.getIdentifier().getValue();
 		}
-		return noPrefix(ref.getReference());
+		return noBaseUrl(noPrefix(ref.getReference()));
 	}
 	
 	/**

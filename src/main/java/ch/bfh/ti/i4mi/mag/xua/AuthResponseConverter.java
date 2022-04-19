@@ -69,7 +69,7 @@ public class AuthResponseConverter {
 	}
 	
 	public String handlesoaperror(@Header("oauthrequest") AuthenticationRequest request, @Body SoapFault exception) throws UnsupportedEncodingException{
-		System.out.println("CALLED SOAP ERROR HANDLER");
+		
 		String returnurl = request.getRedirect_uri();
 		String state = request.getState();		
 		

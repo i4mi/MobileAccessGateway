@@ -69,7 +69,8 @@ public class Iti104ResourceProvider extends AbstractPlainProvider {
             HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
      
-      return requestAction(thePatient, null, httpServletRequest, httpServletResponse, requestDetails);
+      MethodOutcome res = requestAction(thePatient, null, httpServletRequest, httpServletResponse, requestDetails);      
+      return res;
     }
     
    
