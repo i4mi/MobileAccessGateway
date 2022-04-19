@@ -61,6 +61,14 @@ public class PMIRRequestConverter extends BaseRequestConverter {
 		return result;
 	}
 	
+	public static IVXBTS transformTest(DateTimeType date) {
+		IVXBTS result = new IVXBTS();
+		String test = date.getAsV3();
+		if (test.length()>8) test = test.substring(0, 8);
+		result.setValue(test);
+		return result;
+	}
+	
 	public static TS transform(DateType date) {
 		if (date == null || !(date.hasValue())) return null;
 		TS result = new TS();

@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.camel.Body;
 import org.apache.camel.Headers;
 import org.apache.camel.Processor;
+import org.hl7.fhir.r4.model.Patient;
 import org.openehealth.ipf.commons.ihe.fhir.Constants;
 import org.openehealth.ipf.commons.ihe.fhir.FhirSearchParameters;
 import org.openehealth.ipf.commons.ihe.fhir.iti66.Iti66SearchParameters;
@@ -47,6 +48,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryList;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryReturnType;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.RetrievedDocumentSet;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -88,6 +90,22 @@ public class Utils {
         return exchange -> {
         	exchange.getMessage().setHeader(KEPT_BODY, exchange.getProperty(KEPT_BODY));        	        
         };
+    }
+    
+    
+    
+    public static Processor storePreferHeader() {
+    	return exchange -> {
+    
+	    	Map<String, List<String>> httpHeaders = (Map<String, List<String>>) exchange.getMessage().getHeader("FhirHttpHeaders");
+					
+			if (httpHeaders != null) {
+				List<String> header = httpHeaders.get("Prefer");
+				if (header != null && !header.isEmpty()) {
+					exchange.getMessage().setHeader("Prefer", header.get(0));
+				}
+			}
+		};
     }
 
    

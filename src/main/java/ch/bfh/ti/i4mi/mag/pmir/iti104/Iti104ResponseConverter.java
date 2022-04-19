@@ -21,9 +21,13 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.camel.Processor;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MessageHeader.ResponseType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
@@ -62,26 +66,32 @@ public class Iti104ResponseConverter extends BasePMIRResponseConverter implement
 		try {
 			
 			Patient request = (Patient) parameters.get(Utils.KEPT_BODY);
-			
+			String query = (String) parameters.get("FhirHttpQuery");
+			Identifier identifier = Iti104RequestConverter.identifierFromQuery(query);
 			// FIX for xmlns:xmlns
 			String content = new String(input);
 		    content = content.replace("xmlns:xmlns","xmlns:xxxxx");
 			
 			MCCIIN000002UV01Type  msg = HL7V3Transformer.unmarshallMessage(MCCIIN000002UV01Type.class, new ByteArrayInputStream(content.getBytes()));
-									
-			
+												
 			for (net.ihe.gazelle.hl7v3.mccimt000200UV01.MCCIMT000200UV01Acknowledgement akk : msg.getAcknowledgement()) {
-				CS code = akk.getTypeCode();			
-				if (!code.getCode().equals("AA") && !code.getCode().equals("CA")) {
+				CS code = akk.getTypeCode();					
+				if (!code.getCode().equals("AA") && !code.getCode().equals("CA")) {					
 					OperationOutcome outcome = new OperationOutcome();
 					for (MCCIMT000200UV01AcknowledgementDetail detail : akk.getAcknowledgementDetail()) {
 						OperationOutcomeIssueComponent issue = outcome.addIssue();
 						issue.setDetails(new CodeableConcept().setText(toText(detail.getText())).addCoding(transform(detail.getCode())));
 					}
-					return new MethodOutcome(outcome).setCreated(false);
+					throw new InvalidRequestException("Retrieved error response", outcome);
+					//return new MethodOutcome(outcome).setCreated(false);
 				}
 			}
-			return request; // FIXME patietn
+			MethodOutcome out = new MethodOutcome(new IdType(noPrefix(identifier.getSystem())+"-"+identifier.getValue()));
+		
+			OperationOutcome outcome = new OperationOutcome();			
+			out.setOperationOutcome(outcome);
+			return out;
+			
 		} catch (JAXBException e) {
 			throw new InvalidRequestException("failed parsing response");
 		}
@@ -90,6 +100,23 @@ public class Iti104ResponseConverter extends BasePMIRResponseConverter implement
 	public Coding transform(CE code) {
 		return new Coding(code.getCodeSystem(),code.getCode(),code.getDisplayName());
 	}
+	
+	public String noPrefix(String system) {
+		if (system == null) return null;
+		if (system.startsWith("urn:oid:")) {
+            system = system.substring(8);
+        }
+		return system;
+	}
+	
+	public static Processor addPatientToOutcome() {
+    	return exchange -> {
+    		MethodOutcome out = exchange.getProperty(Utils.KEPT_BODY, MethodOutcome.class);
+    		Patient patient = exchange.getMessage().getMandatoryBody(Patient.class);    		
+    		out.setResource(patient);
+        	exchange.getMessage().setBody(out);        	        
+        };
+    }
 	
 	
 }

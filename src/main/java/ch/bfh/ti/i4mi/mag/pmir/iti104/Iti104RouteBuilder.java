@@ -29,6 +29,8 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
+import ch.bfh.ti.i4mi.mag.pmir.iti78.Iti78RequestConverter;
+import ch.bfh.ti.i4mi.mag.pmir.iti78.Iti78ResponseConverter;
 import ch.bfh.ti.i4mi.mag.pmir.iti83.Iti83ResponseConverter;
 import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,9 @@ class Iti104RouteBuilder extends RouteBuilder {
 	
 	@Autowired
 	Iti104ResponseConverter converter;
+	
+	@Autowired
+	Iti78ResponseConverter converter_78;
 	
     public Iti104RouteBuilder(final Config config) {
         super();
@@ -66,16 +71,39 @@ class Iti104RouteBuilder extends RouteBuilder {
                 "&outInterceptors=#soapRequestLogger" + 
                 "&outFaultInterceptors=#soapRequestLogger";
         
+   	 final String xds47Endpoint = String.format("pdqv3-iti47://%s" +
+             "?secure=%s", this.config.getIti47HostUrl(), this.config.isPixHttps() ? "true" : "false")
+             +
+             //"&sslContextParameters=#pixContext" +
+             "&audit=true" +
+             "&auditContext=#myAuditContext" +
+             "&inInterceptors=#soapResponseLogger" + 
+             "&inFaultInterceptors=#soapResponseLogger"+
+             "&outInterceptors=#soapRequestLogger" + 
+             "&outFaultInterceptors=#soapRequestLogger";
+        
+        
         from("pmir-iti104:stub?audit=true&auditContext=#myAuditContext").routeId("iti104-feed")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 .process(AuthTokenConverter.addWsHeader())
-                .process(Utils.keepBody())
+                .process(Utils.keepBody())                
                 .bean(Iti104RequestConverter.class)
                 .doTry()
                   .to(xds44Endpoint)
                   .process(Utils.keptBodyToHeader())
-                  .process(translateToFhir(converter, byte[].class))
+                  .process(Utils.storePreferHeader())
+                  .process(translateToFhir(converter , byte[].class))
+                  .choice()
+	                    .when(header("Prefer").isEqualToIgnoreCase("return=Representation"))	                    
+	                    .process(Utils.keepBody())
+	                    .bean(Iti78RequestConverter.class, "fromMethodOutcome")
+	                    .to(xds47Endpoint)											
+	  			        .process(translateToFhir(converter_78 , byte[].class))
+	  			        .process(Iti104ResponseConverter.addPatientToOutcome())
+	  			        .endChoice()
+                  .end()                     
+                 .endDoTry()
             	.doCatch(javax.xml.ws.soap.SOAPFaultException.class)
 				  .setBody(simple("${exception}"))
 				  .bean(BaseResponseConverter.class, "errorFromException")
