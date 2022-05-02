@@ -370,7 +370,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    }
 	    
 	    // IDP Discovery Service
-	    @Bean
+	    //@Bean
 	    public SAMLDiscovery samlIDPDiscovery() {
 	        SAMLDiscovery idpDiscovery = new SAMLDiscovery();
 	        idpDiscovery.setIdpSelectionPath("/saml/discovery");

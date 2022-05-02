@@ -15,6 +15,7 @@
  */
 package ch.bfh.ti.i4mi.mag;
 
+import org.hibernate.validator.HibernateValidator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,6 +27,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import lombok.extern.slf4j.Slf4j;
+
+import javax.validation.spi.ValidationProvider;
 
 /**
  * Main class of the IPF MobileAccessGateway application.
@@ -47,6 +50,8 @@ public class MobileAccessGateway {
      */
     public static void main(final String[] args) {
         log.info("Configuring MobileAccessGateway");
+        Object x = ValidationProvider.class;
+        Object y = HibernateValidator.class;
         
         final SpringApplication application = new SpringApplication(MobileAccessGateway.class);
         addApplicationStartupHook(application);

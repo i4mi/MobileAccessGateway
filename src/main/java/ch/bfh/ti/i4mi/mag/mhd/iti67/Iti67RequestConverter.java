@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.param.*;
 import org.apache.camel.Body;
 import org.openehealth.ipf.commons.ihe.fhir.iti67.Iti67SearchParameters;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
@@ -38,12 +39,6 @@ import org.openehealth.ipf.commons.ihe.xds.core.requests.query.Query;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryList;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryReturnType;
 
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 
@@ -81,7 +76,7 @@ public class Iti67RequestConverter extends BaseRequestConverter {
             } else {
             	FindDocumentsQuery query;
 	            //  TODO   related Note 4                  -->  $XDSDocumentEntryReferenceIdList
-	            TokenOrListParam related = searchParameter.getRelated();
+	            TokenOrListParam related = searchParameter.getRelatedId();
 	            if (related != null) {
 	            	FindDocumentsByReferenceIdQuery referenceIdQuery = new FindDocumentsByReferenceIdQuery();;
 	            	QueryList<ReferenceId> outerReferences = new QueryList<ReferenceId>();

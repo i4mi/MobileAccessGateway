@@ -36,7 +36,6 @@ import org.openehealth.ipf.commons.audit.model.AuditMessage;
 import org.openehealth.ipf.commons.audit.types.EventType;
 import org.openehealth.ipf.commons.audit.types.PurposeOfUse;
 import org.openehealth.ipf.commons.ihe.fhir.audit.FhirAuditStrategy;
-import org.openehealth.ipf.commons.ihe.fhir.support.OperationOutcomeOperations;
 
 /**
  * Audit strategy for ITI-104 transaction
@@ -48,7 +47,7 @@ public class Iti104AuditStrategy extends FhirAuditStrategy<Iti104AuditDataset> {
 	//private String endpoint = "https://localhost:9091/fhir/$process-message";
 	
     public Iti104AuditStrategy(boolean serverSide) {
-        super(serverSide, OperationOutcomeOperations.INSTANCE);        
+        super(serverSide);
     }
 
     @Override
@@ -81,8 +80,8 @@ public class Iti104AuditStrategy extends FhirAuditStrategy<Iti104AuditDataset> {
      * @return RFC3881EventOutcomeCode
      */
     @Override
-    protected EventOutcomeIndicator getEventOutcomeCodeFromResource(IBaseResource resource) {
-    	if (! (resource instanceof Patient)) return super.getEventOutcomeCodeFromResource(resource);
+    protected EventOutcomeIndicator getEventOutcomeCodeFromResource(Iti104AuditDataset auditDataset, IBaseResource resource) {
+    	if (! (resource instanceof Patient)) return super.getEventOutcomeCodeFromResource(auditDataset, resource);
     	return EventOutcomeIndicator.Success;                       
     }
     
