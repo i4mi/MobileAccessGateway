@@ -101,7 +101,7 @@ public class Iti67StrictResourceProvider extends AbstractPlainProvider {
                 .event(event)
                 .securityLabel(securityLabel)
                 .format(format)
-                .related(relatedTokenParam)
+                .relatedId(relatedTokenParam)
                 ._id(resourceId)
                 .sortSpec(sortSpec)
                 .includeSpec(includeSpec)

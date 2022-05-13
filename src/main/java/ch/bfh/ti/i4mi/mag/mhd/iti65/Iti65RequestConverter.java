@@ -271,6 +271,23 @@ public class Iti65RequestConverter {
 			if (code!=null) target.add(code);
 		}
 	}
+	/**
+	 * removes separator in date and time, except the timezone differentiator
+	 * @param fhirDate  e.g. 2015-02-07T13:28:17-05:00
+	 * @return  2015020T132817-0500
+	 */
+	public Timestamp removeSeparatorsExceptForTimezone(String fhirDate) {
+	  if (fhirDate==null) {
+	    return null;
+	  }
+	  int timePos = fhirDate.indexOf("T");
+	  String dateString = (timePos>=0 ? fhirDate.substring(0, timePos) : fhirDate);
+	  dateString = dateString.replace("-", "");
+	  if (timePos>=0) {
+	    dateString += fhirDate.substring(timePos+1).replace(":", "");
+	  }
+    return Timestamp.fromHL7(dateString);
+	}
 	
 	/**
 	 * FHIR DateType -> XDS Timestamp
@@ -279,10 +296,7 @@ public class Iti65RequestConverter {
 	 */
 	public  Timestamp timestampFromDate(DateType date) {
     	if (date == null) return null; 
-    	String dateString = date.asStringValue();
-    	if (dateString==null) return null;
-    	dateString = dateString.replaceAll("[T\\-:]","");    	
-    	return Timestamp.fromHL7(dateString);
+    	return removeSeparatorsExceptForTimezone(date.asStringValue());
     }
 	
 	/**
@@ -291,11 +305,8 @@ public class Iti65RequestConverter {
 	 * @return
 	 */
 	public  Timestamp timestampFromDate(DateTimeType date) {
-    	if (date == null) return null; 
-    	String dateString = date.asStringValue();
-    	if (dateString==null) return null;
-    	dateString = dateString.replaceAll("[T\\-:]","");    	
-    	return Timestamp.fromHL7(dateString);
+    if (date == null) return null; 
+    return removeSeparatorsExceptForTimezone(date.asStringValue());
     }
 	
 	/**
@@ -304,11 +315,8 @@ public class Iti65RequestConverter {
 	 * @return
 	 */
 	public  Timestamp timestampFromDate(InstantType date) {
-    	if (date == null) return null; 
-    	String dateString = date.asStringValue();
-    	if (dateString==null) return null;
-    	dateString = dateString.replaceAll("[T\\-:]","");    	
-    	return Timestamp.fromHL7(dateString);
+    if (date == null) return null; 
+    return removeSeparatorsExceptForTimezone(date.asStringValue());
     }
 	
 	/**
@@ -442,7 +450,7 @@ public class Iti65RequestConverter {
 		} else if (reference.hasIdentifier()) {					
 	        return transform(reference.getIdentifier());
 		} 
-		throw new InvalidRequestException("Cannot resolve reference");
+		throw new InvalidRequestException("Cannot resolve reference to "+(reference.getReference()!=null ? reference.getReference().toString(): ""));
 	}
 	
 	/**

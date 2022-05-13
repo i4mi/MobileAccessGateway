@@ -20,12 +20,11 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import lombok.extern.slf4j.Slf4j;
+
+import javax.validation.spi.ValidationProvider;
 
 /**
  * Main class of the IPF MobileAccessGateway application.
@@ -47,11 +46,12 @@ public class MobileAccessGateway {
      */
     public static void main(final String[] args) {
         log.info("Configuring MobileAccessGateway");
-        
+
         final SpringApplication application = new SpringApplication(MobileAccessGateway.class);
         addApplicationStartupHook(application);
         application.run(args);
     }
+
     /**
      * Adds a hook to the Application Ready event to run some magic.
      *

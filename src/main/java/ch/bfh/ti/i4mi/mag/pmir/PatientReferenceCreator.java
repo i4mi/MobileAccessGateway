@@ -23,13 +23,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.MobileAccessGateway;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * create a patient reference using the mobile health gateway base address 
  * @author alexander kreutz
  *
  */
+@Slf4j
 public class PatientReferenceCreator {
 
 	@Autowired
@@ -69,7 +72,11 @@ public class PatientReferenceCreator {
 	public Identifiable resolvePatientId(String fullId) {
 		int splitIdx = fullId.indexOf("-");
 		if (splitIdx>0) {
-			return new Identifiable(fullId.substring(splitIdx+1), new AssigningAuthority(schemeMapper.getScheme(fullId.substring(0,splitIdx))));
+		  if (fullId.substring(0,splitIdx).contains(".")) {
+		    return new Identifiable(fullId.substring(splitIdx+1), new AssigningAuthority(schemeMapper.getScheme(fullId.substring(0,splitIdx))));
+		  } else {
+		    log.error("expected oid as a system for resolving Patient in: "+fullId);
+		  }
 		}
 		return null;
 	}
