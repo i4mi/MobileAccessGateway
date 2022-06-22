@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.camel.Body;
 import org.apache.camel.Headers;
 import org.apache.camel.Processor;
+import org.apache.camel.http.common.HttpMessage;
 import org.hl7.fhir.r4.model.Patient;
 import org.openehealth.ipf.commons.ihe.fhir.Constants;
 import org.openehealth.ipf.commons.ihe.fhir.FhirSearchParameters;
@@ -80,6 +81,12 @@ public class Utils {
         return exchange -> {
         	exchange.setProperty(KEPT_BODY, exchange.getIn().getBody());        	        
         };
+    }
+    
+    public static Processor endHttpSession() {
+    	return exchange -> {
+    		exchange.getIn(HttpMessage.class).getRequest().getSession().invalidate();
+    	};
     }
     
     /**
