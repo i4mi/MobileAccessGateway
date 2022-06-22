@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import ch.bfh.ti.i4mi.mag.mhd.Utils;
+
 @Component
 public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
 	@Value("${mag.iua.ap.url}")
@@ -53,7 +55,8 @@ public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
 				assertionEndpointUrl, wsdl);
 			
 		from("servlet://assertion?httpMethodRestrict=POST&matchOnUriPrefix=true").routeId("assertionFromIdpToken")	
-		.doTry()		    
+		.doTry()	
+		    .process(Utils.endHttpSession())
 		    .bean(AuthRequestConverter.class, "buildAssertionRequestFromIdp")
 			.bean(Iti40RequestGenerator.class, "buildAssertion")			
 			.removeHeaders("*", "scope")

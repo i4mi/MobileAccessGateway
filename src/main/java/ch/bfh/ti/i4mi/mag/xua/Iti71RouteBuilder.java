@@ -24,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import ch.bfh.ti.i4mi.mag.mhd.Utils;
+
 /**
  * IUA: ITI-71 Define route for Get-X-User-Assertion
  *
@@ -61,6 +63,7 @@ public class Iti71RouteBuilder extends RouteBuilder {
 		from("servlet://authorize?matchOnUriPrefix=true").routeId("iti71")	
 		.doTry()
 		    .setHeader("oauthrequest").method(converter, "buildAuthenticationRequest")
+		    .process(Utils.endHttpSession())
 		    .bean(AuthRequestConverter.class, "buildAssertionRequest")
 			.bean(Iti40RequestGenerator.class, "buildAssertion")
 			
