@@ -63,7 +63,12 @@ public class Iti71RouteBuilder extends RouteBuilder {
 		from("servlet://authorize?matchOnUriPrefix=true").routeId("iti71")	
 		.doTry()
 		    .setHeader("oauthrequest").method(converter, "buildAuthenticationRequest")
+		    
+		    // end spring security session in order to prevent use of already expired
+		    // identity provider assertions cached in spring security session
+		    // this is unrelated to the IDP provider cookie set by the IDP itself
 		    .process(Utils.endHttpSession())
+		    
 		    .bean(AuthRequestConverter.class, "buildAssertionRequest")
 			.bean(Iti40RequestGenerator.class, "buildAssertion")
 			

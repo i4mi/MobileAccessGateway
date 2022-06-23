@@ -81,7 +81,7 @@ server:
     port: 9090 # Application listening port for HTTP. Remove line to disable.
   servlet:
     session:
-      timeout: 15m
+      timeout: 15m # Session duration must give the users enough time to fill out identity provider login pages
   error:
     whitelabel:
       enabled: false
