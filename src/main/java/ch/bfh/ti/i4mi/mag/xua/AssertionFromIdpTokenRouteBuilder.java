@@ -56,7 +56,11 @@ public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
 			
 		from("servlet://assertion?httpMethodRestrict=POST&matchOnUriPrefix=true").routeId("assertionFromIdpToken")	
 		.doTry()	
+		    // end spring security session in order to prevent use of already expired
+		    // identity provider assertions cached in spring security session
+		    // this is unrelated to the IDP provider cookie set by the IDP itself
 		    .process(Utils.endHttpSession())
+		    
 		    .bean(AuthRequestConverter.class, "buildAssertionRequestFromIdp")
 			.bean(Iti40RequestGenerator.class, "buildAssertion")			
 			.removeHeaders("*", "scope")

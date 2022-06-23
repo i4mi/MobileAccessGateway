@@ -83,6 +83,10 @@ public class Utils {
         };
     }
     
+    /**
+     * terminate current spring security session
+     * @return
+     */
     public static Processor endHttpSession() {
     	return exchange -> {
     		exchange.getIn(HttpMessage.class).getRequest().getSession().invalidate();
