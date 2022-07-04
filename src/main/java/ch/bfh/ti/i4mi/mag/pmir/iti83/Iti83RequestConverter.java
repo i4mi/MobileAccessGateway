@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 import ch.bfh.ti.i4mi.mag.Config;
 import lombok.extern.slf4j.Slf4j;
+import net.ihe.gazelle.hl7v3.coctmt090100UV01.COCTMT090100UV01AssignedPerson;
 import net.ihe.gazelle.hl7v3.datatypes.CD;
 import net.ihe.gazelle.hl7v3.datatypes.CS;
 import net.ihe.gazelle.hl7v3.datatypes.II;
@@ -45,11 +46,14 @@ import net.ihe.gazelle.hl7v3.prpamt201307UV02.PRPAMT201307UV02DataSource;
 import net.ihe.gazelle.hl7v3.prpamt201307UV02.PRPAMT201307UV02ParameterList;
 import net.ihe.gazelle.hl7v3.prpamt201307UV02.PRPAMT201307UV02PatientIdentifier;
 import net.ihe.gazelle.hl7v3.prpamt201307UV02.PRPAMT201307UV02QueryByParameter;
+import net.ihe.gazelle.hl7v3.quqimt021001UV01.QUQIMT021001UV01AuthorOrPerformer;
 import net.ihe.gazelle.hl7v3.voc.ActClassControlAct;
 import net.ihe.gazelle.hl7v3.voc.CommunicationFunctionType;
 import net.ihe.gazelle.hl7v3.voc.EntityClassDevice;
 import net.ihe.gazelle.hl7v3.voc.EntityDeterminer;
+import net.ihe.gazelle.hl7v3.voc.RoleClassAssignedEntity;
 import net.ihe.gazelle.hl7v3.voc.XActMoodIntentEvent;
+import net.ihe.gazelle.hl7v3.voc.XParticipationAuthorPerformer;
 import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
 
 /**
@@ -103,6 +107,17 @@ public class Iti83RequestConverter extends BaseRequestConverter {
 		controlActProcess.setMoodCode(XActMoodIntentEvent.EVN);
 		controlActProcess.setCode(new CD("PRPA_TE201309UV02", "2.16.840.1.113883.1.18", null));
 
+		QUQIMT021001UV01AuthorOrPerformer authorOrPerformer = new QUQIMT021001UV01AuthorOrPerformer();
+		authorOrPerformer.setTypeCode(XParticipationAuthorPerformer.AUT);
+		
+		COCTMT090100UV01AssignedPerson assignedPerson = new COCTMT090100UV01AssignedPerson();
+		assignedPerson.setClassCode(RoleClassAssignedEntity.ASSIGNED);
+		String assignedPersonId = config.getLocalPatientIDAssigningAuthority();
+		if (assignedPersonId == null || assignedPersonId.length()==0) assignedPersonId = config.getCustodianOid();
+		if (assignedPersonId == null || assignedPersonId.length()==0) assignedPersonId = config.getPixQueryOid();
+		assignedPerson.setId(Collections.singletonList(new II(assignedPersonId, null)));
+		authorOrPerformer.setAssignedPerson(assignedPerson);
+		controlActProcess.setAuthorOrPerformer(Collections.singletonList(authorOrPerformer));
 		PRPAMT201307UV02QueryByParameter queryByParameter = new PRPAMT201307UV02QueryByParameter();
 		controlActProcess.setQueryByParameter(queryByParameter);
 		queryByParameter.setQueryId(new II(config.getPixQueryOid(), uniqueId()));

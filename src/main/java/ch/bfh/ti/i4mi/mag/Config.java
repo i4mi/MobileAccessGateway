@@ -165,6 +165,9 @@ public class Config {
 	@Value("${mag.pix.oids.custodian:}")
 	private String custodianOid;
 	
+	@Value("${mag.pix.oids.local-patient-id-aa:}")
+	private String localPatientIDAssigningAuthority;
+	
     
    /**
     * baseurl of gateway
