@@ -254,6 +254,7 @@ public class Iti78ResponseConverter extends BasePMIRResponseConverter implements
 			boolean idadded = false;
 			
 			for (II patientId : patient.getId()) {
+				if (patientId.getRoot()==null && patientId.getExtension()==null) continue;
 				result.addIdentifier().setSystem(getSystem(patientId.getRoot())).setValue(patientId.getExtension());
 				
 				if (!idadded) {
@@ -264,6 +265,7 @@ public class Iti78ResponseConverter extends BasePMIRResponseConverter implements
 			
 			for (PRPAMT201310UV02OtherIDs otherIds : patient.getPatientPerson().getAsOtherIDs()) {
 				for (II patientId : otherIds.getId()) {
+				   if (patientId.getRoot()==null && patientId.getExtension()==null) continue;
 				   result.addIdentifier().setSystem(getSystem(patientId.getRoot())).setValue(patientId.getExtension());	
 				}
 			}
