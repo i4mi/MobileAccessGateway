@@ -76,12 +76,25 @@ public class PMIRRequestConverter extends BaseRequestConverter {
 		return result;
 	}
 	
+	public static String convertContactPointUse(ContactPoint.ContactPointUse use) {
+		switch (use) {
+		case HOME: return "HP"; 
+		case WORK: return "WP"; 
+		case TEMP: return "TMP";
+		case OLD: return "BAD";
+		case MOBILE: return "MC";
+		default: return null;
+		}
+	}
+	
 	public static TEL transform(ContactPoint contactPoint) {
         TEL telecom = new TEL();
-    			        		        	
+    			              
     	ContactPoint.ContactPointUse use = contactPoint.getUse();		        	
-    	if (use != null) telecom.setUse(use.toString());
-    	telecom.setValue(contactPoint.getValue());
+    	if (use != null) telecom.setUse(convertContactPointUse(use));
+    	String telValue = contactPoint.getValue();
+    	if (telValue != null && telValue.indexOf("@")>0 && !telValue.startsWith("mailto:")) telValue = "mailto:"+telValue;
+    	telecom.setValue(telValue);
     	if (contactPoint.hasPeriod()) telecom.addUseablePeriod(transform(contactPoint.getPeriod()));
     	
     	return telecom;
