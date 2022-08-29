@@ -28,6 +28,7 @@ import org.apache.camel.support.jsse.TrustManagersParameters;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.openehealth.ipf.commons.audit.AuditContext;
 import org.openehealth.ipf.commons.audit.DefaultAuditContext;
+import org.openehealth.ipf.commons.audit.protocol.TCPSyslogSender;
 import org.openehealth.ipf.commons.ihe.ws.cxf.payload.InPayloadLoggerInterceptor;
 import org.openehealth.ipf.commons.ihe.ws.cxf.payload.OutPayloadLoggerInterceptor;
 import org.springframework.beans.factory.annotation.Value;
@@ -253,6 +254,7 @@ public class Config {
     	if (this.auditTlsEnabled) {
     	    context.setTlsParameters(new TlsParameterTest(getAuditSSLContext()));
     	}
+    	context.setAuditTransmissionProtocol(new TCPSyslogSender());
     	//context.setAuditTransmissionProtocol(new TLSCloseSocket(context.getTlsParameters()));
     	//CustomTlsParameters p = new CustomTlsParameters();
     	
