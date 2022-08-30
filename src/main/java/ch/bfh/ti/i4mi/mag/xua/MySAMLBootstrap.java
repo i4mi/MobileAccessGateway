@@ -13,7 +13,8 @@ public class MySAMLBootstrap extends SAMLBootstrap {
 	    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 	        super.postProcessBeanFactory(beanFactory);
 	        BasicSecurityConfiguration config = (BasicSecurityConfiguration) Configuration.getGlobalSecurityConfiguration();
-	        config.registerSignatureAlgorithmURI("RSA", SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
+	        config.registerSignatureAlgorithmURI("RSA", SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);	        
 	        config.setSignatureReferenceDigestMethod(SignatureConstants.ALGO_ID_DIGEST_SHA256);
+	        //config.setSignatureCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
 	    }
 }
