@@ -237,6 +237,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    @Bean
 	    public static SAMLBootstrap sAMLBootstrap() {
 	        return new MySAMLBootstrap();
+	        
 	    }
 	 
 	    // Logger for SAML messages and events
@@ -433,11 +434,18 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        metadataGenerator.setEntityBaseURL(baseUrl);//+(context.equals("/")?"":context));
 	        metadataGenerator.setExtendedMetadata(extendedMetadata());
 	        metadataGenerator.setIncludeDiscoveryExtension(false);
+	        
+	        // FOR TESTING with gazelle
+	        metadataGenerator.setWantAssertionSigned(false);
+	        // END
+	        
 	        metadataGenerator.setKeyManager(keyManager());
 	        Collection<String> bindings = new ArrayList<String>();
 	        bindings.add("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact");
+	        
 	        // Uncomment to use HTTP-Artificat
-	        metadataGenerator.setBindingsSSO(bindings);
+	        //metadataGenerator.setBindingsSSO(bindings);
+	        // END
 	        return metadataGenerator;
 	        
 	       
