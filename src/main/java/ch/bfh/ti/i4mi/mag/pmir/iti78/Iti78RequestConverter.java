@@ -17,6 +17,7 @@
 package ch.bfh.ti.i4mi.mag.pmir.iti78;
 
 import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -283,15 +284,16 @@ public class Iti78RequestConverter extends PMIRRequestConverter {
 								ivlts.setLow(transformTest(hDate));break;								
 							case ENDS_BEFORE:
 								ivlts.setHigh(transformTest(lDate));break;																
-							case EQUAL:
 							case APPROXIMATE:
 								ivlts.setLow(transformTest(lDate));
 								ivlts.setHigh(transformTest(hDate));	
 								ivlts.setCenter(transform(lDate));
 								break;
 							//case NOT_EQUAL:
-							//									
-							default:throw new InvalidRequestException("Date operation not supported.");
+							case EQUAL:						
+							default:
+								ivlts.setValue(new SimpleDateFormat("YYYYMMdd").format(lDate));
+								break;
 							}	
 						  
 					  
