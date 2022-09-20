@@ -62,4 +62,6 @@ public class AuthenticationConfig {
 	public Map<String, ClientDefinition> getClients() {
 		return new HashMap<String, ClientDefinition>();
 	}
+	
+	
 }
