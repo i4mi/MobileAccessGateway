@@ -297,7 +297,7 @@ public class Config {
         // A comma separated list of allowed headers when making a non simple CORS request.
         cors.setAllowedHeaders(Arrays.asList("Origin", "Accept", "Content-Type",
                 "Access-Control-Request-Method", "Access-Control-Request-Headers", "Authorization",
-                "Prefer", "If-Match", "If-None-Match", "If-Modified-Since", "If-None-Exist"));
+                "Prefer", "If-Match", "If-None-Match", "If-Modified-Since", "If-None-Exist", "Scope"));
         cors.setExposedHeaders(Arrays.asList("Location", "Content-Location", "ETag", "Last-Modified"));
         cors.setMaxAge(300L);
         return cors;
