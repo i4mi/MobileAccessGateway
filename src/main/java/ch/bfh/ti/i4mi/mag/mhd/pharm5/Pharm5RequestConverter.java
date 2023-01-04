@@ -78,6 +78,9 @@ public class Pharm5RequestConverter extends BaseRequestConverter {
         if ("urn:ch:cda-ch-emed:medication-card:2018".equals(formatCoding.getCode())) {
           chPmlQuery = false;
         }
+        if ("urn:che:epr:ch-emed:medication-card:2022".equals(formatCoding.getCode())) {
+          chPmlQuery = false;
+        }
       }
     }
     if (chPmlQuery) {
