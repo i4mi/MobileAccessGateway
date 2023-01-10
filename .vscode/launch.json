@@ -12,10 +12,11 @@
         },
         {
             "type": "java",
-            "name": "Debug (Launch)-MobileAccessGateway<ipf-hapifhir-iti-example>",
+            "name": "Debug MobileAccessGateway pmp",
             "request": "launch",
             "mainClass": "ch.bfh.ti.i4mi.mag.MobileAccessGateway",
-            "projectName": "ipf-hapifhir-iti-example"
+            "projectName": "mobile-access-gateway",
+            "vmArgs": "-Dspring.config.additional-location=file:/Users/oliveregger/Documents/github/k8s-fhir.ch/configurations/mag-pmp2/application.yml",
         }
     ]
 }
