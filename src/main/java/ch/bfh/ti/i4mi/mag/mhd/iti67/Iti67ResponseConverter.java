@@ -305,8 +305,8 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
 	                    }
 	                    ListIterator<Name> names = sourcePatientInfo.getNames(); 
 	                    while (names.hasNext()) {
-	                    	Name name = names.next();	                    	
-	                    	sourcePatient.addName(transform(name));
+	                    	Name name = names.next();	 	                    	
+	                    	if (name != null) sourcePatient.addName(transform(name));
 	                    }
 	                    ListIterator<Address> addresses = sourcePatientInfo.getAddresses();
 	                    while(addresses.hasNext()) {
