@@ -1,0 +1,11 @@
+site_name: MobileAccessGateway
+theme:
+  name: material
+  logo: assets/mag_logo.png
+  favicon: assets/favicon-256x256.png
+  palette:
+    scheme: mag
+extra_css:
+  - stylesheets/extra.css
+nav:
+  - index.md
