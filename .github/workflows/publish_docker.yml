@@ -1,0 +1,67 @@
+name: Build and Upload to Google Artifact registry
+
+on: workflow_dispatch
+
+env:
+  PROJECT_ID: ahdis-ch
+  GAR_LOCATION: europe-west6
+  REPOSITORY: ahdis
+  IMAGE: mag
+
+jobs:
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish, and Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    permissions:
+      contents: "read"
+      id-token: "write"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "adopt"
+          cache: "maven"
+      - run: mvn --batch-mode --update-snapshots verify
+      - run: mkdir staging && cp target/*.jar staging
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Package
+          path: staging
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      # Configure Workload Identity Federation and generate an access token.
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
+        with:
+          token_format: "access_token"
+          workload_identity_provider: "projects/1022310475153/locations/global/workloadIdentityPools/github-wif-pool/providers/oidc-github-provider"
+          service_account: "github@ahdis-ch.iam.gserviceaccount.com"
+
+      - name: Docker configuration
+        run: |-
+          echo ${{steps.auth.outputs.access_token}} | docker login -u oauth2accesstoken --password-stdin https://$GAR_LOCATION-docker.pkg.dev
+
+      # Build the Docker image for arm and amd
+      - name: Build
+        run: |-
+          docker buildx build \
+            --tag "$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_REF_NAME" \
+            --build-arg GITHUB_SHA="$GITHUB_SHA" \
+            --build-arg GITHUB_REF="$GITHUB_REF" \
+            --push \
+            --platform=linux/arm64,linux/amd64 \
+            -f Dockerfile \
+            mag
