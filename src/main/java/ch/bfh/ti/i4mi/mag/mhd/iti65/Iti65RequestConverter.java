@@ -918,7 +918,9 @@ public class Iti65RequestConverter {
 		if (practitioner == null) return null;
 	   Person result = new Person();
 	   if (practitioner.hasName()) result.setName(transform(practitioner.getNameFirstRep()));
-	   result.setId(transform(practitioner.getIdentifierFirstRep()));
+	   if (practitioner.hasIdentifier()) {
+		   result.setId(transform(practitioner.getIdentifierFirstRep()));
+	   }
 	   return result;
 	}
 	
@@ -930,7 +932,9 @@ public class Iti65RequestConverter {
 	public Person transform(Patient patient) {
 		if (patient == null) return null;
 	   Person result = new Person();
-	   result.setId(transform(patient.getIdentifierFirstRep()));
+	   if (patient.hasIdentifier()) {
+		   result.setId(transform(patient.getIdentifierFirstRep()));
+		}
 	   if (patient.hasName()) result.setName(transform(patient.getNameFirstRep()));	   
 	   return result;
 	}
@@ -943,7 +947,9 @@ public class Iti65RequestConverter {
 	public Person transform(RelatedPerson related) {
 		if (related == null) return null;
 	   Person result = new Person();
-	   result.setId(transform(related.getIdentifierFirstRep()));
+	   if (related.hasIdentifier()) {
+		   result.setId(transform(related.getIdentifierFirstRep()));
+	   }
 	   if (related.hasName()) result.setName(transform(related.getNameFirstRep()));	   
 	   return result;
 	}	
