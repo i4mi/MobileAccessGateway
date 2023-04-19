@@ -6,7 +6,7 @@
 .attachment-field {
   $radius: 5px;
   border-radius: $radius;
-  background: #f0f3f6;
+  background: #e6e7e1;
 
   .attachment-entry {
     border-bottom: 1px solid #dedede;
@@ -46,7 +46,8 @@
     }
 
     &.file-over {
-      background: darken(#f0f3f6, 5%);
+      background: darken(#e6e7e1, 5%);
+      outline: solid #32a1ce;
     }
 
     .spacer {

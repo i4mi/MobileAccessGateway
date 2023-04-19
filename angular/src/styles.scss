@@ -6,7 +6,7 @@
 @include mat.all-component-themes($theme);
 
 body {
-  background: #e2e7ea;
+  background: #eff0e7;
 
   &,
   html {
@@ -49,4 +49,13 @@ $outer-space: 1.5rem;
   .mat-card-content {
     padding-top: $outer-space;
   }
+}
+
+.mat-toolbar.mat-primary {
+  background: #d7e355;
+  color: #fff;
+}
+
+mat-toolbar .logo-container img {
+  height: 100% !important;
 }
