@@ -34,13 +34,7 @@ jobs:
         run: npm install
 
       - name: Build
-        run: npm run build
-
-      - name: Remove the old GUI
-        run: rm -rf ../src/main/resources/static
-
-      - name: Move the new GUI
-        run: mv dist ../src/main/resources/static
+        run: npm run build-mag
 
       - name: Commit
         if: success()
