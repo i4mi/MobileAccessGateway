@@ -409,8 +409,11 @@ public class Iti65RequestConverter {
 	 * @return
 	 */
 	public Identifiable transform(Identifier identifier) {
-		String system = noPrefix(identifier.getSystem());			    	
-		return new Identifiable(identifier.getValue(), new AssigningAuthority(system));
+		String system = noPrefix(identifier.getSystem());
+		if (identifier.hasSystem()) {
+			return new Identifiable(identifier.getValue(), new AssigningAuthority(system));
+		}
+		return new Identifiable(identifier.getValue());
 	}
 	
 	/**
