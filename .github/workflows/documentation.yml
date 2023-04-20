@@ -3,9 +3,11 @@ on:
   workflow_dispatch: # On manual trigger
   push:
     branches:
-      - "master"
+      - master
     paths:
       - "docs/**"
+      - "mkdocs.yml"
+      - "requirements.txt"
 
 jobs:
   build:
@@ -18,9 +20,9 @@ jobs:
       - name: Install Python 3
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
-          cache: 'pip'
-          cache-dependency-path: 'requirements.txt'
+          python-version: "3.x"
+          cache: "pip"
+          cache-dependency-path: "requirements.txt"
 
       - name: Install mkdocs
         run: pip install -r requirements.txt

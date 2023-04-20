@@ -1,6 +1,10 @@
 name: Build and Upload to Google Artifact registry
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "*"
 
 env:
   PROJECT_ID: ahdis-ch

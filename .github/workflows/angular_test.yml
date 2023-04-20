@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./matchbox-frontend
+        working-directory: ./angular
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -20,9 +20,9 @@ jobs:
         uses: actions/setup-node@v3
         with:
           # https://github.com/actions/setup-node
-          node-version: 16
+          node-version: 18
           cache: "npm"
-          cache-dependency-path: matchbox-frontend/package-lock.json
+          cache-dependency-path: angular/package-lock.json
 
       - name: Install dependencies
         run: npm install
