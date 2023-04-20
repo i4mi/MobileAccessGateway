@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { FhirConfigService } from '../fhirConfig.service';
 import { Subscription } from 'rxjs';
 import debug from 'debug';
-import { MatTableDataSource } from '@angular/material/table';
 import Client from 'fhir-kit-client';
 import { Router } from '@angular/router';
 
