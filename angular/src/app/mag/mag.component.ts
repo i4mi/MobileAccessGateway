@@ -3,16 +3,14 @@ import { FhirConfigService } from '../fhirConfig.service';
 import { FormControl } from '@angular/forms';
 import FhirClient from 'fhir-kit-client';
 import { FhirPathService } from '../fhirpath.service';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { v4 as uuidv4 } from 'uuid';
 import { Base64 } from 'js-base64';
 import { MatTableDataSource } from '@angular/material/table';
-import { AuthConfig, OAuthErrorEvent, OAuthService } from 'angular-oauth2-oidc';
+import { OAuthErrorEvent, OAuthService } from 'angular-oauth2-oidc';
 import { Router } from '@angular/router';
-import { getTokenSourceMapRange } from 'typescript';
 import { IDroppedBlob } from '../upload/upload.component';
 import { FhirResource } from 'fhir-kit-client';
-import { UniqueSelectionDispatcher } from '@angular/cdk/collections';
 
 // adapted from https://stackoverflow.com/a/17415677/16231610
 const pad = (num: number) => String(Math.floor(Math.abs(num))).padStart(2, '0');

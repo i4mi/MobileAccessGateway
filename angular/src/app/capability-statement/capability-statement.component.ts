@@ -2,8 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { FhirConfigService } from '../fhirConfig.service';
 import FhirClient from 'fhir-kit-client';
 
-import debug from 'debug';
-
 @Component({
   selector: 'app-capability-statement',
   templateUrl: './capability-statement.component.html',

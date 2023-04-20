@@ -2,10 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FhirConfigService } from '../fhirConfig.service';
 import { PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import FhirClient from 'fhir-kit-client';
-import { SelectorMatcher } from '@angular/compiler';
 
 @Component({
   selector: 'app-patients',
