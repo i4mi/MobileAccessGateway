@@ -21,7 +21,7 @@ export class AppComponent {
     } else {
       base = base + 'fhir';
     }
-    console.log('note: using fhir base' + base);
+    console.log('note: using fhir base ' + base);
     fhirConfigService.changeMagMicroService(base);
   }
 }
