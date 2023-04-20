@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk11-openj9:alpine-slim
+FROM bellsoft/liberica-openjdk-alpine:latest
 MAINTAINER oliver egger <oliver.egger@ahdis.ch>
 EXPOSE 9090
 EXPOSE 9091
