@@ -63,4 +63,4 @@ jobs:
             --push \
             --platform=linux/arm64,linux/amd64 \
             -f Dockerfile \
-            mag
+            .
