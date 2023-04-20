@@ -16,6 +16,7 @@
 
 package org.openehealth.ipf.commons.ihe.fhir.iti67_v401;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -142,8 +143,14 @@ public class Iti67ResourceProvider extends AbstractPlainProvider {
 
         var patientChain = patient.getChain();
         if (Patient.SP_IDENTIFIER.equals(patientChain)) {
+            if (patient.getValue()!=null) {
+                // values can also be url encoded #91
+                patient.setValue(java.net.URLDecoder.decode(patient.getValue(), StandardCharsets.UTF_8));
+                patient.setChain(patientChain);
+            }
             searchParameters.setPatientIdentifier(patient.toTokenParam(getFhirContext()));
         } else if (patientChain == null || patientChain.isEmpty()) {
+            patient.setValue(java.net.URLDecoder.decode(patient.getValue(), StandardCharsets.UTF_8));
             searchParameters.setPatientReference(patient);
         }
 

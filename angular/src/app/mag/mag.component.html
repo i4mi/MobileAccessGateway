@@ -1,0 +1,385 @@
+<mat-card class="display">
+  <mat-card-content>
+    <mat-card-header>
+      <mat-card-title
+        >Mobile Access Gateway - Patient Identifiers</mat-card-title
+      >
+    </mat-card-header>
+
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>sourceIdentifier system</mat-label>
+        <input matInput [formControl]="sourceIdentifierSystem" />
+      </mat-form-field>
+      &nbsp;
+      <mat-form-field class="column50">
+        <mat-label>sourceIdentifier value</mat-label>
+        <input matInput [formControl]="sourceIdentifierValue" />
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>targetIdentifier system (MPI-ID)</mat-label>
+        <input matInput [formControl]="targetIdentifierSystem" />
+      </mat-form-field>
+      &nbsp;
+      {{ targetIdentifierValue }}
+    </div>
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>targetIdentifier system (EPR-SPID)</mat-label>
+        <input matInput [formControl]="targetIdentifier2System" />
+      </mat-form-field>
+      &nbsp;
+      {{ targetIdentifier2Value }}
+    </div>
+
+    <div>
+      <div>targetId: {{ targetId }}</div>
+    </div>
+
+    <ng-container *ngIf="inPixmProgress">
+      <mat-progress-spinner mode="indeterminate"> </mat-progress-spinner>
+    </ng-container>
+
+    <mat-card-actions>
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        (click)="onPIXmQuery()"
+      >
+        PIXm Query
+      </button>
+
+      <ng-container *ngIf="targetId.length > 0">
+        <button mat-raised-button type="submit" (click)="onFetchPatient()">
+          get Patient
+        </button>
+      </ng-container>
+    </mat-card-actions>
+
+    <ng-container *ngIf="patient">
+      <div *ngIf="patient.name">
+        {{ patient.name[0]?.given }} {{ patient.name[0]?.family }},
+        {{ patient.birthDate }} <br />&nbsp;<br />
+      </div>
+
+      <div>
+        <mat-form-field class="column50">
+          <mat-label>sourceIdentifier system</mat-label>
+          <input matInput [formControl]="sourceAddIdentifierSystem" />
+        </mat-form-field>
+        &nbsp;
+        <mat-form-field class="column50">
+          <mat-label>sourceIdentifier value</mat-label>
+          <input matInput [formControl]="sourceAddIdentifierValue" />
+        </mat-form-field>
+      </div>
+
+      <div>
+        <mat-form-field class="column50">
+          <mat-label>managingOrganization oid</mat-label>
+          <input matInput [formControl]="sourceManagingOrganizationOid" />
+        </mat-form-field>
+        &nbsp;
+        <mat-form-field class="column50">
+          <mat-label>managingOrganization name</mat-label>
+          <input matInput [formControl]="sourceManagingOrganizationName" />
+        </mat-form-field>
+      </div>
+
+      <mat-card-actions>
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          (click)="onPIXmFeedAdd()"
+        >
+          PIXm Feed - Add Identifier
+        </button>
+      </mat-card-actions>
+    </ng-container>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="display">
+  <mat-card-content>
+    <mat-card-header>
+      <mat-card-title>Mobile Access Gateway - Authenticate</mat-card-title>
+    </mat-card-header>
+
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>Authenticate/Authorize</mat-label>
+        <select matNativeControl required [formControl]="authenticate">
+          <option value="Patient">Patient</option>
+          <option value="HCP">HCP</option>
+          <option value="TCU">TCU</option>
+        </select>
+      </mat-form-field>
+    </div>
+
+    <div *ngIf="getScopes()">
+      <pre><code [highlight]="getScopes()"></code></pre>
+    </div>
+
+    <mat-card-actions>
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        (click)="onAuthenticate()"
+      >
+        Authenticate
+      </button>
+    </mat-card-actions>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="display">
+  <mat-card-content>
+    <mat-card-header>
+      <mat-card-title>Mobile Access Gateway - Query</mat-card-title>
+    </mat-card-header>
+
+    <mat-table #table [dataSource]="dataSource">
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef class="name"
+          >Description</mat-header-cell
+        >
+        <mat-cell *matCellDef="let entry" class="name">
+          {{ entry.description }}
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="title">
+        <mat-header-cell *matHeaderCellDef class="title">Title</mat-header-cell>
+        <mat-cell *matCellDef="let entry" class="title">
+          <div>
+            {{ entry.content[0].attachment.title }}
+          </div>
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="contentType">
+        <mat-header-cell *matHeaderCellDef class="contentType"
+          >Title</mat-header-cell
+        >
+        <mat-cell *matCellDef="let entry" class="contentType">
+          <div>
+            {{ entry.content[0].attachment.contentType }}
+          </div>
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="formatCode">
+        <mat-header-cell *matHeaderCellDef class="formatCode"
+          >formatCode</mat-header-cell
+        >
+        <mat-cell *matCellDef="let entry" class="formatCode">
+          <div>
+            {{ entry.content[0].format.code }}
+          </div>
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="action">
+        <mat-header-cell *matHeaderCellDef class="res">Actions</mat-header-cell>
+        <mat-cell *matCellDef="let entry" class="res">
+          <button mat-icon-button (click)="onRemove(entry)" type="submit">
+            <mat-icon>remove</mat-icon>
+          </button>
+          <button mat-icon-button (click)="onReplace(entry)" type="submit">
+            <mat-icon>reply</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            (click)="onDownloadDocumentReferenceAttachment(entry)"
+            type="submit"
+          >
+            <mat-icon>download</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row
+        *matHeaderRowDef="[
+          'name',
+          'title',
+          'contentType',
+          'formatCode',
+          'action'
+        ]"
+      ></mat-header-row>
+      <mat-row
+        *matRowDef="
+          let row;
+          columns: ['name', 'title', 'contentType', 'formatCode', 'action']
+        "
+      >
+      </mat-row>
+    </mat-table>
+
+    <ng-container *ngIf="inMhdQueryProgress">
+      <mat-progress-spinner mode="indeterminate"> </mat-progress-spinner>
+    </ng-container>
+
+    <mat-card-actions>
+      <button
+        mat-raised-button
+        type="submit"
+        (click)="onFindDocumentReferences()"
+      >
+        Document References
+      </button>
+    </mat-card-actions>
+
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>serviceStart From</mat-label>
+        <input matInput [formControl]="serviceStartFrom" />
+      </mat-form-field>
+      &nbsp;
+      <mat-form-field class="column50">
+        <mat-label>serviceStart To</mat-label>
+        <input matInput [formControl]="serviceStartTo" />
+      </mat-form-field>
+    </div>
+
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>serviceEnd From</mat-label>
+        <input matInput [formControl]="serviceEndFrom" />
+      </mat-form-field>
+      &nbsp;
+      <mat-form-field class="column50">
+        <mat-label>serviceEnd To</mat-label>
+        <input matInput [formControl]="serviceEndTo" />
+      </mat-form-field>
+    </div>
+
+    <mat-card-actions>
+      <button mat-raised-button type="submit" (click)="onFindMedicationList()">
+        Medication List
+      </button>
+      <button mat-raised-button type="submit" (click)="onFindMedicationCard()">
+        Medication Card
+      </button>
+    </mat-card-actions>
+
+    <ng-container *ngIf="canTransformToPdf()">
+      <mat-card-actions>
+        <button mat-raised-button type="submit" (click)="onPdf()">Pdf</button>
+      </mat-card-actions>
+    </ng-container>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="display">
+  <mat-card-content>
+    <mat-card-header>
+      <mat-card-title>Mobile Access Gateway - Upload</mat-card-title>
+    </mat-card-header>
+
+    <app-upload (addFiles)="addFile($event)"> </app-upload>
+
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>Description</mat-label>
+        <input matInput [formControl]="documentDescription" />
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>Document Type</mat-label>
+        <select matNativeControl required [formControl]="documentType">
+          <option value="APPC">APPC Document</option>
+          <option value="MTP">Medication Treatment Plan document</option>
+          <option value="DIS">Medication Dispense document</option>
+          <option value="PRE">Medication Prescription document/option></option>
+          <option value="PADV">Pharmaceutical Advice document</option>
+          <option value="PDF">PDF</option>
+        </select>
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>Confidentiality</mat-label>
+        <select
+          matNativeControl
+          required
+          [formControl]="documentConfidentiality"
+        >
+          <option value="NORM">Normally accessible</option>
+          <option value="RESTRICTED">Restricted accessible</option>
+          <option value="SECRET">Secret</option>
+        </select>
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>DocumentEntry.masterIdentifier (uuid)</mat-label>
+        <input matInput [formControl]="masterIdentifier" />
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>DocumentEntry.creationTime</mat-label>
+        <input matInput [formControl]="creationTime" />
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>DocumentEntry.languageCode</mat-label>
+        <input matInput [formControl]="languageCode" />
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>ihe-sourceId</mat-label>
+        <input matInput [formControl]="iheSourceId" /> </mat-form-field
+      >&nbsp;
+      <a
+        href="https://profiles.ihe.net/ITI/MHD/4.0.2/StructureDefinition-ihe-sourceId.html"
+        >ig</a
+      >
+    </div>
+
+    <div *ngIf="replaceDocumentReference">
+      Replace Document with {{ replaceDocumentReference.identifier[0].value }}
+    </div>
+
+    <div *ngFor="let entry of replaceUuids">
+      {{ entry.descr }}: {{ entry.existingUuid }} -> {{ entry.newUuid }}
+    </div>
+    <div *ngIf="errMsgAssignPatient">{{ errMsgAssignPatient }}</div>
+    <ng-container *ngIf="inMhdUploadProgress">
+      <mat-progress-spinner mode="indeterminate"> </mat-progress-spinner>
+    </ng-container>
+    <div>
+      <button
+        mat-raised-button
+        type="submit"
+        (click)="assignMobileAccessPatient()"
+      >
+        Assign Mobile Access Patient</button
+      >&nbsp;
+
+      <button mat-raised-button type="submit" (click)="createMhdTransaction()">
+        Provide and Register
+      </button>
+
+      <button mat-raised-button type="submit" (click)="createAppc()">
+        Create APPC for PMP
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="display">
+  <mat-card-content>
+    <mat-card-header>
+      <mat-card-title>Response</mat-card-title>
+    </mat-card-header>
+    <div *ngIf="errMsg">{{ errMsg }}</div>
+
+    <pre><code [highlight]="getJson()" [lineNumbers]="true"></code></pre>
+  </mat-card-content>
+</mat-card>

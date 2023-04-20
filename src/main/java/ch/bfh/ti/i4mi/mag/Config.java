@@ -184,11 +184,18 @@ public class Config {
     public String getUriFhirEndpoint() { return baseurl+"/fhir"; };
     
    
-    @Value("${mag.client-ssl.key-store:}")
+    @Value("${mag.client-ssl.keystore.path:}")
     private String keystore;
     
-    @Value("${mag.client-ssl.key-store-password:}")
+    @Value("${mag.client-ssl.keystore.password:}")
     private String keystorePassword;
+
+    @Value("${mag.client-ssl.truststore.path:}")
+    private String truststore;
+
+    @Value("${mag.client-ssl.truststore.password:}")
+    private String truststorePassword;
+
     
     @Value("${mag.client-ssl.cert-alias:}")
     private String certAlias;
@@ -214,8 +221,14 @@ public class Config {
     	kmp.setKeyStore(ksp);
     	kmp.setKeyPassword(keystorePassword);       	
     	
+
+        KeyStoreParameters tsp = new KeyStoreParameters();
+    	// Keystore file may be found at src/main/resources
+    	tsp.setResource(truststore); 
+    	tsp.setPassword(truststorePassword);
+
     	TrustManagersParameters tmp = new TrustManagersParameters();
-    	tmp.setKeyStore(ksp);    	
+    	tmp.setKeyStore(tsp);    	
     
     	SSLContextParameters scp = new SSLContextParameters();
     	scp.setKeyManagers(kmp);

@@ -1,0 +1,44 @@
+name: Build the Angular GUI and commit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - "angular/**"
+
+jobs:
+  build-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+    defaults:
+      run:
+        working-directory: ./angular
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          # https://github.com/actions/setup-node
+          node-version: 18
+          cache: "npm"
+          cache-dependency-path: angular/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build-mag
+
+      - name: Commit
+        if: success()
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Rebuild the Angular GUI resources"
+          file_pattern: "src/main/resources/static"
