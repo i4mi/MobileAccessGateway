@@ -558,6 +558,7 @@ export class MagComponent implements OnInit {
       return;
     }
     this.uploadContentType = 'text/xml';
+    this.documentDescription.setValue('Policy document');
     this.documentType.setValue('APPC');
     this.documentConfidentiality.setValue('NORM');
     this.masterIdentifier.setValue('urn:uuid:' + uuidv4());
