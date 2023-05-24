@@ -964,16 +964,34 @@ export class MagComponent implements OnInit {
   getDocumentReferenceType(): fhir.r4.CodeableConcept {
     switch (this.documentType.value) {
       case 'APPC':
-      case 'MTP':
-      case 'PADV':
-      case 'DIS':
       case 'PDF':
+      case 'PADV':
         return {
           coding: [
             {
               system: 'http://snomed.info/sct',
               code: '419891008',
               display: 'Record artifact',
+            },
+          ],
+        };
+      case 'MTP':
+        return {
+          coding: [
+            {
+              system: 'http://snomed.info/sct',
+              code: '761931002',
+              display: 'Medication treatment plan report (record artifact)',
+            },
+          ],
+        };
+      case 'DIS':
+        return {
+          coding: [
+            {
+              system: 'http://snomed.info/sct',
+              code: '294121000195110',
+              display: 'Medication dispense document (record artifact)',
             },
           ],
         };
@@ -1186,51 +1204,30 @@ export class MagComponent implements OnInit {
       const snomedct = composition.type.coding.find(
         (coding) => 'http://snomed.info/sct' === coding.system
       );
-      const loinc = composition.type.coding.find(
-        (coding) => 'http://loinc.org' === coding.system
-      );
       if (composition.language) {
         this.languageCode.setValue(composition.language);
       }
-      if (
-        loinc &&
-        '77603-9' === loinc.code &&
-        snomedct &&
-        '419891008' === snomedct.code
-      ) {
-        this.uploadBundle = bundle;
-        this.documentType.setValue('MTP');
+
+      if (!snomedct) {
         return;
       }
-      if (
-        loinc &&
-        '57833-6' === loinc.code &&
-        snomedct &&
-        '761938008' === snomedct.code
-      ) {
-        this.uploadBundle = bundle;
-        this.documentType.setValue('PRE');
-        return;
-      }
-      if (
-        loinc &&
-        '60593-1' === loinc.code &&
-        snomedct &&
-        '419891008' === snomedct.code
-      ) {
-        this.uploadBundle = bundle;
-        this.documentType.setValue('DIS');
-        return;
-      }
-      if (
-        loinc &&
-        '61356-2' === loinc.code &&
-        snomedct &&
-        '419891008' === snomedct.code
-      ) {
-        this.uploadBundle = bundle;
-        this.documentType.setValue('PADV');
-        return;
+      switch (snomedct.code) {
+        case '761931002':
+          this.uploadBundle = bundle;
+          this.documentType.setValue('MTP');
+          return;
+        case '761938008':
+          this.uploadBundle = bundle;
+          this.documentType.setValue('PRE');
+          return;
+        case '294121000195110':
+          this.uploadBundle = bundle;
+          this.documentType.setValue('DIS');
+          return;
+        case '419891008':
+          this.uploadBundle = bundle;
+          this.documentType.setValue('PADV');
+          return;
       }
     }
   }
