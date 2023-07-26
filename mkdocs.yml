@@ -11,8 +11,9 @@ extra_css:
 nav:
   - Home: index.md
   - Features: features.md
-  - Changelog: changelog.md
+  - Endpoints: endpoints.md
   - EPR Integration: integration-primary-system.md
+  - Changelog: changelog.md
 markdown_extensions:
   - admonition
   - attr_list

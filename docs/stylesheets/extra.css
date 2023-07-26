@@ -9,3 +9,6 @@
   padding: 0 1rem;
   box-shadow: var(--md-shadow-z1);
 }
+.md-typeset svg {
+  vertical-align: sub;
+}
