@@ -12,3 +12,12 @@ nav:
   - Home: index.md
   - Features: features.md
   - Changelog: changelog.md
+  - EPR Integration: integration-primary-system.md
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
