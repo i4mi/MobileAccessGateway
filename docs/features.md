@@ -10,3 +10,4 @@ The MobileAccessGateway provides translation from REST to SOAP variants of IHE t
 - ITI-93 to ITI-44
 - ITI-104 to ITI-44 or ITI-47
 - ITI-71 to ITI-40
+- RESTful Get X-User Assertion to Get X-User Assertion
