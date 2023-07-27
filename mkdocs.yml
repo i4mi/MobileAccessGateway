@@ -6,6 +6,8 @@ theme:
   favicon: assets/favicon-256x256.png
   palette:
     scheme: mag
+  features:
+    - content.code.annotate
 extra_css:
   - stylesheets/extra.css
 nav:
@@ -20,5 +22,7 @@ markdown_extensions:
   - md_in_html
   - pymdownx.highlight
   - pymdownx.superfences
+  - pymdownx.snippets:
+      base_path: ["docs/snippets"]
   - pymdownx.tabbed:
       alternate_style: true
