@@ -26,7 +26,7 @@ See [client.http](client.http) for example calls to the Mobile Access Gateway.
 ## Run the JAR
 
 1. Clone https://github.com/oehf/ipf.git
-2. run mvn clean install -DskipTests in this directory, this should produce 4.0-SNAPSHOT (you need at least jdk11)
+2. run mvn clean install -DskipTests in this directory, this should produce 4.0-SNAPSHOT (you need at least jdk17)
 3. Clone this repo
 4. Install the dependencies: `mvn install`
 5. Either run it from your favorite IDE or in the CLI: `mvn clean compile && mvn exec:java -Dexec.mainClass="ch.bfh.ti.i4mi.mag.MobileAccessGateway"`

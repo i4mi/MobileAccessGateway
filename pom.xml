@@ -17,7 +17,7 @@
 		<maven.compiler.target>1.11</maven.compiler.target>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
 
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 
 		<!-- plugins -->
 		<compiler-plugin-version>3.10.1</compiler-plugin-version>
@@ -32,7 +32,6 @@
 		<ipf-version>4.3.1</ipf-version>
 		<opensaml-version>2.6.6</opensaml-version>
 		<spring-security-saml2-core-version>1.0.10.RELEASE</spring-security-saml2-core-version>
-
 
 		<start-class>ch.bfh.ti.i4mi.mag.MobileAccessGateway</start-class>
 	</properties>
