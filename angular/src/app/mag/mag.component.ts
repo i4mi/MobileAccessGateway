@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FhirConfigService } from '../fhirConfig.service';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import FhirClient from 'fhir-kit-client';
 import { FhirPathService } from '../fhirpath.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -54,31 +54,31 @@ export class MagComponent implements OnInit {
 
   targetId: string;
 
-  public sourceIdentifierSystem: FormControl;
-  public sourceIdentifierValue: FormControl;
-  public sourceAddIdentifierSystem: FormControl;
-  public sourceAddIdentifierValue: FormControl;
-  public sourceManagingOrganizationOid: FormControl;
-  public sourceManagingOrganizationName: FormControl;
-  public targetIdentifierSystem: FormControl;
-  public targetIdentifier2System: FormControl;
-  public authenticate: FormControl;
-  public documentType: FormControl;
-  public documentConfidentiality: FormControl;
-  public documentDescription: FormControl;
-  public masterIdentifier: FormControl;
-  public creationTime: FormControl;
-  public languageCode: FormControl;
-  public serviceStartFrom: FormControl;
-  public serviceStartTo: FormControl;
-  public serviceEndFrom: FormControl;
-  public serviceEndTo: FormControl;
+  public sourceIdentifierSystem: UntypedFormControl;
+  public sourceIdentifierValue: UntypedFormControl;
+  public sourceAddIdentifierSystem: UntypedFormControl;
+  public sourceAddIdentifierValue: UntypedFormControl;
+  public sourceManagingOrganizationOid: UntypedFormControl;
+  public sourceManagingOrganizationName: UntypedFormControl;
+  public targetIdentifierSystem: UntypedFormControl;
+  public targetIdentifier2System: UntypedFormControl;
+  public authenticate: UntypedFormControl;
+  public documentType: UntypedFormControl;
+  public documentConfidentiality: UntypedFormControl;
+  public documentDescription: UntypedFormControl;
+  public masterIdentifier: UntypedFormControl;
+  public creationTime: UntypedFormControl;
+  public languageCode: UntypedFormControl;
+  public serviceStartFrom: UntypedFormControl;
+  public serviceStartTo: UntypedFormControl;
+  public serviceEndFrom: UntypedFormControl;
+  public serviceEndTo: UntypedFormControl;
 
-  public iheSourceId: FormControl;
+  public iheSourceId: UntypedFormControl;
 
-  public searchGiven: FormControl;
+  public searchGiven: UntypedFormControl;
   public searchGivenValue = '';
-  public searchFamily: FormControl;
+  public searchFamily: UntypedFormControl;
   public searchFamilyValue = '';
   public fhirConfigService: FhirConfigService;
 
@@ -120,87 +120,87 @@ export class MagComponent implements OnInit {
       .then((data: fhir.r4.CapabilityStatement) =>
         this.setJson(JSON.stringify(data, null, 2))
       );
-    this.sourceIdentifierSystem = new FormControl();
+    this.sourceIdentifierSystem = new UntypedFormControl();
     this.sourceIdentifierSystem.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.sourceIdentifierSystem',
         'urn:oid:2.16.756.5.30.1.196.3.2.1'
       )
     );
-    this.sourceIdentifierValue = new FormControl();
+    this.sourceIdentifierValue = new UntypedFormControl();
     this.sourceIdentifierValue.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.sourceIdentifierValue',
         'MAGMED001'
       )
     );
-    this.sourceAddIdentifierSystem = new FormControl();
+    this.sourceAddIdentifierSystem = new UntypedFormControl();
     this.sourceAddIdentifierSystem.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.sourceAddIdentifierSystem',
         'urn:oid:2.16.756.5.30.1.196.3.2.1'
       )
     );
-    this.sourceAddIdentifierValue = new FormControl();
+    this.sourceAddIdentifierValue = new UntypedFormControl();
     this.sourceAddIdentifierValue.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.sourceAddIdentifierValue',
         'MAGMED001'
       )
     );
-    this.sourceManagingOrganizationOid = new FormControl();
+    this.sourceManagingOrganizationOid = new UntypedFormControl();
     this.sourceManagingOrganizationOid.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.sourceManagingOrganizationOid',
         'urn:oid:1.3.6.1.4.1.21367.2017.2.7.109'
       )
     );
-    this.sourceManagingOrganizationName = new FormControl();
+    this.sourceManagingOrganizationName = new UntypedFormControl();
     this.sourceManagingOrganizationName.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.sourceManagingOrganizationName',
         'TESTORG'
       )
     );
-    this.targetIdentifierSystem = new FormControl();
+    this.targetIdentifierSystem = new UntypedFormControl();
     this.targetIdentifierSystem.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.targetIdentifierSystem',
         'urn:oid:2.16.756.5.30.1.191.1.0.2.1'
       )
     );
-    this.targetIdentifier2System = new FormControl();
+    this.targetIdentifier2System = new UntypedFormControl();
     this.targetIdentifier2System.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.targetIdentifier2System',
         'urn:oid:2.16.756.5.30.1.127.3.10.3'
       )
     );
-    this.serviceStartFrom = new FormControl();
+    this.serviceStartFrom = new UntypedFormControl();
     this.serviceStartFrom.setValue(
       this.getLocalStorageItemOrDefault('mag.serviceStartFrom', '')
     );
-    this.serviceStartTo = new FormControl();
+    this.serviceStartTo = new UntypedFormControl();
     this.serviceStartTo.setValue(
       this.getLocalStorageItemOrDefault('mag.serviceStartTo', '')
     );
-    this.serviceEndFrom = new FormControl();
+    this.serviceEndFrom = new UntypedFormControl();
     this.serviceEndFrom.setValue(
       this.getLocalStorageItemOrDefault('mag.serviceEndFrom', '')
     );
-    this.serviceEndTo = new FormControl();
+    this.serviceEndTo = new UntypedFormControl();
     this.serviceEndTo.setValue(
       this.getLocalStorageItemOrDefault('mag.serviceEndTo', '')
     );
-    this.authenticate = new FormControl();
+    this.authenticate = new UntypedFormControl();
     this.authenticate.setValue(
       this.getLocalStorageItemOrDefault('mag.authenticate', 'HCP')
     );
-    this.documentType = new FormControl();
+    this.documentType = new UntypedFormControl();
     this.documentType.setValue(
       this.getLocalStorageItemOrDefault('mag.documentType', 'APPC')
     );
-    this.documentConfidentiality = new FormControl();
+    this.documentConfidentiality = new UntypedFormControl();
     this.documentConfidentiality.setValue(
       this.getLocalStorageItemOrDefault('mag.documentConfidentiality', 'NORM')
     );
@@ -214,21 +214,21 @@ export class MagComponent implements OnInit {
     );
     this.targetId = this.getLocalStorageItemOrDefault('mag.targetId', '');
 
-    this.iheSourceId = new FormControl();
+    this.iheSourceId = new UntypedFormControl();
     this.iheSourceId.setValue(oid_mag_ahdis + '.1');
 
-    this.searchGiven = new FormControl();
-    this.searchFamily = new FormControl();
-    this.documentDescription = new FormControl();
+    this.searchGiven = new UntypedFormControl();
+    this.searchFamily = new UntypedFormControl();
+    this.documentDescription = new UntypedFormControl();
     this.documentDescription.setValue(
       this.getLocalStorageItemOrDefault('mag.documentType', 'Titel')
     );
-    this.masterIdentifier = new FormControl();
+    this.masterIdentifier = new UntypedFormControl();
     this.masterIdentifier.setValue(uuidv4());
-    this.creationTime = new FormControl();
+    this.creationTime = new UntypedFormControl();
     this.creationTime.setValue(toLocaleDateTime(new Date()));
 
-    this.languageCode = new FormControl();
+    this.languageCode = new UntypedFormControl();
     this.languageCode.setValue(
       this.getLocalStorageItemOrDefault('mag.languageCode', 'de-CH')
     );
