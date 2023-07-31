@@ -26,6 +26,7 @@
 		<spring-boot-plugin-version>2.6.7</spring-boot-plugin-version>
 
 		<!-- libraries -->
+		<husky-version>2.1.1</husky-version>
 		<camel-version>3.14.2</camel-version>
 		<hibernate-version>5.2.5.Final</hibernate-version>
 		<hl7v3-code-jar-version>1.3.7</hl7v3-code-jar-version>
