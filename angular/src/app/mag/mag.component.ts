@@ -6,7 +6,7 @@ import { FhirPathService } from '../fhirpath.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { v4 as uuidv4 } from 'uuid';
 import { Base64 } from 'js-base64';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
 import { OAuthErrorEvent, OAuthService } from 'angular-oauth2-oidc';
 import { Router } from '@angular/router';
 import { IDroppedBlob } from '../upload/upload.component';
