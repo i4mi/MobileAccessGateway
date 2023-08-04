@@ -26,7 +26,7 @@
 		<spring-boot-plugin-version>2.6.7</spring-boot-plugin-version>
 
 		<!-- libraries -->
-		<husky-version>2.1.1</husky-version>
+		<husky-version>2.1.2-SNAPSHOT</husky-version>
 		<camel-version>3.14.2</camel-version>
 		<hibernate-version>5.2.5.Final</hibernate-version>
 		<hl7v3-code-jar-version>1.3.7</hl7v3-code-jar-version>
@@ -153,6 +153,12 @@
             <artifactId>ipf-platform-camel-ihe-hl7v3</artifactId>
         </dependency>
 
+		<dependency>
+            <groupId>org.openehealth.ipf.platform-camel</groupId>
+            <artifactId>ipf-platform-camel-ihe-hpd</artifactId>
+			<version>${ipf-version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.openehealth.ipf.commons</groupId>
             <artifactId>ipf-commons-ihe-xua</artifactId>
@@ -240,6 +246,17 @@
     		<version>2.12.0</version>
 		</dependency>
 		-->
+
+		<dependency>
+			<groupId>org.projecthusky.communication</groupId>
+			<artifactId>husky-communication-gen</artifactId>
+			<version>${husky-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.projecthusky.communication</groupId>
+			<artifactId>husky-communication-ch</artifactId>
+			<version>${husky-version}</version>
+		</dependency>
 
 		<!-- Development tools -->
 		<dependency>

@@ -41,7 +41,7 @@ import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 
 /**
  * ITI-67 to PHARM-1 request converter
- * 
+ *
  * @author Oliver Egger
  *
  */
@@ -58,8 +58,8 @@ public class Pharm5RequestConverter extends BaseRequestConverter {
   }
 
   /**
-   * convert PHARM-5 request to CMPD Pharm-1
-   * 
+   * convert CH:PHARM-5 request to CMPD Pharm-1
+   *
    * @param searchParameter
    * @return
    */
@@ -171,11 +171,11 @@ public class Pharm5RequestConverter extends BaseRequestConverter {
     List<DocumentEntryType> documentEntryTypes = new ArrayList<DocumentEntryType>();
     documentEntryTypes.add(DocumentEntryType.ON_DEMAND);
     documentEntryTypes.add(DocumentEntryType.STABLE);
-    
+
     if (chPmlQuery) {
       ((ChFindMedicationListQuery) query).setDocumentEntryTypes(documentEntryTypes);
     } else {
-      ((ChFindMedicationCardQuery) query).setDocumentEntryTypes(documentEntryTypes);      
+      ((ChFindMedicationCardQuery) query).setDocumentEntryTypes(documentEntryTypes);
     }
 
     final ChQueryRegistry queryRegistry = new ChQueryRegistry(query);

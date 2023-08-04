@@ -96,6 +96,9 @@ public class Config {
 	@Value("${mag.xds.iti-57.url:}")
     private String iti57HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
 
+	@Value("${mag.hpd.iti-58.url:}")
+    private String iti58HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
+
     
     /**
      * Own full URL where clients can retrieve documents from 
