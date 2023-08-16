@@ -289,7 +289,7 @@ You can read the audit messages for a given patient with an ITI-81 transaction.
 
 !!! warning
 
-    The endpoint for this transaction is the EPR community itself, not the MobileAccessGateway.
+    The endpoint for this transaction is the EPR community itself, not the Mobile Access Gateway.
     This transaction is still implemented on a previous CH:ATC specification (March 2020), based on the [IHE Restfull
     ATNA supplement rev. 2.2](https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_RESTful-ATNA_Rev2.2_TI_2017-07-21.pdf).
     A lot have changed since.

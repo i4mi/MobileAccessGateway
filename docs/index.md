@@ -1,6 +1,6 @@
-# MobileAccessGateway
+# Mobile Access Gateway
 
-The MobileAccessGateway is an implementation based on the [CH EPR mHealth](https://fhir.ch/ig/ch-epr-mhealth/index.html)
+The Mobile Access Gateway is an implementation based on the [CH EPR mHealth](https://fhir.ch/ig/ch-epr-mhealth/index.html)
 implementation guide.  
 It provides a FHIR Gateway supporting the PMIR and MHD server actors and uses XDS/PIXV3 to communicate with an XDS
 Affinity Domain.

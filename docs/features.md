@@ -1,4 +1,4 @@
-The MobileAccessGateway provides translation from REST to SOAP variants of IHE transaction:
+The Mobile Access Gateway provides translation from REST to SOAP variants of IHE transaction:
 
 - ITI-65 to ITI-41
 - ITI-66 to ITI-18

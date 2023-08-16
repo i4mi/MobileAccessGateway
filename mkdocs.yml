@@ -1,4 +1,4 @@
-site_name: MobileAccessGateway
+site_name: Mobile Access Gateway
 repo_url: https://github.com/i4mi/MobileAccessGateway
 theme:
   name: material

@@ -1,4 +1,4 @@
-Here are the endpoints exposed by the MobileAccessGateway.
+Here are the endpoints exposed by the Mobile Access Gateway.
 
 | Transaction          | URL                                                   |
 | -------------------- | ----------------------------------------------------- |
