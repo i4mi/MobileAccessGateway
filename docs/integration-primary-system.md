@@ -67,7 +67,7 @@ Identifiers include the MPI-PID and EPR-SPID, and identifiers used by primary sy
 Demographics include the given and family names, date of birth, gender, nationality and telecoms.
 It can be queried and updated.
 
-### Retrieve patient identifiers
+### Retrieving patient identifiers
 
 Patient identifiers (commonly the MPI-PID and EPR-SPID) can be queried with an
 [ITI-83 (_Mobile Patient Identifier Cross-reference Query_) transaction](https://fhir.ch/ig/ch-epr-mhealth/iti-83.html).
@@ -89,7 +89,7 @@ GET /Patient/$ihe-pix?sourceIdentifier=urn:oid:2.16.756.5.30.1.191.1.0.12.3.101|
 
 </details>
 
-### Retrieve patient demographics
+### Retrieving patient demographics
 
 Patient demographics can be queried with an
 [ITI-78 (_Mobile Patient Demographics Query_) transaction](https://fhir.ch/ig/ch-epr-mhealth/iti-78.html).
@@ -129,7 +129,7 @@ specifying other information.
     GET /Patient?family=MOHR&given=ALICE&gender=female HTTP/1.1
     ```
 
-### Feed patient information
+### Feeding patient information
 
 Feeding patient information can be done with the [ITI-104 (_Patient Identity Feed FHIR_) transaction](https://fhir.ch/ig/ch-epr-mhealth/iti-104.html).
 The following profile shall be used: `http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition-ch-pixm-patient.html`.
@@ -290,7 +290,7 @@ You can read the audit messages for a given patient with an ITI-81 transaction.
 !!! warning
 
     The endpoint for this transaction is the EPR community itself, not the Mobile Access Gateway.
-    This transaction is still implemented on a previous CH:ATC specification (March 2020), based on the [IHE Restfull
+    This transaction is still implemented on a previous CH:ATC specification (March 2020), based on the [IHE Restful
     ATNA supplement rev. 2.2](https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_RESTful-ATNA_Rev2.2_TI_2017-07-21.pdf).
     A lot have changed since.
 
@@ -298,6 +298,9 @@ The transaction is an HTTP GET request on the endpoint, with the parameter `enti
 and `date` to constraint the audit message date.
 The `Authorization` header uses the prefix `IHE-SAML` and the SAML assertion is encoded with the [regular base64
 alphabet](https://datatracker.ietf.org/doc/html/rfc4648#section-4).
+
+The community will ask other communities for their audit messages and regroup them all.
+If a foreign community is not reachable, an OperationOutcome may be added to the response Bundle.
 
 <details><summary>Examples</summary>
 
@@ -309,6 +312,6 @@ Authorization: IHE-SAML Zm9vYmE=
 </details>
 
 [string]: http://hl7.org/fhir/R4/search.html#string "String search type"
-[token]: http://hl7.org/fhir/R4/search.html#string "Token search type"
+[token]: http://hl7.org/fhir/R4/search.html#token "Token search type"
 [date]: http://hl7.org/fhir/R4/search.html#date "Date search type"
 [uri]: http://hl7.org/fhir/R4/search.html#uri "URI search type"
