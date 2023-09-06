@@ -286,7 +286,7 @@ public class Config {
         context.setAuditRepositoryTransport("UDP");        
         */
         //context.setAuditSource(AuditSource.of("code","system","display"));
-        //context.setSendingApplication("MobileAccessGateway");
+        //context.setSendingApplication("Mobile Access Gateway");
             	    	
         return context;	
     }

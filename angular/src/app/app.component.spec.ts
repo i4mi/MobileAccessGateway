@@ -3,7 +3,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component';
-import { MatMenuModule } from '@angular/material/menu';
+import { MatLegacyMenuModule as MatMenuModule } from '@angular/material/legacy-menu';
 import { TranslateModule } from '@ngx-translate/core';
 
 export const FHIR_JS_CONFIG: FhirConfig = {
@@ -24,7 +24,6 @@ describe('AppComponent', () => {
           HttpClientTestingModule,
           RouterModule.forRoot(routes, {
             useHash: true,
-            relativeLinkResolution: 'legacy',
           }),
         ],
         schemas: [NO_ERRORS_SCHEMA],

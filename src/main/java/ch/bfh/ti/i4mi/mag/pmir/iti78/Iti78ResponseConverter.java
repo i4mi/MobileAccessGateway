@@ -198,17 +198,50 @@ public class Iti78ResponseConverter extends BasePMIRResponseConverter implements
 	
 	public ContactPoint transform(TEL telecom) {
 		ContactPoint contactPoint = new ContactPoint();
-    			      
+
 		String use = telecom.getUse();
 		if (use != null) {
-			switch(use) {
-			case "HP":contactPoint.setUse(ContactPoint.ContactPointUse.HOME);break;
-			
+			switch (use) {
+				case "H":
+				case "HP":
+				case "HV":
+					contactPoint.setUse(ContactPoint.ContactPointUse.HOME);
+					break;
+				case "WP":
+				case "DIR":
+				case "PUB":
+					contactPoint.setUse(ContactPoint.ContactPointUse.WORK);
+					break;
+				case "TMP":
+					contactPoint.setUse(ContactPoint.ContactPointUse.TEMP);
+					break;
+				case "MC":
+					contactPoint.setUse(ContactPoint.ContactPointUse.MOBILE);
+					break;
 			}
 		}
-		contactPoint.setValue(telecom.getValue());
-    	    	    	    
-    	return contactPoint;
+		final String[] telecomParts = telecom.getValue().split(":");
+		if (telecomParts.length == 2) {
+			switch (telecomParts[0].toLowerCase()) {
+				case "mailto":
+					contactPoint.setSystem(ContactPoint.ContactPointSystem.EMAIL);
+					break;
+				case "tel":
+					contactPoint.setSystem(ContactPoint.ContactPointSystem.PHONE);
+					break;
+				case "fax":
+					contactPoint.setSystem(ContactPoint.ContactPointSystem.FAX);
+					break;
+			}
+			if (contactPoint.getSystem() == null) {
+				// No system, no contactPoint
+				return null;
+			}
+			contactPoint.setValue(telecomParts[1]);
+			return contactPoint;
+		}
+		// No value, no contactPoint
+		return null;
 	}
 	
 	public List<Patient> translateToFhir(byte[] input, Map<String, Object> parameters)  {

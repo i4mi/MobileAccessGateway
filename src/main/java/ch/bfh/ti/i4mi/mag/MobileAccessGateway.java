@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.validation.spi.ValidationProvider;
 
 /**
- * Main class of the IPF MobileAccessGateway application.
+ * Main class of the IPF Mobile Access Gateway application.
  *
  * @author Oliver Egger
  */
@@ -45,7 +45,7 @@ public class MobileAccessGateway {
      * @param args The list of CLI parameters.
      */
     public static void main(final String[] args) {
-        log.info("Configuring MobileAccessGateway");
+        log.info("Configuring Mobile Access Gateway");
 
         final SpringApplication application = new SpringApplication(MobileAccessGateway.class);
         addApplicationStartupHook(application);
@@ -59,7 +59,7 @@ public class MobileAccessGateway {
      */
     public static void addApplicationStartupHook(final SpringApplication application) {
         application.addListeners((ApplicationListener<ApplicationReadyEvent>) event -> {
-            log.info("MobileAccessGateway has been configured and has started");
+            log.info("Mobile Access Gateway has been configured and has started");
         });
     }
 }

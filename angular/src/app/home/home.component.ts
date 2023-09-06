@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatTabChangeEvent } from '@angular/material/tabs/tab-group';
+import { MatLegacyTabChangeEvent } from '@angular/material/legacy-tabs';
 import packageJson from '../../../package.json';
 
 @Component({
@@ -15,7 +15,7 @@ export class HomeComponent implements OnInit {
 
   update(index): void {}
 
-  tabChanged(tabChangeEvent: MatTabChangeEvent): void {
+  tabChanged(tabChangeEvent: MatLegacyTabChangeEvent): void {
     console.log('tabChangeEvent => ', tabChangeEvent);
     console.log('index => ', tabChangeEvent.index);
     this.update(tabChangeEvent.index);

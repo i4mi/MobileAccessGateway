@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FhirConfigService } from '../fhirConfig.service';
-import { PageEvent } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
-import { FormControl } from '@angular/forms';
+import { LegacyPageEvent as PageEvent } from '@angular/material/legacy-paginator';
+import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
+import { UntypedFormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import FhirClient from 'fhir-kit-client';
 
@@ -29,11 +29,11 @@ export class PatientsComponent implements OnInit {
   };
 
   pageSizeOptions = [this.pageSize];
-  public searchName: FormControl;
+  public searchName: UntypedFormControl;
   public searchNameValue = '';
-  public searchGiven: FormControl;
+  public searchGiven: UntypedFormControl;
   public searchGivenValue = '';
-  public searchFamily: FormControl;
+  public searchFamily: UntypedFormControl;
   public searchFamilyValue = '';
 
   selectedPatient: fhir.r4.Patient;
@@ -41,15 +41,15 @@ export class PatientsComponent implements OnInit {
   constructor(private data: FhirConfigService) {
     this.client = data.getMobileAccessGatewayClient();
 
-    this.searchName = new FormControl();
+    this.searchName = new UntypedFormControl();
     this.searchName.valueChanges
       .pipe(debounceTime(400), distinctUntilChanged())
       .subscribe((term) => this.search());
-    this.searchGiven = new FormControl();
+    this.searchGiven = new UntypedFormControl();
     this.searchGiven.valueChanges
       .pipe(debounceTime(400), distinctUntilChanged())
       .subscribe((term) => this.search());
-    this.searchFamily = new FormControl();
+    this.searchFamily = new UntypedFormControl();
     this.searchFamily.valueChanges
       .pipe(debounceTime(400), distinctUntilChanged())
       .subscribe((term) => this.search());
