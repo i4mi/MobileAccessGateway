@@ -1392,11 +1392,11 @@ export class MagComponent implements OnInit {
                 id: '1',
                 identifier: [
                   {
-                    system: 'urn:oid:2.16.756.5.30.1.191.1.0.12.3.101',
+                    system: '$10',
                     value: '$10',
                   },
                   {
-                    system: 'urn:oid:2.16.756.5.30.1.191.1.0.2.1',
+                    system: '$11',
                     value: '$11',
                   },
                 ],
@@ -1562,10 +1562,10 @@ export class MagComponent implements OnInit {
 
     const docrefpat: fhir.r4.Patient = docref.contained[0] as fhir.r4.Patient;
 
-    docrefpat.identifier[0].value = this.sourceIdentifierSystem.value;
+    docrefpat.identifier[0].system = this.sourceIdentifierSystem.value;
     docrefpat.identifier[0].value = this.sourceIdentifierValue.value; // $10
 
-    docrefpat.identifier[1].value = this.targetIdentifierSystem.value;
+    docrefpat.identifier[1].system = this.targetIdentifierSystem.value;
     docrefpat.identifier[1].value = this.targetIdentifierValue; // $11
 
     // if we feteched the patient before we also set the names to it
