@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContentComponent;
@@ -55,6 +56,8 @@ import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 import org.owasp.esapi.codecs.Hex;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseQueryResponseConverter;
 
@@ -154,8 +157,19 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     // Not a contained resource. URL Points to an existing Patient Resource
                     // representing the XDS Affinity Domain Patient.                  
                     if (documentEntry.getPatientId()!=null) {
-                    	Identifiable patient = documentEntry.getPatientId();                    	
-                    	documentReference.setSubject(transformPatient(patient));
+                    	Identifiable patient = documentEntry.getPatientId();
+                        if (config.getUriExternalPatientEndpoint()!=null) {
+                            GenericClient client = new GenericClient(FhirContext.forR4Cached(), null, config.getUriExternalPatientEndpoint(), null);
+                            client.setDontValidateConformance(true);
+                            Bundle bundle = (Bundle) client.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndIdentifier("urn:oid:"+patient.getAssigningAuthority().getUniversalId(), patient.getId())).returnBundle(Bundle.class).execute();
+                            if (bundle.getEntry().size()>0) {
+                                Reference result = new Reference();
+                                result.setReference(bundle.getEntry().get(0).getFullUrl());
+                                documentReference.setSubject(result);
+                            } 
+                        } else {
+                        	documentReference.setSubject(transformPatient(patient));
+                        }
                     }
 
                     // creationTime -> date instant [0..1]
