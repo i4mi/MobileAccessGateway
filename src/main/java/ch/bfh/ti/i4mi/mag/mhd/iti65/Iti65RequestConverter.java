@@ -724,12 +724,12 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 	 */
 	public  void processDocumentReference(DocumentReference reference, DocumentEntry entry) {
 		
-		if (reference.getIdElement()!=null) {
-			entry.setEntryUuid(reference.getIdElement().getIdPart());
-		} else {
+		//if (reference.getIdElement()!=null) {
+		//	entry.setEntryUuid(reference.getIdElement().getIdPart());
+		//} else {
 			entry.assignEntryUuid();
 			reference.setId(entry.getEntryUuid());
-		}
+		//}
         Identifier masterIdentifier = reference.getMasterIdentifier();
         entry.setUniqueId(noPrefix(masterIdentifier.getValue()));
                

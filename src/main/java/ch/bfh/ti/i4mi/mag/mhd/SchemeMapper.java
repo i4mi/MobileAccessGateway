@@ -34,6 +34,9 @@ public class SchemeMapper {
 	
 	public SchemeMapper() {
 		registerSchemeToSystem("2.16.840.1.113883.6.96", "http://snomed.info/sct");
+		registerSchemeToSystem("1.3.6.1.4.1.19376.1.2.3", "http://ihe.net/fhir/ihe.formatcode.fhir/CodeSystem/formatcode");
+		registerSchemeToSystem("2.16.840.1.113883.6.1",	"http://loinc.org");
+		registerSchemeToSystem("2.16.840.1.113883.5.25", "http://terminology.hl7.org/CodeSystem/v3-Confidentiality");
 	}
 	
 	/**
