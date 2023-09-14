@@ -111,9 +111,9 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     list.add(documentReference);
                     // limitedMetadata -> meta.profile canonical [0..*] 
                     if (documentEntry.isLimitedMetadata()) {
-                    	documentReference.getMeta().addProfile("http://ihe.net/fhir/StructureDefinition/IHE_MHD_Query_Comprehensive_DocumentReference");
+                    	documentReference.getMeta().addProfile("https://ihe.net/fhir/StructureDefinition/IHE_MHD_Query_Comprehensive_DocumentReference");
                     } else {
-                    	documentReference.getMeta().addProfile("http://ihe.net/fhir/StructureDefinition/IHE_MHD_Comprehensive_DocumentManifest");
+                    	documentReference.getMeta().addProfile("https://ihe.net/fhir/StructureDefinition/IHE_MHD_Comprehensive_DocumentManifest");
                     }
                     
                     // uniqueId -> masterIdentifier Identifier [0..1] [1..1]
@@ -184,11 +184,7 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     // [1..1]                    
 					documentReference.setRelatesTo(relatesToMapping.get(documentEntry.getEntryUuid()));
 
-                    // title -> description string [0..1]
-                    if (documentEntry.getTitle() != null) {
-                        documentReference.setDescription(documentEntry.getTitle().getValue());
-                    }
-
+                 
                     // confidentialityCode -> securityLabel CodeableConcept [0..*] Note: This
                     // is NOT the DocumentReference.meta, as that holds the meta tags for the
                     // DocumentReference itself.
@@ -199,7 +195,13 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     DocumentReferenceContentComponent content = documentReference.addContent();
                     Attachment attachment = new Attachment();
                     content.setAttachment(attachment);
+                    
+                    // title -> content.attachment.title string [0..1]
+                    if (documentEntry.getTitle() != null) {
+                        attachment.setTitle(documentEntry.getTitle().getValue());
+                    }
 
+                    
                     // mimeType -> content.attachment.contentType [1..1] code [0..1]
                     if (documentEntry.getMimeType() != null) {
                         attachment.setContentType(documentEntry.getMimeType());
@@ -227,9 +229,9 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     	attachment.setHash(Hex.fromHex(documentEntry.getHash()));
                     }
 
-                    // comments -> content.attachment.title string [0..1]
+                    // comments -> description string [0..1]
                     if (documentEntry.getComments() != null) {
-                        attachment.setTitle(documentEntry.getComments().getValue());
+                        documentReference.setDescription(documentEntry.getComments().getValue());
                     }
 
                     // TcreationTime -> content.attachment.creation dateTime [0..1]

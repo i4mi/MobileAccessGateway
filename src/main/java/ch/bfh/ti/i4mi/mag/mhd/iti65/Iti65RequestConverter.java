@@ -98,6 +98,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.sun.istack.ByteArrayDataSource;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
@@ -109,7 +110,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-public class Iti65RequestConverter {
+public class Iti65RequestConverter extends BaseRequestConverter {
 
 	private SchemeMapper schemeMapper;
 	
@@ -172,6 +173,10 @@ public class Iti65RequestConverter {
 			} else if ("http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle".equals(profile.getValue())) {
 				submissionSet.setLimitedMetadata(false);
 			} else if ("http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle".equals(profile.getValue())) {
+				submissionSet.setLimitedMetadata(true);
+			} else if ("https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle".equals(profile.getValue())) {
+				submissionSet.setLimitedMetadata(false);
+			} else if ("https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle".equals(profile.getValue())) {
 				submissionSet.setLimitedMetadata(true);
 			} 
 		}
@@ -613,7 +618,8 @@ public class Iti65RequestConverter {
 		submissionSet.assignEntryUuid();
 		manifest.setId(submissionSet.getEntryUuid());
 		
-		Extension designationType = manifest.getExtensionByUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType");
+		Extension designationType = getExtensionByUrl(manifest, "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType");
+		
 		if (designationType != null && designationType.getValue() instanceof CodeableConcept) {
 			submissionSet.setContentTypeCode(transformCodeableConcept((CodeableConcept) designationType.getValue()));
 		}
@@ -640,7 +646,10 @@ public class Iti65RequestConverter {
 		}
 		 // recipient	SubmissionSet.intendedRecipient		
 		
-		for (Extension recipientExt : manifest.getExtensionsByUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-intendedRecipient")) {
+		List<Extension> recipients = manifest.getExtensionsByUrl("https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-intendedRecipient");
+		if (recipients.isEmpty()) recipients = manifest.getExtensionsByUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-intendedRecipient");
+		
+		for (Extension recipientExt : recipients) {
 			Reference recipientRef = (Reference) recipientExt.getValue();		
 			Resource res = findResource(recipientRef, manifest.getContained());
 			
@@ -673,7 +682,8 @@ public class Iti65RequestConverter {
 						
 		}
 		
-		Extension source = manifest.getExtensionByUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId");
+		Extension source = getExtensionByUrl(manifest, "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId");
+		
 		if (source != null && source.getValue() instanceof Identifier) {
 		  submissionSet.setSourceId(noPrefix(((Identifier) source.getValue()).getValue()));
 		}
@@ -755,9 +765,9 @@ public class Iti65RequestConverter {
 			 } else throw new InvalidRequestException("No authenticator of type Organization supported.");			
 		}
 		             
-        // title -> description string [0..1]
-		String title = reference.getDescription();
-		if (title != null) entry.setTitle(localizedString(title));
+        // comments -> description string [0..1]
+		String comments = reference.getDescription();
+		if (comments != null) entry.setComments(localizedString(comments));
        
         // confidentialityCode -> securityLabel CodeableConcept [0..*] Note: This
         // is NOT the DocumentReference.meta, as that holds the meta tags for the
@@ -783,9 +793,9 @@ public class Iti65RequestConverter {
         byte[] hash = attachment.getHash();
         if (hash != null) entry.setHash(Hex.encodeHexString(hash));
 
-        // comments -> content.attachment.title string [0..1]
-        String comments = attachment.getTitle();
-        if (comments!=null) entry.setComments(localizedString(comments));       
+        // title -> content.attachment.title string [0..1]
+        String title = attachment.getTitle();
+        if (title!=null) entry.setTitle(localizedString(title));       
 
         // creationTime -> content.attachment.creation dateTime [0..1]
         if (attachment.hasCreation()) {

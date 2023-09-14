@@ -67,7 +67,7 @@ public class Iti65ResponseConverter extends BaseResponseConverter implements ToF
 			Bundle responseBundle = new Bundle();		
 			Bundle requestBundle = (Bundle) parameters.get(Utils.KEPT_BODY);
 			
-			responseBundle.getMeta().addProfile("http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.ProvideDocumentBundleResponse");
+			responseBundle.getMeta().addProfile("https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.ProvideDocumentBundleResponse");
 			
 			for (Bundle.BundleEntryComponent requestEntry : requestBundle.getEntry()) {
 	            Bundle.BundleEntryResponseComponent response = new Bundle.BundleEntryResponseComponent()
