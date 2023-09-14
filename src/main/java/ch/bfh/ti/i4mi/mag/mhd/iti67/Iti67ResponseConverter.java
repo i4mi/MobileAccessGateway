@@ -122,7 +122,7 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     // uniqueId -> masterIdentifier Identifier [0..1] [1..1]
                     if (documentEntry.getUniqueId() != null) {
                         documentReference.setMasterIdentifier(
-                                (new Identifier().setValue("urn:oid:" + documentEntry.getUniqueId())));
+                                (new Identifier().setValue("urn:oid:" + documentEntry.getUniqueId())).setSystem("urn:ietf:rfc:3986"));
                     }
 
                     // entryUUID -> identifier Identifier [0..*]
