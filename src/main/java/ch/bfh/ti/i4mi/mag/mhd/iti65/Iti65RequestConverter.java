@@ -97,6 +97,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.sun.istack.ByteArrayDataSource;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 import ch.bfh.ti.i4mi.mag.Config;
@@ -453,6 +455,23 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 				String[] identifier = ids.split("\\|");
 				if (identifier.length == 2) {
 					return new Identifiable(identifier[1], new AssigningAuthority(noPrefix(identifier[0])));
+				}
+			}
+			// try to resolved it by fetching the url
+			String ref = reference.getReference();
+			if (ref!=null && ref.startsWith("http") && ref.contains("/Patient/")) {
+				String fhirBase = ref.substring(0, ref.indexOf("/Patient/"));
+				String patientId = ref.substring(ref.indexOf("/Patient/")+9);
+				GenericClient client = new GenericClient(FhirContext.forR4Cached(), null, fhirBase, null);
+				client.setDontValidateConformance(true);
+				Patient patient = client.read(Patient.class, patientId);
+				if (patient!=null && patient.hasIdentifier()) {
+					String oidString = "urn:oid:"+config.getOidMpiPid();
+					for (Identifier identifier : patient.getIdentifier()) {
+						if (oidString.equals(identifier.getSystem())) {
+							return transform(identifier);
+						}
+					}
 				}
 			}
 		} else if (reference.hasIdentifier()) {					
