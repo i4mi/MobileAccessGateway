@@ -465,7 +465,7 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 				String fhirBase = ref.substring(0, ref.indexOf("/Patient/"));
 
 				if (!fhirBase.equals(config.getUriExternalPatientEndpoint())) {
-					throw FhirUtils.unprocessableEntity(
+					throw FhirUtils.invalidRequest(
 										OperationOutcome.IssueSeverity.ERROR,
 										OperationOutcome.IssueType.INVALID,
 										null, null,
@@ -486,7 +486,7 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 					}
 				}
 
-				throw FhirUtils.unprocessableEntity(
+				throw FhirUtils.invalidRequest(
 									OperationOutcome.IssueSeverity.ERROR,
 									OperationOutcome.IssueType.INVALID,
 									null, null,
@@ -560,84 +560,6 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 		return result;
 	}
 	
-	/**
-	 * ITI-65: process DocumentManifest resource from Bundle
-	 * @param manifest
-	 * @param submissionSet
-	 */
-	private  void processDocumentManifest(DocumentManifest manifest, SubmissionSet submissionSet) {
-		// masterIdentifier	SubmissionSet.uniqueId
-		Identifier masterIdentifier = manifest.getMasterIdentifier();
-		submissionSet.setUniqueId(noPrefix(masterIdentifier.getValue()));
-		   
-		
-		submissionSet.assignEntryUuid();
-		manifest.setId(submissionSet.getEntryUuid());
-				
-		CodeableConcept type = manifest.getType();
-		submissionSet.setContentTypeCode(transformCodeableConcept(type));
-		
-		DateTimeType created = manifest.getCreatedElement();
-		submissionSet.setSubmissionTime(timestampFromDate(created));
-		   
-		//  subject	SubmissionSet.patientId
-		Reference ref = manifest.getSubject();
-		submissionSet.setPatientId(transformReferenceToIdentifiable(ref, manifest));
-		
-		// Author
-        Extension authorRoleExt = manifest.getExtensionByUrl("http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-author-authorrole");
-		if (manifest.hasAuthor() || (authorRoleExt!=null)) {
-		    Identifiable identifiable = null;
-			Reference author = manifest.getAuthorFirstRep();
-            if (authorRoleExt!=null) {
-                Coding coding = authorRoleExt.castToCoding(authorRoleExt.getValue());
-                if (coding !=null) {
-                    identifiable = new Identifiable(coding.getCode(), new AssigningAuthority(noPrefix(coding.getSystem())));
-                }
-            }
-			submissionSet.setAuthor(transformAuthor(author, manifest.getContained(), identifiable));
-		}
-		 // recipient	SubmissionSet.intendedRecipient		
-		for (Reference recipientRef : manifest.getRecipient()) {
-			Resource res = findResource(recipientRef, manifest.getContained());
-			
-			if (res instanceof Practitioner) {
-				Recipient recipient = new Recipient();
-				recipient.setPerson(transform((Practitioner) res));
-				recipient.setTelecom(transform(((Practitioner) res).getTelecomFirstRep()));
-				submissionSet.getIntendedRecipients().add(recipient);
-			} else if (res instanceof Organization) {
-				Recipient recipient = new Recipient();
-				recipient.setOrganization(transform((Organization) res));
-				recipient.setTelecom(transform(((Organization) res).getTelecomFirstRep()));
-				submissionSet.getIntendedRecipients().add(recipient);
-			} else if (res instanceof PractitionerRole) {
-				Recipient recipient = new Recipient();
-				PractitionerRole role = (PractitionerRole) res;
-				recipient.setOrganization(transform((Organization) findResource(role.getOrganization(), manifest.getContained())));
-				recipient.setPerson(transform((Practitioner) findResource(role.getPractitioner(), manifest.getContained())));
-				recipient.setTelecom(transform(role.getTelecomFirstRep()));
-				submissionSet.getIntendedRecipients().add(recipient);
-			} else if (res instanceof Patient) {
-				Recipient recipient = new Recipient();
-				recipient.setPerson(transform((Patient) res));
-				recipient.setTelecom(transform(((Patient) res).getTelecomFirstRep()));
-			} else if (res instanceof RelatedPerson) {
-				Recipient recipient = new Recipient();
-				recipient.setPerson(transform((RelatedPerson) res));
-				recipient.setTelecom(transform(((RelatedPerson) res).getTelecomFirstRep()));
-			}								
-						
-		}
-		
-		// source	SubmissionSet.sourceId
-		String source = noPrefix(manifest.getSource());		
-		submissionSet.setSourceId(source);
-		  
-		String description = manifest.getDescription();		
-		if (description!=null) submissionSet.setTitle(localizedString(description));		  
-		
-	}
 	
 	/**
 	 * ITI-65: process ListResource resource from Bundle
@@ -654,7 +576,12 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 				submissionSet.setUniqueId(uniqueId);	
 			}
 		}
-		
+		if (submissionSet.getUniqueId() == null) throw FhirUtils.invalidRequest(
+				OperationOutcome.IssueSeverity.ERROR,
+				OperationOutcome.IssueType.INVALID,
+				null, null,
+				"List.identifier with use usual missing"
+		);
 		
 		submissionSet.assignEntryUuid();
 		manifest.setId(submissionSet.getEntryUuid());
@@ -666,6 +593,13 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 		}
 				 		
 		DateTimeType created = manifest.getDateElement();
+	
+		if (created == null || !created.hasValue()) throw FhirUtils.invalidRequest(
+				OperationOutcome.IssueSeverity.ERROR,
+				OperationOutcome.IssueType.INVALID,
+				null, null,
+				"List.date missing"
+		);		
 		submissionSet.setSubmissionTime(timestampFromDate(created));
 		   
 		//  subject	SubmissionSet.patientId
@@ -753,6 +687,12 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 			reference.setId(entry.getEntryUuid());
 		//}
         Identifier masterIdentifier = reference.getMasterIdentifier();
+        if (masterIdentifier == null || !masterIdentifier.hasValue() || masterIdentifier.getValue() == null || masterIdentifier.getValue().length() == 0) throw FhirUtils.invalidRequest(
+				OperationOutcome.IssueSeverity.ERROR,
+				OperationOutcome.IssueType.INVALID,
+				null, null,
+				"DocumentReference.masterIdentifier missing"
+		);
         entry.setUniqueId(noPrefix(masterIdentifier.getValue()));
                
         // limitedMetadata -> meta.profile canonical [0..*] 
