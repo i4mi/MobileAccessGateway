@@ -58,6 +58,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.ListResource.ListEntryComponent;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
@@ -69,6 +70,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.codesystems.IdentifierUse;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
+import org.openehealth.ipf.commons.ihe.fhir.support.FhirUtils;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Association;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssociationType;
@@ -461,6 +463,16 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 			String ref = reference.getReference();
 			if (ref!=null && ref.startsWith("http") && ref.contains("/Patient/")) {
 				String fhirBase = ref.substring(0, ref.indexOf("/Patient/"));
+
+				if (!fhirBase.equals(config.getUriExternalPatientEndpoint())) {
+					throw FhirUtils.unprocessableEntity(
+										OperationOutcome.IssueSeverity.ERROR,
+										OperationOutcome.IssueType.INVALID,
+										null, null,
+										"Patient url must be in the form "+config.getUriExternalPatientEndpoint()+"/Patient/... but was "+ref
+								);					
+				}
+
 				String patientId = ref.substring(ref.indexOf("/Patient/")+9);
 				GenericClient client = new GenericClient(FhirContext.forR4Cached(), null, fhirBase, null);
 				client.setDontValidateConformance(true);
@@ -473,6 +485,14 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 						}
 					}
 				}
+
+				throw FhirUtils.unprocessableEntity(
+									OperationOutcome.IssueSeverity.ERROR,
+									OperationOutcome.IssueType.INVALID,
+									null, null,
+									"Patient not found or or no identifier for affinity domain  "+ref+" "+config.getOidMpiPid()
+							);					
+
 			}
 		} else if (reference.hasIdentifier()) {					
 	        return transform(reference.getIdentifier());
