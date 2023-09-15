@@ -535,7 +535,9 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 		if (ref.hasIdentifier()) {
 			return ref.getIdentifier().getValue();
 		}
-		return noBaseUrl(noPrefix(ref.getReference()));
+		String result = noBaseUrl(noPrefix(ref.getReference()));
+		if (!result.startsWith("urn:")) result = "urn:uuid:" + result;
+		return result;
 	}
 	
 	/**
