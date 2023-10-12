@@ -175,7 +175,12 @@ public class Config {
     */
 	@Value("${mag.baseurl:}")
 	private String baseurl;
-	 
+
+    @Value("${mag.extpatienturl:}")
+	private String extpatienturl;
+
+    public String getUriExternalPatientEndpoint() { return extpatienturl; };
+
 	/**
      * Own full URL of patient endpoint
      */

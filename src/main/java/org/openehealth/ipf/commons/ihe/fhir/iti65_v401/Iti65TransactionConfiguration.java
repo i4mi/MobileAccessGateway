@@ -24,6 +24,9 @@ import org.openehealth.ipf.commons.ihe.fhir.support.BundleProfileSelector;
 import static org.openehealth.ipf.commons.ihe.fhir.iti65_v401.Iti65Constants.ITI65_COMPREHENSIVE_METADATA_PROFILE;
 import static org.openehealth.ipf.commons.ihe.fhir.iti65_v401.Iti65Constants.ITI65_MINIMAL_METADATA_PROFILE;
 import static org.openehealth.ipf.commons.ihe.fhir.iti65_v401.Iti65Constants.ITI65_LEGACY_METADATA_PROFILE;
+import static org.openehealth.ipf.commons.ihe.fhir.iti65_v401.Iti65Constants.ITI65_COMPREHENSIVE_METADATA_PROFILE_HTTP;
+import static org.openehealth.ipf.commons.ihe.fhir.iti65_v401.Iti65Constants.ITI65_MINIMAL_METADATA_PROFILE_HTTP;
+import static org.openehealth.ipf.commons.ihe.fhir.iti65_v401.Iti65Constants.ITI65_LEGACY_METADATA_PROFILE_HTTP;
 
 /**
  * Standard Configuration for Iti65Component.
@@ -46,7 +49,10 @@ public class Iti65TransactionConfiguration extends FhirTransactionConfiguration<
         setStaticConsumerSelector(new BundleProfileSelector(
                 ITI65_COMPREHENSIVE_METADATA_PROFILE,
                 ITI65_MINIMAL_METADATA_PROFILE,
-                ITI65_LEGACY_METADATA_PROFILE));
+                ITI65_LEGACY_METADATA_PROFILE,
+                ITI65_COMPREHENSIVE_METADATA_PROFILE_HTTP,
+                ITI65_MINIMAL_METADATA_PROFILE_HTTP,
+                ITI65_LEGACY_METADATA_PROFILE_HTTP));
     }
 
     @Override

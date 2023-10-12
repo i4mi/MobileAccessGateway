@@ -65,6 +65,7 @@ export class MagComponent implements OnInit {
   public authenticate: UntypedFormControl;
   public documentType: UntypedFormControl;
   public documentConfidentiality: UntypedFormControl;
+  public documentTitle: UntypedFormControl;
   public documentDescription: UntypedFormControl;
   public masterIdentifier: UntypedFormControl;
   public creationTime: UntypedFormControl;
@@ -219,9 +220,15 @@ export class MagComponent implements OnInit {
 
     this.searchGiven = new UntypedFormControl();
     this.searchFamily = new UntypedFormControl();
+    
+    this.documentTitle = new UntypedFormControl();
+    this.documentTitle.setValue(
+      this.getLocalStorageItemOrDefault('mag.documentTitle', 'Titel')
+    );
+    
     this.documentDescription = new UntypedFormControl();
     this.documentDescription.setValue(
-      this.getLocalStorageItemOrDefault('mag.documentType', 'Titel')
+      this.getLocalStorageItemOrDefault('mag.documentDescription', 'Description')
     );
     this.masterIdentifier = new UntypedFormControl();
     this.masterIdentifier.setValue(uuidv4());
@@ -558,7 +565,7 @@ export class MagComponent implements OnInit {
       return;
     }
     this.uploadContentType = 'text/xml';
-    this.documentDescription.setValue('Policy document');
+    this.documentTitle.setValue('Policy document');
     this.documentType.setValue('APPC');
     this.documentConfidentiality.setValue('NORM');
     this.masterIdentifier.setValue('urn:uuid:' + uuidv4());
@@ -632,6 +639,7 @@ export class MagComponent implements OnInit {
   async findDocumentReferences(): Promise<fhir.r4.Bundle> {
     let query = {
       status: 'current',
+      _count: 500,
       'patient.identifier': encodeURIComponent(
         this.targetIdentifierSystem.value + '|' + this.targetIdentifierValue
       ),
@@ -1158,7 +1166,7 @@ export class MagComponent implements OnInit {
     const reader = new FileReader();
     reader.readAsText(blob.blob);
     const that = this;
-    this.documentDescription.setValue(blob.name);
+    this.documentTitle.setValue(blob.name);
     this.creationTime.setValue(toLocaleDateTime(new Date()));
     reader.onload = () => {
       if (
@@ -1392,11 +1400,11 @@ export class MagComponent implements OnInit {
                 id: '1',
                 identifier: [
                   {
-                    system: 'urn:oid:2.16.756.5.30.1.191.1.0.12.3.101',
+                    system: '$10',
                     value: '$10',
                   },
                   {
-                    system: 'urn:oid:2.16.756.5.30.1.191.1.0.2.1',
+                    system: '$11',
                     value: '$11',
                   },
                 ],
@@ -1562,10 +1570,10 @@ export class MagComponent implements OnInit {
 
     const docrefpat: fhir.r4.Patient = docref.contained[0] as fhir.r4.Patient;
 
-    docrefpat.identifier[0].value = this.sourceIdentifierSystem.value;
+    docrefpat.identifier[0].system = this.sourceIdentifierSystem.value;
     docrefpat.identifier[0].value = this.sourceIdentifierValue.value; // $10
 
-    docrefpat.identifier[1].value = this.targetIdentifierSystem.value;
+    docrefpat.identifier[1].system = this.targetIdentifierSystem.value;
     docrefpat.identifier[1].value = this.targetIdentifierValue; // $11
 
     // if we feteched the patient before we also set the names to it
@@ -1639,6 +1647,7 @@ export class MagComponent implements OnInit {
     docref.content[0].attachment.url = fullUrlBinary; // $1
     docref.content[0].attachment.contentType = this.uploadContentType; // $1.2
     docref.content[0].attachment.language = this.languageCode.value; // $1.3
+    docref.content[0].attachment.title = this.documentTitle.value;
 
     let documentReference: fhir.r4.DocumentReference = bundleTransaction
       .entry[2].resource as fhir.r4.DocumentReference;
