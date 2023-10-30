@@ -46,7 +46,10 @@ public class IdRequestConverter extends BaseRequestConverter {
         if (fhirHttpUri != null && fhirHttpUri.contains("/")) {
             boolean getLeafClass = true;
             String uuid = fhirHttpUri.substring(fhirHttpUri.lastIndexOf("/") + 1);
-
+            if (!uuid.startsWith("urn:uuid:")) {
+            	uuid = "urn:uuid:"+uuid;
+            }
+            
             GetDocumentsQuery query = new GetDocumentsQuery();
             final QueryRegistry queryRegistry = new QueryRegistry(query);            
             query.setUuids(Collections.singletonList(uuid));

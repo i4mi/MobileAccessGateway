@@ -33,8 +33,8 @@ this angular app is directly provided with matchbox
 
 ```
 ng build --configuration production
-rm -rf ../MobileAccessGateway/src/main/resources/static/*
-cp -r dist/* ../MobileAccessGateway/src/main/resources/static
+rm -rf ../src/main/resources/static/*
+cp -r dist/* ../src/main/resources/static
 ```
 
 ## Contributing

@@ -144,14 +144,6 @@
     </mat-card-header>
 
     <mat-table #table [dataSource]="dataSource">
-      <ng-container matColumnDef="name">
-        <mat-header-cell *matHeaderCellDef class="name"
-          >Description</mat-header-cell
-        >
-        <mat-cell *matCellDef="let entry" class="name">
-          {{ entry.description }}
-        </mat-cell>
-      </ng-container>
       <ng-container matColumnDef="title">
         <mat-header-cell *matHeaderCellDef class="title">Title</mat-header-cell>
         <mat-cell *matCellDef="let entry" class="title">
@@ -160,9 +152,19 @@
           </div>
         </mat-cell>
       </ng-container>
+    
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef class="name"
+          >Description</mat-header-cell
+        >
+        <mat-cell *matCellDef="let entry" class="name">
+          {{ entry.description }}
+        </mat-cell>
+      </ng-container>
+     
       <ng-container matColumnDef="contentType">
         <mat-header-cell *matHeaderCellDef class="contentType"
-          >Title</mat-header-cell
+          >Content-Type</mat-header-cell
         >
         <mat-cell *matCellDef="let entry" class="contentType">
           <div>
@@ -201,8 +203,8 @@
 
       <mat-header-row
         *matHeaderRowDef="[
-          'name',
           'title',
+          'name',
           'contentType',
           'formatCode',
           'action'
@@ -211,7 +213,7 @@
       <mat-row
         *matRowDef="
           let row;
-          columns: ['name', 'title', 'contentType', 'formatCode', 'action']
+          columns: ['title', 'name', 'contentType', 'formatCode', 'action']
         "
       >
       </mat-row>
@@ -280,6 +282,12 @@
 
     <app-upload (addFiles)="addFile($event)"> </app-upload>
 
+    <div>
+      <mat-form-field class="column50">
+        <mat-label>Title</mat-label>
+        <input matInput [formControl]="documentTitle" />
+      </mat-form-field>
+    </div>
     <div>
       <mat-form-field class="column50">
         <mat-label>Description</mat-label>

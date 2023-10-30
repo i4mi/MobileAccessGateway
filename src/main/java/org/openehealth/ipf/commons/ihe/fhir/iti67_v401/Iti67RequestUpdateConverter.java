@@ -62,20 +62,20 @@ public class Iti67RequestUpdateConverter extends Iti65RequestConverter {
     SubmissionSet submissionSet = new SubmissionSet();
     submissionSet.setSubmissionTime(new Timestamp(ZonedDateTime.now(), Timestamp.Precision.SECOND));
 
-    Extension source = documentReference
-        .getExtensionByUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId");
+    Extension source = 
+        getExtensionByUrl(documentReference, "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId");
     if (source != null && source.getValue() instanceof Identifier) {
       submissionSet.setSourceId(noPrefix(((Identifier) source.getValue()).getValue()));
     }
 
-    Extension designationType = documentReference
-        .getExtensionByUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType");
+    Extension designationType = 
+        getExtensionByUrl(documentReference, "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType");
     if (designationType != null && designationType.getValue() instanceof CodeableConcept) {
       submissionSet.setContentTypeCode(transformCodeableConcept((CodeableConcept) designationType.getValue()));
     }
 
-    Extension authorRoleExt = documentReference
-        .getExtensionByUrl("http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-author-authorrole");
+    Extension authorRoleExt = 
+        getExtensionByUrl(documentReference, "https://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-author-authorrole");
     if (authorRoleExt != null) {
       Identifiable identifiable = null;
       if (authorRoleExt != null) {
