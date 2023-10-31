@@ -122,7 +122,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements InitializingBean, DisposableBean {
 	
 	public final static String DEFAULT_IDP = "default";
-	
+	private Timer backgroundTaskTimer;
+	private MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager;
+
     @Value("${mag.iua.idp.key-store}")
     private String samlKeystore;
     
@@ -148,7 +150,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
     private String signKeyPassword;
 
     @Value("${mag.iua.sp.entity-id}")
-    private String entityId;
+    private String spEntityId;
     
     @Value("${mag.baseurl}")
     private String baseUrl;
@@ -175,7 +177,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 		 
 			http.authorizeRequests()
 			.antMatchers("/login").authenticated()
-			.antMatchers("/camel/authorize").authenticated()
+			.antMatchers("/camel/authorize/**").authenticated()
 			.antMatchers("/camel/token").permitAll()
 			.antMatchers("/saml/**").permitAll()
 	        .antMatchers("/**").permitAll();
@@ -195,9 +197,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 		
 	 }
 	 
-	 private Timer backgroundTaskTimer;
-	 private MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager;
-
+	
 		public void init() {
 			this.backgroundTaskTimer = new Timer(true);
 			this.multiThreadedHttpConnectionManager = new MultiThreadedHttpConnectionManager();
@@ -466,7 +466,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        }
 
 	        CachingMetadataManager metadata = new CachingMetadataManager(providers);
-	        metadata.setHostedSPName(entityId);
+	        metadata.setHostedSPName(spEntityId);
 	        metadata.setDefaultIDP(DEFAULT_IDP + "idp");
 	        return metadata;
 	    }
@@ -491,9 +491,9 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        IDPConfig conf = getIDPs().get(entityId);
 
 	        if (DEFAULT_IDP.equals(entityId)) {
-	            metadataGenerator.setEntityId(entityId);
+	            metadataGenerator.setEntityId(spEntityId);
 	        } else {
-	            metadataGenerator.setEntityId(entityId + "/alias/" + entityId);
+	            metadataGenerator.setEntityId(spEntityId + "/alias/" + entityId);
 	        }
 	        metadataGenerator.setEntityBaseURL(baseUrl);//+(context.equals("/")?"":context));
 

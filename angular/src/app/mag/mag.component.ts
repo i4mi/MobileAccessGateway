@@ -63,6 +63,7 @@ export class MagComponent implements OnInit {
   public targetIdentifierSystem: UntypedFormControl;
   public targetIdentifier2System: UntypedFormControl;
   public authenticate: UntypedFormControl;
+  public provider: UntypedFormControl;
   public documentType: UntypedFormControl;
   public documentConfidentiality: UntypedFormControl;
   public documentTitle: UntypedFormControl;
@@ -197,6 +198,10 @@ export class MagComponent implements OnInit {
     this.authenticate.setValue(
       this.getLocalStorageItemOrDefault('mag.authenticate', 'HCP')
     );
+    this.provider = new UntypedFormControl();
+    this.provider.setValue(
+      this.getLocalStorageItemOrDefault('mag.provider', '')
+    );
     this.documentType = new UntypedFormControl();
     this.documentType.setValue(
       this.getLocalStorageItemOrDefault('mag.documentType', 'APPC')
@@ -242,7 +247,7 @@ export class MagComponent implements OnInit {
 
     this.fhirConfigService = data;
 
-    oauthService.configure(this.fhirConfigService.getAuthCodeFlowConfig());
+    oauthService.configure(this.fhirConfigService.getAuthCodeFlowConfig(this.provider.value));
     oauthService.tryLoginCodeFlow().then((_) => {
       this.scopes = this.oauthService.getGrantedScopes();
     });
@@ -286,6 +291,7 @@ export class MagComponent implements OnInit {
     );
     this.setLocaleStorageItem('mag.targetId', this.targetId);
     this.setLocaleStorageItem('mag.authenticate', this.authenticate.value);
+    this.setLocaleStorageItem('mag.provider', this.provider.value);
     this.setLocaleStorageItem('mag.documentType', this.documentType.value);
     this.setLocaleStorageItem(
       'mag.documentConfidentiality',
@@ -538,7 +544,7 @@ export class MagComponent implements OnInit {
     this.cache();
     this.scopes = null;
     if (this.authenticate.value === 'HCP') {
-      let authCodeFlowConfig = this.fhirConfigService.getAuthCodeFlowConfig();
+      let authCodeFlowConfig = this.fhirConfigService.getAuthCodeFlowConfig(this.provider.value);
       authCodeFlowConfig.scope = `person_id=${this.targetIdentifier2Value}^^^&2.16.756.5.30.1.127.3.10.3&ISO purpose_of_use=urn:oid:2.16.756.5.30.1.127.3.10.5|NORM subject_role=urn:oid:2.16.756.5.30.1.127.3.10.6|HCP`;
       this.oauthService.configure(authCodeFlowConfig);
       this.oauthService.initCodeFlow();
