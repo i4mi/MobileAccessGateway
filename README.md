@@ -76,7 +76,7 @@ To create a new docker image run:
 
 ```
 mvn clean package
-docker build -t mag:v030 .
+docker build -t mag:v059 .
 ```
 
 Where "mag" is the image name and v030 is the version. Then push to a registry.
