@@ -52,8 +52,8 @@ mag:
       entity-id: mobileaccessgateway.pagekite.me
       disable-code-challenge: false
     ap:
-      url: https://ehealthsuisse.ihe-europe.net/STS
-      wsdl: https://ehealthsuisse.ihe-europe.net/STS?wsdl
+      url: https://epdplayground.i4mi.bfh.ch:7443/EPDSTS/services/SecurityTokenService
+      wsdl: classpath:/local-WSDL/wsdl/ws-trust-1.3.wsdl
     clients:
       oauthdebugger:
         secret: demosecret
