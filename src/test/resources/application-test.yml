@@ -1,7 +1,7 @@
 # General configuration of the Mobile Access Gateway
 
 mag:
-  homeCommunityId: urn:uid:1.2.3.5
+  homeCommunityId: urn:oid:1.2.3.4.5
   baseurl: http://localhost
   client-ssl:
     enabled: true
@@ -63,6 +63,12 @@ mag:
         secret: secret
         redirect: https://developers.google.com/oauthplayground
 
+  ppq:
+    ppq-1:
+      url: localhost:9090/services/ppq1Endpoint
+    ppq-2:
+      url: localhost:9090/services/ppq2Endpoint
+
   audit:
     audit-enabled: false
     audit-tls-enabled: false
@@ -81,9 +87,10 @@ server:
     key-store-password: a1b2c3
     key-store-type: pkcs12
     key-alias: server
-  port: 9091 # Application listening port for HTTPS
+    enabled: false
+  port: 9090 # Application listening port for HTTPS
   http:
-    port: 9090 # Application listening port for HTTP. Remove line to disable.
+    port: 9095 # Application listening port for HTTP. Remove line to disable.
   servlet:
     session:
       timeout: 15m # Session duration must give the users enough time to fill out identity provider login pages
