@@ -32,7 +32,7 @@
 		<ipf-version>4.8-m2</ipf-version>
 		<opensaml-version>2.6.6</opensaml-version>
 		<spring-security-saml2-core-version>1.0.10.RELEASE</spring-security-saml2-core-version>
-
+		<velocity-version>2.3</velocity-version>
 
 
 		<start-class>ch.bfh.ti.i4mi.mag.MobileAccessGateway</start-class>
@@ -123,6 +123,22 @@
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>javax.ws.rs-api</artifactId>
 			<version>2.0.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openehealth.ipf.boot</groupId>
+			<artifactId>ipf-xacml20-spring-boot-starter</artifactId>
+			<version>${ipf-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openehealth.ipf.platform-camel</groupId>
+			<artifactId>ipf-platform-camel-ihe-fhir-r4-chppqm</artifactId>
+			<version>${ipf-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity-engine-core</artifactId>
+			<version>${velocity-version}</version>
 		</dependency>
 
 		<dependency>

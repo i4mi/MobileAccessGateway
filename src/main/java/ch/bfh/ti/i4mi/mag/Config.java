@@ -69,7 +69,13 @@ public class Config {
     */
 	@Value("${mag.xds.https:true}")
     private boolean https;
-    
+
+    /**
+     * home community ID with prefix
+     */
+    @Value("${mag.homeCommunityId}")
+    private String homeCommunity;
+
     /**
      * URL of ITI-18 endpoint (
      */
@@ -96,7 +102,18 @@ public class Config {
 	@Value("${mag.xds.iti-57.url:}")
     private String iti57HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
 
-    
+    /**
+     * URL of CH:PPQ-1 endpoint
+     */
+    @Value("${mag.ppq.ppq-1.url:}")
+    private String ppq1HostUrl;
+
+    /**
+     * URL of CH:PPQ-2 endpoint
+     */
+    @Value("${mag.ppq.ppq-2.url:}")
+    private String ppq2HostUrl;
+
     /**
      * Own full URL where clients can retrieve documents from 
      */
