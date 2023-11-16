@@ -74,7 +74,7 @@ public class Iti83ResponseConverter extends BasePMIRResponseConverter implements
 		PRPAIN201310UV02Type msg = HL7V3Transformer.unmarshallMessage(PRPAIN201310UV02Type.class, new ByteArrayInputStream(content.getBytes()));
 		
 		Parameters query = (Parameters) parameters.get(Utils.KEPT_BODY);
-		List<Type> targetSystemList = (List<Type>) query.getParameters("targetSystem");	
+		List<Parameters.ParametersParameterComponent> targetSystemList =  query.getParameters("targetSystem");
 		Parameters response = new Parameters();
 		
 		PRPAIN201310UV02MFMIMT700711UV01ControlActProcess controlAct = msg.getControlActProcess();
@@ -97,8 +97,8 @@ public class Iti83ResponseConverter extends BasePMIRResponseConverter implements
 		Set<String> acceptedTargetSystem = new HashSet<String>();
 		Set<String> noDuplicates = new HashSet<String>();
 		if (targetSystemList != null) {
-			for (Type targetSystemType : targetSystemList) {
-				UriType targetSystem = (UriType) targetSystemType;
+			for (Parameters.ParametersParameterComponent targetSystemType : targetSystemList) {
+				UriType targetSystem = (UriType) targetSystemType.getValue();
 				acceptedTargetSystem.add(targetSystem.getValue());
 			}
 		}

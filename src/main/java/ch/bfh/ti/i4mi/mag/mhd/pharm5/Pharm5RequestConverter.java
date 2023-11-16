@@ -71,10 +71,10 @@ public class Pharm5RequestConverter extends BaseRequestConverter {
 
     boolean chPmlQuery = true;
     // we query PML except if we are explicitly adding the formatcode for
-    List<Type> formatTypes = searchParameter.getParameters(Pharm5Constants.PHARM5_FORMAT);
+    List<Parameters.ParametersParameterComponent> formatTypes = searchParameter.getParameters(Pharm5Constants.PHARM5_FORMAT);
     if (formatTypes != null && formatTypes.size() > 0) {
-      for (Type format : formatTypes) {
-        Coding formatCoding = (Coding) format;
+      for (Parameters.ParametersParameterComponent format : formatTypes) {
+        Coding formatCoding = (Coding) format.getValue();
         if ("urn:ch:cda-ch-emed:medication-card:2018".equals(formatCoding.getCode())) {
           chPmlQuery = false;
         }
@@ -90,10 +90,10 @@ public class Pharm5RequestConverter extends BaseRequestConverter {
     }
 
     // status --> $XDSDocumentEntryStatus
-    List<Type> statusTypes = searchParameter.getParameters(Pharm5Constants.PHARM5_STATUS);
+    List<Parameters.ParametersParameterComponent> statusTypes = searchParameter.getParameters(Pharm5Constants.PHARM5_STATUS);
     if (statusTypes != null) {
       List<AvailabilityStatus> availabilites = new ArrayList<AvailabilityStatus>();
-      for (Type status : statusTypes) {
+      for (Parameters.ParametersParameterComponent status : statusTypes) {
         String tokenValue = status.primitiveValue();
         if (tokenValue.equals("current"))
           availabilites.add(AvailabilityStatus.APPROVED);
@@ -104,9 +104,9 @@ public class Pharm5RequestConverter extends BaseRequestConverter {
     }
 
     // patient or patient.identifier --> $XDSDocumentEntryPatientId
-    Type patientIdentifier = searchParameter.getParameter(Pharm5Constants.PHARM5_PATIENT_IDENTIFIER);
+    Parameters.ParametersParameterComponent patientIdentifier = searchParameter.getParameter(Pharm5Constants.PHARM5_PATIENT_IDENTIFIER);
     if (patientIdentifier != null) {
-      Identifier patIdentifier = (Identifier) patientIdentifier;
+      Identifier patIdentifier = (Identifier) patientIdentifier.getValue();
       String system = patIdentifier.getSystem();
       if (system == null || !system.startsWith("urn:oid:"))
         throw new InvalidRequestException("Missing OID for patient");
@@ -116,46 +116,46 @@ public class Pharm5RequestConverter extends BaseRequestConverter {
     // patient or patient.identifier --> $XDSDocumentEntryPatientId
 
     if (chPmlQuery) {
-      Type serviceStartFrom = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_START_FROM);
+      Parameters.ParametersParameterComponent serviceStartFrom = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_START_FROM);
       if (serviceStartFrom != null) {
-        ((ChFindMedicationListQuery) query).getServiceStart().setFrom(timestampFromDate(serviceStartFrom));
+        ((ChFindMedicationListQuery) query).getServiceStart().setFrom(timestampFromDate(serviceStartFrom.getValue()));
       }
-      Type serviceStartTo = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_START_TO);
+      Parameters.ParametersParameterComponent serviceStartTo = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_START_TO);
       if (serviceStartTo != null) {
-        ((ChFindMedicationListQuery) query).getServiceStart().setTo(timestampFromDate(serviceStartTo));
+        ((ChFindMedicationListQuery) query).getServiceStart().setTo(timestampFromDate(serviceStartTo.getValue()));
       }
-      Type serviceEndFrom = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_END_FROM);
+      Parameters.ParametersParameterComponent serviceEndFrom = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_END_FROM);
       if (serviceEndFrom != null) {
-        ((ChFindMedicationListQuery) query).getServiceEnd().setFrom(timestampFromDate(serviceEndFrom));
+        ((ChFindMedicationListQuery) query).getServiceEnd().setFrom(timestampFromDate(serviceEndFrom.getValue()));
       }
-      Type serviceEndTo = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_END_TO);
+      Parameters.ParametersParameterComponent serviceEndTo = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_END_TO);
       if (serviceEndTo != null) {
-        ((ChFindMedicationListQuery) query).getServiceEnd().setTo(timestampFromDate(serviceEndTo));
+        ((ChFindMedicationListQuery) query).getServiceEnd().setTo(timestampFromDate(serviceEndTo.getValue()));
       }
     } else {
-      Type serviceStartFrom = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_START_FROM);
+      Parameters.ParametersParameterComponent serviceStartFrom = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_START_FROM);
       if (serviceStartFrom != null) {
-        ((ChFindMedicationCardQuery) query).getServiceStart().setFrom(timestampFromDate(serviceStartFrom));
+        ((ChFindMedicationCardQuery) query).getServiceStart().setFrom(timestampFromDate(serviceStartFrom.getValue()));
       }
-      Type serviceStartTo = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_START_TO);
+      Parameters.ParametersParameterComponent serviceStartTo = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_START_TO);
       if (serviceStartTo != null) {
-        ((ChFindMedicationCardQuery) query).getServiceStart().setTo(timestampFromDate(serviceStartTo));
+        ((ChFindMedicationCardQuery) query).getServiceStart().setTo(timestampFromDate(serviceStartTo.getValue()));
       }
-      Type serviceEndFrom = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_END_FROM);
+      Parameters.ParametersParameterComponent serviceEndFrom = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_END_FROM);
       if (serviceEndFrom != null) {
-        ((ChFindMedicationCardQuery) query).getServiceEnd().setFrom(timestampFromDate(serviceEndFrom));
+        ((ChFindMedicationCardQuery) query).getServiceEnd().setFrom(timestampFromDate(serviceEndFrom.getValue()));
       }
-      Type serviceEndTo = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_END_TO);
+      Parameters.ParametersParameterComponent serviceEndTo = searchParameter.getParameter(Pharm5Constants.PHARM5_SERVICE_END_TO);
       if (serviceEndTo != null) {
-        ((ChFindMedicationCardQuery) query).getServiceEnd().setTo(timestampFromDate(serviceEndTo));
+        ((ChFindMedicationCardQuery) query).getServiceEnd().setTo(timestampFromDate(serviceEndTo.getValue()));
       }
     }
 
     formatTypes = searchParameter.getParameters(Pharm5Constants.PHARM5_FORMAT);
     if (formatTypes != null && formatTypes.size() > 0) {
       List<Code> formatCodes = new ArrayList<Code>();
-      for (Type format : formatTypes) {
-        Coding formatCoding = (Coding) format;
+      for (Parameters.ParametersParameterComponent format : formatTypes) {
+        Coding formatCoding = (Coding) format.getValue();
         Code formatCode = new Code();
         formatCode.setCode(formatCoding.getCode());
         String system = formatCoding.getSystem();

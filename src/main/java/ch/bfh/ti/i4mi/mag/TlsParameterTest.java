@@ -16,7 +16,7 @@ public class TlsParameterTest implements TlsParameters {
 	}
 	
 	@Override
-	public SSLContext getSSLContext() {
+	public SSLContext getSSLContext(boolean dummy) {
 		try {
 		  return source.createSSLContext(source.getCamelContext());
 		} catch (Exception e) {}

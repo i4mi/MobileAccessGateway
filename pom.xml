@@ -26,12 +26,13 @@
 		<spring-boot-plugin-version>2.6.7</spring-boot-plugin-version>
 
 		<!-- libraries -->
-		<camel-version>3.14.2</camel-version>
+		<camel-version>3.21.1</camel-version>
 		<hibernate-version>5.2.5.Final</hibernate-version>
 		<hl7v3-code-jar-version>1.3.7</hl7v3-code-jar-version>
-		<ipf-version>4.3.1</ipf-version>
+		<ipf-version>4.8-m2</ipf-version>
 		<opensaml-version>2.6.6</opensaml-version>
 		<spring-security-saml2-core-version>1.0.10.RELEASE</spring-security-saml2-core-version>
+
 
 
 		<start-class>ch.bfh.ti.i4mi.mag.MobileAccessGateway</start-class>
@@ -119,6 +120,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>2.0.1</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jetty</artifactId>
 		</dependency>
@@ -187,7 +194,8 @@
 
 		<dependency>
             <groupId>org.apache.camel</groupId>
-            <artifactId>camel-cxf</artifactId>
+            <artifactId>camel-cxf-soap</artifactId>
+			<version>${camel-version}</version>
         </dependency>
         <dependency>
 	       <groupId>org.apache.cxf</groupId>

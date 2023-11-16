@@ -68,8 +68,8 @@ public class Iti83RequestConverter extends BaseRequestConverter {
 	private Config config;
 	
 	public String iti83ToIti45Converter(Parameters parameters) throws JAXBException {
-		List<Type> targetSystemList = (List<Type>) parameters.getParameters("targetSystem");
-		Identifier sourceIdentifier = (Identifier) parameters.getParameter("sourceIdentifier");
+		List<Parameters.ParametersParameterComponent> targetSystemList = parameters.getParameters("targetSystem");
+		Identifier sourceIdentifier = (Identifier) parameters.getParameter("sourceIdentifier").getValue();
 
 		PRPAIN201309UV02Type resultMsg = new PRPAIN201309UV02Type();
 		resultMsg.setITSVersion("XML_1.0");
@@ -135,8 +135,8 @@ public class Iti83RequestConverter extends BaseRequestConverter {
 		patientIdentifier.setSemanticsText(ST("Patient.id"));
 
 		if (targetSystemList != null && (targetSystemList.size() > 0)) {
-			for (Type targetSystemType : targetSystemList) {
-				UriType targetSystem = (UriType) targetSystemType;
+			for (Parameters.ParametersParameterComponent targetSystemType : targetSystemList) {
+				UriType targetSystem = (UriType) targetSystemType.getValue();
 				String sourceSystem = getScheme(targetSystem.getValue());
 				PRPAMT201307UV02DataSource dataSource = new PRPAMT201307UV02DataSource();
 				parameterList.addDataSource(dataSource);
