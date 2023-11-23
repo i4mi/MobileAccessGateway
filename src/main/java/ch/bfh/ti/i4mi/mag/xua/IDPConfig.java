@@ -26,7 +26,9 @@ import lombok.Data;
 @Data
 public class IDPConfig {
 
-    private String metadataUrl;
+    private String name;
+    
+	private String metadataUrl;
 
     private String keyAlias;
 

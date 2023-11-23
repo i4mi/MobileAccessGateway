@@ -26,6 +26,11 @@ export class FhirConfigService {
     return service ? service : '/mag/fhir';
   }
 
+  getMobileAccessGatewayIDPEnumerationUrl(): string {
+    const service = localStorage.getItem('magMicroService');
+    return service.replace('/fhir', '/camel/idps');
+  }
+
   getMobileAccessGatewayLoginUrl(): string {
     const service = localStorage.getItem('magMicroService');
     return service.replace('/fhir', '/camel/authorize');

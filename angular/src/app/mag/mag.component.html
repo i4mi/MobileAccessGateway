@@ -121,12 +121,10 @@
       &nbsp;
       <mat-form-field class="column50">
         <mat-label>Provider</mat-label>
-        <select matNativeControl required [formControl]="provider">
-          <option value="">Default</option>
-          <option value="hin">HIN</option>
-          <option value="trustid">TrustID</option>
-          <option value="geneveid">GeneveID</option>
-          <option value="vaudid">VaudID-Santé</option>
+        <select matNativeControl [formControl]="provider">
+          <option *ngFor="let idp of idps" [value]="idp.id">
+            {{ idp.name }}
+          </option>         
         </select>
       </mat-form-field>
     </div>

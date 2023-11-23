@@ -27,6 +27,11 @@ export function toLocaleDateTime(date: Date) {
   return `${toLocaleDate(date)}T${toLocaleTime(date)}${sign}${timeZone}`;
 }
 
+interface IDP {
+  id: string;
+  name: string;  
+}
+
 class UUIReplace {
   descr: string;
   existingUuid: string;
@@ -100,6 +105,7 @@ export class MagComponent implements OnInit {
   errMsgAssignPatient: string;
 
   scopes: object;
+  idps: Array<IDP>;
 
   inMhdQueryProgress = false;
   inMhdUploadProgress = false;
@@ -262,6 +268,21 @@ export class MagComponent implements OnInit {
 
     this.pdf = '';
     this.replaceDocumentReference = null;
+    const options = {
+        responseType: 'json' as const
+    };
+    this.http.get(this.data.getMobileAccessGatewayIDPEnumerationUrl(), options).subscribe({
+          next: (body: Array<IDP>) => {
+            this.idps = body;
+            this.provider.setValue(
+              this.getLocalStorageItemOrDefault('mag.provider', '')
+            );            
+          },
+          error: (err: Error) => {
+            this.idps = [ { id : "", name : "Default" } ];
+            this.provider.setValue("");
+          },
+    });
   }
 
   cache() {
