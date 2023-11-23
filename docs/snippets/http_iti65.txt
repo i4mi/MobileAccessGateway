@@ -198,7 +198,8 @@ Content-Type: application/fhir+json;charset=UTF-8
               "contentType": "application/pdf",
               "creation": "2011-11-29T11:00:00+01:00",
               "language": "de-CH",
-              "url": "urn:uuid:59f3a738-11c1-4a0e-a89b-c4552d0fe9a7"
+              "url": "urn:uuid:59f3a738-11c1-4a0e-a89b-c4552d0fe9a7",
+              "title": "Document example title"
             },
             "format": {
               "code": "urn:che:epr:EPR_Unstructured_Document",

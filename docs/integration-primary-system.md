@@ -13,8 +13,13 @@ For HTTP GET requests, there is usually an equivalent HTTP POST request that sho
 
 ## Authentication
 
+![Sequence diagram for authentication](assets/auth.png)
+
+The sequence diagram shows the currently implemented authentication flow.
+
 You should integrate one of the supported IDPs in your application.
-The SAML flow is the only one currently supported.
+The OAuth/IUA flow is supported for clients, the SAML flow is the only one implemented between the 
+MobileAccessGateway and the IDP.
 
 Once you get the IDP SAML assertion, you can trade it for the community SAML assertion, which binds your IDP
 identification to a specific patient and a purpose of use.
