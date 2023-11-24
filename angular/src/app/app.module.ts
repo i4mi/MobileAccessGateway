@@ -61,7 +61,6 @@ export function createTranslateLoader(http: HttpClient) {
     HighlightModule,
     RouterModule.forRoot(routes, {
       useHash: true,
-      relativeLinkResolution: 'legacy',
     }),
     TranslateModule.forRoot({
       loader: {
@@ -77,7 +76,7 @@ export function createTranslateLoader(http: HttpClient) {
       provide: HIGHLIGHT_OPTIONS,
       useValue: {
         coreLibraryLoader: () => import('highlight.js/lib/core'),
-        lineNumbersLoader: () => import('highlightjs-line-numbers.js'), // Optional, only if you want the line numbers
+        lineNumbersLoader: () => import('ngx-highlightjs/line-numbers'), // Optional, only if you want the line numbers
         languages: {
           json: () => import('highlight.js/lib/languages/json'),
           xml: () => import('highlight.js/lib/languages/xml'),

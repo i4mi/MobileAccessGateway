@@ -175,7 +175,12 @@ public class Config {
     */
 	@Value("${mag.baseurl:}")
 	private String baseurl;
-	 
+
+    @Value("${mag.extpatienturl:}")
+	private String extpatienturl;
+
+    public String getUriExternalPatientEndpoint() { return extpatienturl; };
+
 	/**
      * Own full URL of patient endpoint
      */
@@ -286,7 +291,7 @@ public class Config {
         context.setAuditRepositoryTransport("UDP");        
         */
         //context.setAuditSource(AuditSource.of("code","system","display"));
-        //context.setSendingApplication("MobileAccessGateway");
+        //context.setSendingApplication("Mobile Access Gateway");
             	    	
         return context;	
     }

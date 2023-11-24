@@ -12,7 +12,7 @@
         },
         {
             "type": "java",
-            "name": "Debug MobileAccessGateway pmp",
+            "name": "Debug Mobile Access Gateway pmp",
             "request": "launch",
             "mainClass": "ch.bfh.ti.i4mi.mag.MobileAccessGateway",
             "projectName": "mobile-access-gateway",

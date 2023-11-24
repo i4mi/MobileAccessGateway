@@ -57,7 +57,7 @@ minikube kubectl -- create secret generic mobile-access-gateway-secret --from-fi
 minikube kubectl -- apply -f kubernetes-config.yml
 ````
 
-## Using the MobileAccessGateway service locally (in your browser etc...)
+## Using the Mobile Access Gateway service locally (in your browser etc...)
 ````
 minikube service mobile-access-gateway-service
 ````

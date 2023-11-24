@@ -58,6 +58,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.ListResource.ListEntryComponent;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
@@ -69,6 +70,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.codesystems.IdentifierUse;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
+import org.openehealth.ipf.commons.ihe.fhir.support.FhirUtils;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Association;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssociationType;
@@ -97,7 +99,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.sun.istack.ByteArrayDataSource;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
@@ -109,7 +114,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-public class Iti65RequestConverter {
+public class Iti65RequestConverter extends BaseRequestConverter {
 
 	private SchemeMapper schemeMapper;
 	
@@ -172,6 +177,10 @@ public class Iti65RequestConverter {
 			} else if ("http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle".equals(profile.getValue())) {
 				submissionSet.setLimitedMetadata(false);
 			} else if ("http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle".equals(profile.getValue())) {
+				submissionSet.setLimitedMetadata(true);
+			} else if ("https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle".equals(profile.getValue())) {
+				submissionSet.setLimitedMetadata(false);
+			} else if ("https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle".equals(profile.getValue())) {
 				submissionSet.setLimitedMetadata(true);
 			} 
 		}
@@ -450,6 +459,41 @@ public class Iti65RequestConverter {
 					return new Identifiable(identifier[1], new AssigningAuthority(noPrefix(identifier[0])));
 				}
 			}
+			// try to resolved it by fetching the url
+			String ref = reference.getReference();
+			if (ref!=null && ref.startsWith("http") && ref.contains("/Patient/")) {
+				String fhirBase = ref.substring(0, ref.indexOf("/Patient/"));
+
+				if (!fhirBase.equals(config.getUriExternalPatientEndpoint())) {
+					throw FhirUtils.invalidRequest(
+										OperationOutcome.IssueSeverity.ERROR,
+										OperationOutcome.IssueType.INVALID,
+										null, null,
+										"Patient url must be in the form "+config.getUriExternalPatientEndpoint()+"/Patient/... but was "+ref
+								);					
+				}
+
+				String patientId = ref.substring(ref.indexOf("/Patient/")+9);
+				GenericClient client = new GenericClient(FhirContext.forR4Cached(), null, fhirBase, null);
+				client.setDontValidateConformance(true);
+				Patient patient = client.read(Patient.class, patientId);
+				if (patient!=null && patient.hasIdentifier()) {
+					String oidString = "urn:oid:"+config.getOidMpiPid();
+					for (Identifier identifier : patient.getIdentifier()) {
+						if (oidString.equals(identifier.getSystem())) {
+							return transform(identifier);
+						}
+					}
+				}
+
+				throw FhirUtils.invalidRequest(
+									OperationOutcome.IssueSeverity.ERROR,
+									OperationOutcome.IssueType.INVALID,
+									null, null,
+									"Patient not found or or no identifier for affinity domain  "+ref+" "+config.getOidMpiPid()
+							);					
+
+			}
 		} else if (reference.hasIdentifier()) {					
 	        return transform(reference.getIdentifier());
 		} 
@@ -511,87 +555,11 @@ public class Iti65RequestConverter {
 		if (ref.hasIdentifier()) {
 			return ref.getIdentifier().getValue();
 		}
-		return noBaseUrl(noPrefix(ref.getReference()));
+		String result = noBaseUrl(noPrefix(ref.getReference()));
+		if (!result.startsWith("urn:")) result = "urn:uuid:" + result;
+		return result;
 	}
 	
-	/**
-	 * ITI-65: process DocumentManifest resource from Bundle
-	 * @param manifest
-	 * @param submissionSet
-	 */
-	private  void processDocumentManifest(DocumentManifest manifest, SubmissionSet submissionSet) {
-		// masterIdentifier	SubmissionSet.uniqueId
-		Identifier masterIdentifier = manifest.getMasterIdentifier();
-		submissionSet.setUniqueId(noPrefix(masterIdentifier.getValue()));
-		   
-		
-		submissionSet.assignEntryUuid();
-		manifest.setId(submissionSet.getEntryUuid());
-				
-		CodeableConcept type = manifest.getType();
-		submissionSet.setContentTypeCode(transformCodeableConcept(type));
-		
-		DateTimeType created = manifest.getCreatedElement();
-		submissionSet.setSubmissionTime(timestampFromDate(created));
-		   
-		//  subject	SubmissionSet.patientId
-		Reference ref = manifest.getSubject();
-		submissionSet.setPatientId(transformReferenceToIdentifiable(ref, manifest));
-		
-		// Author
-        Extension authorRoleExt = manifest.getExtensionByUrl("http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-author-authorrole");
-		if (manifest.hasAuthor() || (authorRoleExt!=null)) {
-		    Identifiable identifiable = null;
-			Reference author = manifest.getAuthorFirstRep();
-            if (authorRoleExt!=null) {
-                Coding coding = authorRoleExt.castToCoding(authorRoleExt.getValue());
-                if (coding !=null) {
-                    identifiable = new Identifiable(coding.getCode(), new AssigningAuthority(noPrefix(coding.getSystem())));
-                }
-            }
-			submissionSet.setAuthor(transformAuthor(author, manifest.getContained(), identifiable));
-		}
-		 // recipient	SubmissionSet.intendedRecipient		
-		for (Reference recipientRef : manifest.getRecipient()) {
-			Resource res = findResource(recipientRef, manifest.getContained());
-			
-			if (res instanceof Practitioner) {
-				Recipient recipient = new Recipient();
-				recipient.setPerson(transform((Practitioner) res));
-				recipient.setTelecom(transform(((Practitioner) res).getTelecomFirstRep()));
-				submissionSet.getIntendedRecipients().add(recipient);
-			} else if (res instanceof Organization) {
-				Recipient recipient = new Recipient();
-				recipient.setOrganization(transform((Organization) res));
-				recipient.setTelecom(transform(((Organization) res).getTelecomFirstRep()));
-				submissionSet.getIntendedRecipients().add(recipient);
-			} else if (res instanceof PractitionerRole) {
-				Recipient recipient = new Recipient();
-				PractitionerRole role = (PractitionerRole) res;
-				recipient.setOrganization(transform((Organization) findResource(role.getOrganization(), manifest.getContained())));
-				recipient.setPerson(transform((Practitioner) findResource(role.getPractitioner(), manifest.getContained())));
-				recipient.setTelecom(transform(role.getTelecomFirstRep()));
-				submissionSet.getIntendedRecipients().add(recipient);
-			} else if (res instanceof Patient) {
-				Recipient recipient = new Recipient();
-				recipient.setPerson(transform((Patient) res));
-				recipient.setTelecom(transform(((Patient) res).getTelecomFirstRep()));
-			} else if (res instanceof RelatedPerson) {
-				Recipient recipient = new Recipient();
-				recipient.setPerson(transform((RelatedPerson) res));
-				recipient.setTelecom(transform(((RelatedPerson) res).getTelecomFirstRep()));
-			}								
-						
-		}
-		
-		// source	SubmissionSet.sourceId
-		String source = noPrefix(manifest.getSource());		
-		submissionSet.setSourceId(source);
-		  
-		String description = manifest.getDescription();		
-		if (description!=null) submissionSet.setTitle(localizedString(description));		  
-		
-	}
 	
 	/**
 	 * ITI-65: process ListResource resource from Bundle
@@ -608,17 +576,30 @@ public class Iti65RequestConverter {
 				submissionSet.setUniqueId(uniqueId);	
 			}
 		}
-		
+		if (submissionSet.getUniqueId() == null) throw FhirUtils.invalidRequest(
+				OperationOutcome.IssueSeverity.ERROR,
+				OperationOutcome.IssueType.INVALID,
+				null, null,
+				"List.identifier with use usual missing"
+		);
 		
 		submissionSet.assignEntryUuid();
 		manifest.setId(submissionSet.getEntryUuid());
 		
-		Extension designationType = manifest.getExtensionByUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType");
+		Extension designationType = getExtensionByUrl(manifest, "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType");
+		
 		if (designationType != null && designationType.getValue() instanceof CodeableConcept) {
 			submissionSet.setContentTypeCode(transformCodeableConcept((CodeableConcept) designationType.getValue()));
 		}
 				 		
 		DateTimeType created = manifest.getDateElement();
+	
+		if (created == null || !created.hasValue()) throw FhirUtils.invalidRequest(
+				OperationOutcome.IssueSeverity.ERROR,
+				OperationOutcome.IssueType.INVALID,
+				null, null,
+				"List.date missing"
+		);		
 		submissionSet.setSubmissionTime(timestampFromDate(created));
 		   
 		//  subject	SubmissionSet.patientId
@@ -640,7 +621,10 @@ public class Iti65RequestConverter {
 		}
 		 // recipient	SubmissionSet.intendedRecipient		
 		
-		for (Extension recipientExt : manifest.getExtensionsByUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-intendedRecipient")) {
+		List<Extension> recipients = manifest.getExtensionsByUrl("https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-intendedRecipient");
+		if (recipients.isEmpty()) recipients = manifest.getExtensionsByUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-intendedRecipient");
+		
+		for (Extension recipientExt : recipients) {
 			Reference recipientRef = (Reference) recipientExt.getValue();		
 			Resource res = findResource(recipientRef, manifest.getContained());
 			
@@ -673,7 +657,8 @@ public class Iti65RequestConverter {
 						
 		}
 		
-		Extension source = manifest.getExtensionByUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId");
+		Extension source = getExtensionByUrl(manifest, "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId");
+		
 		if (source != null && source.getValue() instanceof Identifier) {
 		  submissionSet.setSourceId(noPrefix(((Identifier) source.getValue()).getValue()));
 		}
@@ -695,13 +680,19 @@ public class Iti65RequestConverter {
 	 */
 	public  void processDocumentReference(DocumentReference reference, DocumentEntry entry) {
 		
-		if (reference.getIdElement()!=null) {
-			entry.setEntryUuid(reference.getIdElement().getIdPart());
-		} else {
+		//if (reference.getIdElement()!=null) {
+		//	entry.setEntryUuid(reference.getIdElement().getIdPart());
+		//} else {
 			entry.assignEntryUuid();
 			reference.setId(entry.getEntryUuid());
-		}
+		//}
         Identifier masterIdentifier = reference.getMasterIdentifier();
+        if (masterIdentifier == null || !masterIdentifier.hasValue() || masterIdentifier.getValue() == null || masterIdentifier.getValue().length() == 0) throw FhirUtils.invalidRequest(
+				OperationOutcome.IssueSeverity.ERROR,
+				OperationOutcome.IssueType.INVALID,
+				null, null,
+				"DocumentReference.masterIdentifier missing"
+		);
         entry.setUniqueId(noPrefix(masterIdentifier.getValue()));
                
         // limitedMetadata -> meta.profile canonical [0..*] 
@@ -755,9 +746,9 @@ public class Iti65RequestConverter {
 			 } else throw new InvalidRequestException("No authenticator of type Organization supported.");			
 		}
 		             
-        // title -> description string [0..1]
-		String title = reference.getDescription();
-		if (title != null) entry.setTitle(localizedString(title));
+        // comments -> description string [0..1]
+		String comments = reference.getDescription();
+		if (comments != null) entry.setComments(localizedString(comments));
        
         // confidentialityCode -> securityLabel CodeableConcept [0..*] Note: This
         // is NOT the DocumentReference.meta, as that holds the meta tags for the
@@ -783,9 +774,9 @@ public class Iti65RequestConverter {
         byte[] hash = attachment.getHash();
         if (hash != null) entry.setHash(Hex.encodeHexString(hash));
 
-        // comments -> content.attachment.title string [0..1]
-        String comments = attachment.getTitle();
-        if (comments!=null) entry.setComments(localizedString(comments));       
+        // title -> content.attachment.title string [0..1]
+        String title = attachment.getTitle();
+        if (title!=null) entry.setTitle(localizedString(title));       
 
         // creationTime -> content.attachment.creation dateTime [0..1]
         if (attachment.hasCreation()) {

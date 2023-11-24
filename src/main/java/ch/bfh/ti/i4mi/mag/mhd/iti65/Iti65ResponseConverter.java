@@ -67,7 +67,7 @@ public class Iti65ResponseConverter extends BaseResponseConverter implements ToF
 			Bundle responseBundle = new Bundle();		
 			Bundle requestBundle = (Bundle) parameters.get(Utils.KEPT_BODY);
 			
-			responseBundle.getMeta().addProfile("http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.ProvideDocumentBundleResponse");
+			responseBundle.getMeta().addProfile("https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.ProvideDocumentBundleResponse");
 			
 			for (Bundle.BundleEntryComponent requestEntry : requestBundle.getEntry()) {
 	            Bundle.BundleEntryResponseComponent response = new Bundle.BundleEntryResponseComponent()
@@ -79,10 +79,10 @@ public class Iti65ResponseConverter extends BaseResponseConverter implements ToF
                      + "&repositoryUniqueId=" + config.getRepositoryUniqueId());	            
 	            } else if (requestEntry.getResource() instanceof ListResource) {
 	            	String id = config.getSchemeMapper().getScheme(((ListResource) requestEntry.getResource()).getId());
-	            	response.setLocation("List/"+id);
+	            	response.setLocation(config.getBaseurl()+"/fhir/List/"+id);
 	            } else if (requestEntry.getResource() instanceof DocumentReference) {
 	            	String id = config.getSchemeMapper().getScheme(((DocumentReference) requestEntry.getResource()).getId());
-	            	response.setLocation("DocumentReference/"+id);	              
+	            	response.setLocation(config.getBaseurl()+"/fhir/DocumentReference/"+id);	              
 	            }
 	            responseBundle.addEntry()
 	                    .setResponse(response);

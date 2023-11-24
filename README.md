@@ -1,6 +1,6 @@
-# MobileAccessGateway
+# Mobile Access Gateway
 
-The MobileAccessGateway is an implementation based on the [CH EPR mHealth](https://fhir.ch/ig/ch-epr-mhealth/index.html) [(CI-Build)](http://build.fhir.org/ig/ehealthsuisse/ch-epr-mhealth/index.html) implementation guide.  
+The Mobile Access Gateway is an implementation based on the [CH EPR mHealth](https://fhir.ch/ig/ch-epr-mhealth/index.html) [(CI-Build)](http://build.fhir.org/ig/ehealthsuisse/ch-epr-mhealth/index.html) implementation guide.  
 It provides a FHIR Gateway supporting the PMIR and MHD server actors and uses XDS/PIXV3 to communicate with an XDS Affinity Domain.
 
 It uses [IPF](https://oehf.github.io/ipf/) and [HAPI-FHIR](https://hapifhir.io/).
@@ -17,7 +17,7 @@ It uses [IPF](https://oehf.github.io/ipf/) and [HAPI-FHIR](https://hapifhir.io/)
 
 ## Test setup
 
-Current configuration works with [XDSTools7](https://ehealthsuisse.ihe-europe.net/xdstools7/), a [simulator](http://ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/rb) is setup where the MobileAccessGateway connects.
+Current configuration works with [XDSTools7](https://ehealthsuisse.ihe-europe.net/xdstools7/), a [simulator](http://ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/rb) is setup where the Mobile Access Gateway connects.
 
 [Patient Manager](https://ehealthsuisse.ihe-europe.net/PatientManager/home.seam) is used for simulating PIX V3.
 
@@ -68,7 +68,7 @@ npm run build-mag
 
 ## Deployment
 
-The MobileAccessGateway can run in a docker container and can be deployed to a Kubernetes cluster.
+The Mobile Access Gateway can run in a docker container and can be deployed to a Kubernetes cluster.
 
 ### Building an image
 
@@ -76,7 +76,7 @@ To create a new docker image run:
 
 ```
 mvn clean package
-docker build -t mag:v030 .
+docker build -t mag:v059 .
 ```
 
 Where "mag" is the image name and v030 is the version. Then push to a registry.

@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Extension;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
@@ -115,5 +117,25 @@ public class BaseRequestConverter {
 		return Long.toString(currentId++);
 	}
 	
+	public Extension getExtensionByUrl(DomainResource resource,String url) {
+		if (url != null && resource != null) {
+		    Extension ext = resource.getExtensionByUrl(url);
+		    if (ext != null) return ext;
+		    if (url.startsWith("https://")) ext = resource.getExtensionByUrl(url.replace("https://", "http://"));
+		    return ext;
+		}
+		return null;
+	}
+
+	public List<Extension> getExtensionsByUrl(DomainResource resource,String url) {
+		if (url != null && resource != null) {
+		    List<Extension> ext = resource.getExtensionsByUrl(url);
+		    if (!ext.isEmpty()) return ext;
+		    if (url.startsWith("https://")) ext = resource.getExtensionsByUrl(url.replace("https://", "http://"));
+		    return ext;
+		}
+		return null;
+	}
+
 	
 }

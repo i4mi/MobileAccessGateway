@@ -1,12 +1,12 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FhirConfigService } from '../fhirConfig.service';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import FhirClient from 'fhir-kit-client';
 import { FhirPathService } from '../fhirpath.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { v4 as uuidv4 } from 'uuid';
 import { Base64 } from 'js-base64';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
 import { OAuthErrorEvent, OAuthService } from 'angular-oauth2-oidc';
 import { Router } from '@angular/router';
 import { IDroppedBlob } from '../upload/upload.component';
@@ -54,31 +54,32 @@ export class MagComponent implements OnInit {
 
   targetId: string;
 
-  public sourceIdentifierSystem: FormControl;
-  public sourceIdentifierValue: FormControl;
-  public sourceAddIdentifierSystem: FormControl;
-  public sourceAddIdentifierValue: FormControl;
-  public sourceManagingOrganizationOid: FormControl;
-  public sourceManagingOrganizationName: FormControl;
-  public targetIdentifierSystem: FormControl;
-  public targetIdentifier2System: FormControl;
-  public authenticate: FormControl;
-  public documentType: FormControl;
-  public documentConfidentiality: FormControl;
-  public documentDescription: FormControl;
-  public masterIdentifier: FormControl;
-  public creationTime: FormControl;
-  public languageCode: FormControl;
-  public serviceStartFrom: FormControl;
-  public serviceStartTo: FormControl;
-  public serviceEndFrom: FormControl;
-  public serviceEndTo: FormControl;
+  public sourceIdentifierSystem: UntypedFormControl;
+  public sourceIdentifierValue: UntypedFormControl;
+  public sourceAddIdentifierSystem: UntypedFormControl;
+  public sourceAddIdentifierValue: UntypedFormControl;
+  public sourceManagingOrganizationOid: UntypedFormControl;
+  public sourceManagingOrganizationName: UntypedFormControl;
+  public targetIdentifierSystem: UntypedFormControl;
+  public targetIdentifier2System: UntypedFormControl;
+  public authenticate: UntypedFormControl;
+  public documentType: UntypedFormControl;
+  public documentConfidentiality: UntypedFormControl;
+  public documentTitle: UntypedFormControl;
+  public documentDescription: UntypedFormControl;
+  public masterIdentifier: UntypedFormControl;
+  public creationTime: UntypedFormControl;
+  public languageCode: UntypedFormControl;
+  public serviceStartFrom: UntypedFormControl;
+  public serviceStartTo: UntypedFormControl;
+  public serviceEndFrom: UntypedFormControl;
+  public serviceEndTo: UntypedFormControl;
 
-  public iheSourceId: FormControl;
+  public iheSourceId: UntypedFormControl;
 
-  public searchGiven: FormControl;
+  public searchGiven: UntypedFormControl;
   public searchGivenValue = '';
-  public searchFamily: FormControl;
+  public searchFamily: UntypedFormControl;
   public searchFamilyValue = '';
   public fhirConfigService: FhirConfigService;
 
@@ -120,87 +121,87 @@ export class MagComponent implements OnInit {
       .then((data: fhir.r4.CapabilityStatement) =>
         this.setJson(JSON.stringify(data, null, 2))
       );
-    this.sourceIdentifierSystem = new FormControl();
+    this.sourceIdentifierSystem = new UntypedFormControl();
     this.sourceIdentifierSystem.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.sourceIdentifierSystem',
         'urn:oid:2.16.756.5.30.1.196.3.2.1'
       )
     );
-    this.sourceIdentifierValue = new FormControl();
+    this.sourceIdentifierValue = new UntypedFormControl();
     this.sourceIdentifierValue.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.sourceIdentifierValue',
         'MAGMED001'
       )
     );
-    this.sourceAddIdentifierSystem = new FormControl();
+    this.sourceAddIdentifierSystem = new UntypedFormControl();
     this.sourceAddIdentifierSystem.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.sourceAddIdentifierSystem',
         'urn:oid:2.16.756.5.30.1.196.3.2.1'
       )
     );
-    this.sourceAddIdentifierValue = new FormControl();
+    this.sourceAddIdentifierValue = new UntypedFormControl();
     this.sourceAddIdentifierValue.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.sourceAddIdentifierValue',
         'MAGMED001'
       )
     );
-    this.sourceManagingOrganizationOid = new FormControl();
+    this.sourceManagingOrganizationOid = new UntypedFormControl();
     this.sourceManagingOrganizationOid.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.sourceManagingOrganizationOid',
         'urn:oid:1.3.6.1.4.1.21367.2017.2.7.109'
       )
     );
-    this.sourceManagingOrganizationName = new FormControl();
+    this.sourceManagingOrganizationName = new UntypedFormControl();
     this.sourceManagingOrganizationName.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.sourceManagingOrganizationName',
         'TESTORG'
       )
     );
-    this.targetIdentifierSystem = new FormControl();
+    this.targetIdentifierSystem = new UntypedFormControl();
     this.targetIdentifierSystem.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.targetIdentifierSystem',
         'urn:oid:2.16.756.5.30.1.191.1.0.2.1'
       )
     );
-    this.targetIdentifier2System = new FormControl();
+    this.targetIdentifier2System = new UntypedFormControl();
     this.targetIdentifier2System.setValue(
       this.getLocalStorageItemOrDefault(
         'mag.targetIdentifier2System',
         'urn:oid:2.16.756.5.30.1.127.3.10.3'
       )
     );
-    this.serviceStartFrom = new FormControl();
+    this.serviceStartFrom = new UntypedFormControl();
     this.serviceStartFrom.setValue(
       this.getLocalStorageItemOrDefault('mag.serviceStartFrom', '')
     );
-    this.serviceStartTo = new FormControl();
+    this.serviceStartTo = new UntypedFormControl();
     this.serviceStartTo.setValue(
       this.getLocalStorageItemOrDefault('mag.serviceStartTo', '')
     );
-    this.serviceEndFrom = new FormControl();
+    this.serviceEndFrom = new UntypedFormControl();
     this.serviceEndFrom.setValue(
       this.getLocalStorageItemOrDefault('mag.serviceEndFrom', '')
     );
-    this.serviceEndTo = new FormControl();
+    this.serviceEndTo = new UntypedFormControl();
     this.serviceEndTo.setValue(
       this.getLocalStorageItemOrDefault('mag.serviceEndTo', '')
     );
-    this.authenticate = new FormControl();
+    this.authenticate = new UntypedFormControl();
     this.authenticate.setValue(
       this.getLocalStorageItemOrDefault('mag.authenticate', 'HCP')
     );
-    this.documentType = new FormControl();
+    this.documentType = new UntypedFormControl();
     this.documentType.setValue(
       this.getLocalStorageItemOrDefault('mag.documentType', 'APPC')
     );
-    this.documentConfidentiality = new FormControl();
+    this.documentConfidentiality = new UntypedFormControl();
     this.documentConfidentiality.setValue(
       this.getLocalStorageItemOrDefault('mag.documentConfidentiality', 'NORM')
     );
@@ -214,21 +215,27 @@ export class MagComponent implements OnInit {
     );
     this.targetId = this.getLocalStorageItemOrDefault('mag.targetId', '');
 
-    this.iheSourceId = new FormControl();
+    this.iheSourceId = new UntypedFormControl();
     this.iheSourceId.setValue(oid_mag_ahdis + '.1');
 
-    this.searchGiven = new FormControl();
-    this.searchFamily = new FormControl();
-    this.documentDescription = new FormControl();
-    this.documentDescription.setValue(
-      this.getLocalStorageItemOrDefault('mag.documentType', 'Titel')
+    this.searchGiven = new UntypedFormControl();
+    this.searchFamily = new UntypedFormControl();
+    
+    this.documentTitle = new UntypedFormControl();
+    this.documentTitle.setValue(
+      this.getLocalStorageItemOrDefault('mag.documentTitle', 'Titel')
     );
-    this.masterIdentifier = new FormControl();
+    
+    this.documentDescription = new UntypedFormControl();
+    this.documentDescription.setValue(
+      this.getLocalStorageItemOrDefault('mag.documentDescription', 'Description')
+    );
+    this.masterIdentifier = new UntypedFormControl();
     this.masterIdentifier.setValue(uuidv4());
-    this.creationTime = new FormControl();
+    this.creationTime = new UntypedFormControl();
     this.creationTime.setValue(toLocaleDateTime(new Date()));
 
-    this.languageCode = new FormControl();
+    this.languageCode = new UntypedFormControl();
     this.languageCode.setValue(
       this.getLocalStorageItemOrDefault('mag.languageCode', 'de-CH')
     );
@@ -558,7 +565,7 @@ export class MagComponent implements OnInit {
       return;
     }
     this.uploadContentType = 'text/xml';
-    this.documentDescription.setValue('Policy document');
+    this.documentTitle.setValue('Policy document');
     this.documentType.setValue('APPC');
     this.documentConfidentiality.setValue('NORM');
     this.masterIdentifier.setValue('urn:uuid:' + uuidv4());
@@ -632,6 +639,7 @@ export class MagComponent implements OnInit {
   async findDocumentReferences(): Promise<fhir.r4.Bundle> {
     let query = {
       status: 'current',
+      _count: 500,
       'patient.identifier': encodeURIComponent(
         this.targetIdentifierSystem.value + '|' + this.targetIdentifierValue
       ),
@@ -964,16 +972,34 @@ export class MagComponent implements OnInit {
   getDocumentReferenceType(): fhir.r4.CodeableConcept {
     switch (this.documentType.value) {
       case 'APPC':
-      case 'MTP':
-      case 'PADV':
-      case 'DIS':
       case 'PDF':
+      case 'PADV':
         return {
           coding: [
             {
               system: 'http://snomed.info/sct',
               code: '419891008',
               display: 'Record artifact',
+            },
+          ],
+        };
+      case 'MTP':
+        return {
+          coding: [
+            {
+              system: 'http://snomed.info/sct',
+              code: '761931002',
+              display: 'Medication treatment plan report (record artifact)',
+            },
+          ],
+        };
+      case 'DIS':
+        return {
+          coding: [
+            {
+              system: 'http://snomed.info/sct',
+              code: '294121000195110',
+              display: 'Medication dispense document (record artifact)',
             },
           ],
         };
@@ -1140,7 +1166,7 @@ export class MagComponent implements OnInit {
     const reader = new FileReader();
     reader.readAsText(blob.blob);
     const that = this;
-    this.documentDescription.setValue(blob.name);
+    this.documentTitle.setValue(blob.name);
     this.creationTime.setValue(toLocaleDateTime(new Date()));
     reader.onload = () => {
       if (
@@ -1186,51 +1212,30 @@ export class MagComponent implements OnInit {
       const snomedct = composition.type.coding.find(
         (coding) => 'http://snomed.info/sct' === coding.system
       );
-      const loinc = composition.type.coding.find(
-        (coding) => 'http://loinc.org' === coding.system
-      );
       if (composition.language) {
         this.languageCode.setValue(composition.language);
       }
-      if (
-        loinc &&
-        '77603-9' === loinc.code &&
-        snomedct &&
-        '419891008' === snomedct.code
-      ) {
-        this.uploadBundle = bundle;
-        this.documentType.setValue('MTP');
+
+      if (!snomedct) {
         return;
       }
-      if (
-        loinc &&
-        '57833-6' === loinc.code &&
-        snomedct &&
-        '761938008' === snomedct.code
-      ) {
-        this.uploadBundle = bundle;
-        this.documentType.setValue('PRE');
-        return;
-      }
-      if (
-        loinc &&
-        '60593-1' === loinc.code &&
-        snomedct &&
-        '419891008' === snomedct.code
-      ) {
-        this.uploadBundle = bundle;
-        this.documentType.setValue('DIS');
-        return;
-      }
-      if (
-        loinc &&
-        '61356-2' === loinc.code &&
-        snomedct &&
-        '419891008' === snomedct.code
-      ) {
-        this.uploadBundle = bundle;
-        this.documentType.setValue('PADV');
-        return;
+      switch (snomedct.code) {
+        case '761931002':
+          this.uploadBundle = bundle;
+          this.documentType.setValue('MTP');
+          return;
+        case '761938008':
+          this.uploadBundle = bundle;
+          this.documentType.setValue('PRE');
+          return;
+        case '294121000195110':
+          this.uploadBundle = bundle;
+          this.documentType.setValue('DIS');
+          return;
+        case '419891008':
+          this.uploadBundle = bundle;
+          this.documentType.setValue('PADV');
+          return;
       }
     }
   }
@@ -1395,11 +1400,11 @@ export class MagComponent implements OnInit {
                 id: '1',
                 identifier: [
                   {
-                    system: 'urn:oid:2.16.756.5.30.1.191.1.0.12.3.101',
+                    system: '$10',
                     value: '$10',
                   },
                   {
-                    system: 'urn:oid:2.16.756.5.30.1.191.1.0.2.1',
+                    system: '$11',
                     value: '$11',
                   },
                 ],
@@ -1565,10 +1570,10 @@ export class MagComponent implements OnInit {
 
     const docrefpat: fhir.r4.Patient = docref.contained[0] as fhir.r4.Patient;
 
-    docrefpat.identifier[0].value = this.sourceIdentifierSystem.value;
+    docrefpat.identifier[0].system = this.sourceIdentifierSystem.value;
     docrefpat.identifier[0].value = this.sourceIdentifierValue.value; // $10
 
-    docrefpat.identifier[1].value = this.targetIdentifierSystem.value;
+    docrefpat.identifier[1].system = this.targetIdentifierSystem.value;
     docrefpat.identifier[1].value = this.targetIdentifierValue; // $11
 
     // if we feteched the patient before we also set the names to it
@@ -1642,6 +1647,7 @@ export class MagComponent implements OnInit {
     docref.content[0].attachment.url = fullUrlBinary; // $1
     docref.content[0].attachment.contentType = this.uploadContentType; // $1.2
     docref.content[0].attachment.language = this.languageCode.value; // $1.3
+    docref.content[0].attachment.title = this.documentTitle.value;
 
     let documentReference: fhir.r4.DocumentReference = bundleTransaction
       .entry[2].resource as fhir.r4.DocumentReference;

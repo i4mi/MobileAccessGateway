@@ -80,15 +80,15 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                     
                     documentManifest.setId(noUuidPrefix(submissionSet.getEntryUuid()));  
                     
-                    documentManifest.setCode(new CodeableConcept(new Coding("http://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes","submissionset","Submission Set")));
+                    documentManifest.setCode(new CodeableConcept(new Coding("https://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes","submissionset","Submission Set")));
                     targetList.put(documentManifest.getId(), documentManifest);
                     
                     list.add(documentManifest);
                     // limitedMetadata -> meta.profile canonical [0..*]       
                     if (submissionSet.isLimitedMetadata()) {
-                    	documentManifest.getMeta().addProfile("http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.SubmissionSet");
+                    	documentManifest.getMeta().addProfile("https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.SubmissionSet");
                     } else {
-                    	documentManifest.getMeta().addProfile("http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.SubmissionSet");
+                    	documentManifest.getMeta().addProfile("https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.SubmissionSet");
                     }
                     
                     // comment -> text Narrative [0..1]
@@ -118,7 +118,7 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                     if (submissionSet.getContentTypeCode()!=null) {
                         documentManifest
                           .addExtension()
-                          .setUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType")
+                          .setUrl("https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType")
                           .setValue(transform(submissionSet.getContentTypeCode()));
                     }
                     
@@ -152,7 +152,7 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                     		if (contact != null) organization.addTelecom(contact);
                     		documentManifest
                     		  .addExtension()
-                    		  .setUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-intendedRecipient")
+                    		  .setUrl("https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-intendedRecipient")
                     		  .setValue(new Reference().setResource(organization));
                     	} else if (organization != null && practitioner != null) {
                     		PractitionerRole role = new PractitionerRole();
@@ -161,7 +161,7 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                     		if (contact != null) role.addTelecom(contact);
                     		documentManifest
 	                    		.addExtension()
-	                  		    .setUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-intendedRecipient")
+	                  		    .setUrl("https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-intendedRecipient")
 	                  		    .setValue(new Reference().setResource(role));                    		                    		
                     	} else if (organization == null && practitioner != null) {                    		
                     		// May be a patient, related person or practitioner
@@ -172,7 +172,7 @@ public class Iti66ResponseConverter extends BaseQueryResponseConverter {
                     if (submissionSet.getSourceId()!=null) {
                         documentManifest
                           .addExtension()
-                          .setUrl("http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId")
+                          .setUrl("https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId")
                           .setValue(new Identifier().setValue("urn:oid:"+submissionSet.getSourceId()));
                     }
                     // title -> description string [0..1]

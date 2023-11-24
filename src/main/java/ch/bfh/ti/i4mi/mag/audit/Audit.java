@@ -25,7 +25,7 @@ public class Audit implements ApplicationListener<ApplicationReadyEvent> {
 	@Autowired
 	private AuditContext myAuditContext;
 	
-	@Value("${mag.name:MobileAccessGateway}")
+	@Value("${mag.name:Mobile Access Gateway}")
 	private String appName;
 	
 	public void start() {

@@ -1,11 +1,28 @@
-site_name: MobileAccessGateway
+site_name: Mobile Access Gateway
+repo_url: https://github.com/i4mi/MobileAccessGateway
 theme:
   name: material
   logo: assets/mag_logo.png
   favicon: assets/favicon-256x256.png
   palette:
     scheme: mag
+  features:
+    - content.code.annotate
 extra_css:
   - stylesheets/extra.css
 nav:
-  - index.md
+  - Home: index.md
+  - Features: features.md
+  - Endpoints: endpoints.md
+  - EPR Integration: integration-primary-system.md
+  - Changelog: changelog.md
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.snippets:
+      base_path: ["docs/snippets"]
+  - pymdownx.tabbed:
+      alternate_style: true

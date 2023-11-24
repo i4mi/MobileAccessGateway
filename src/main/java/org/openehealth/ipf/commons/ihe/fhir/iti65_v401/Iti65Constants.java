@@ -22,11 +22,16 @@ package org.openehealth.ipf.commons.ihe.fhir.iti65_v401;
  */
 public interface Iti65Constants {
 
-    String ITI65_LEGACY_METADATA_PROFILE = "http://ihe.net/fhir/tag/iti-65";
-    String ITI65_COMPREHENSIVE_METADATA_PROFILE = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle";
-    String ITI65_MINIMAL_METADATA_PROFILE = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle";
+    String ITI65_LEGACY_METADATA_PROFILE = "https://ihe.net/fhir/tag/iti-65";
+    String ITI65_COMPREHENSIVE_METADATA_PROFILE = "https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle";
+    String ITI65_MINIMAL_METADATA_PROFILE = "https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle";
 
-    String ITI65_MINIMAL_DOCUMENT_MANIFEST_PROFILE = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.SubmissionSet";
-    String ITI65_MINIMAL_DOCUMENT_REFERENCE_PROFILE = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentReference";
+    String ITI65_LEGACY_METADATA_PROFILE_HTTP = "http://ihe.net/fhir/tag/iti-65";
+    String ITI65_COMPREHENSIVE_METADATA_PROFILE_HTTP = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle";
+    String ITI65_MINIMAL_METADATA_PROFILE_HTTP = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle";
+
+    
+    String ITI65_MINIMAL_DOCUMENT_MANIFEST_PROFILE = "https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.SubmissionSet";
+    String ITI65_MINIMAL_DOCUMENT_REFERENCE_PROFILE = "https://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentReference";
 
 }
