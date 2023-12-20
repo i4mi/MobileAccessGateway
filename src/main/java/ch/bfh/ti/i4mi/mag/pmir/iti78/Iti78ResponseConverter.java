@@ -388,6 +388,11 @@ public class Iti78ResponseConverter extends BasePMIRResponseConverter implements
 		    }
 		    
 			response.add(result);
+			
+			// Fix for issue #86. More restrictions required for query than provided.
+			if (response.isEmpty() && errtext.length() > 0) {
+				throw new InvalidRequestException(errtext, error(IssueType.INVALID, errtext));
+			}
 		}
 		
 						

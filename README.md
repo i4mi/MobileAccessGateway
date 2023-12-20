@@ -96,3 +96,77 @@ Where "mag" is the image name and v030 is the version. Then push to a registry.
   `kubectl create secret generic mobile-access-gateway-secret --from-file=client.jks=myconfig/client-certificate.jks --from-file=server.p12=myconfig/server-certificate.jks --from-file=idp.jks=myconfig/idp.jks`
 - Upload configuration
   `kubectl apply -f myconfig/kubernetes-config.yml`
+  
+## Adding a new identity provider
+
+### 1. Preparations
+Select a short identifier (no spaces, no special characters) for the IDP you want to connect to. This identifier will be called <idp-name> in this guide. (example: "trustid") 
+
+Which instance of the MAG should be able to connect to the IDP? You need a separate registration for each instance. The base-url of the MAG instance including protokoll, domain, port (if not 80 or 443) and base path will be called <baseurl>. (example: "https://test.ahids.ch/mag-test")    
+
+### 2. Ask for IDP metadata
+You need a metadata file from the IDP. Either this metadata is freely available in the internet under a fixed URL or you need to receive the file through another channel and store the metadata XML file in the MAGs configuration directory.
+An example IDP metadata file (for gazelle) can be found here: https://ehealthsuisse.ihe-europe.net/metadata/idp-metadata.xml
+ 
+### 3. Generate signing and encryption keys
+Signing and encryption keys for SAML are in an extra keystore specified in the "mag.iua.idp" section. It is possible to reuse keys from the keystore for multiple IDPs, but it might be better
+to have separate keys for each provider so that you can exchange the keys for a single provider only. Each provider might have different requirements about the keys and certificates used.
+(for example the certificate needs to contain a support email address) 
+Here is an example how to create a signing key. Adopt according to requirements of IDP.
+```
+openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:4096 -keyout signKey.key -out signKey.crt
+```
+
+Repeat the same for the TLS key: (another example with extended requirements)
+```
+openssl req -x509 -sha256 -nodes -days 1460 -newkey rsa:4096 -extensions client_ext -extfile myssl.conf -outform PEM -keyout tlsKey.key -out tlsKey.cer 
+
+myssl.conf must contain section:
+
+# Client Certificate Extensions
+[ client_ext ]
+basicConstraints        = CA:FALSE
+keyUsage                = critical, digitalSignature
+extendedKeyUsage        = critical, clientAuth
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always
+issuerAltName           = issuer:copy
+
+```
+
+Convert your keys into keystores and merge those.
+Choose an "alias" (a name) for both keys. Replace <sign-key-alias> and <tls-key-alias> with the chosen aliases.
+```
+openssl pkcs12 -export -in signKey.crt -inkey signKey.key -name "<sign-key-alias>" -out signKey.p12
+openssl pkcs12 -export -in tlsKey.crt -inkey tlsKey.key -name "<tls-key-alias>" -out tlsKey.p12
+keytool -importkeystore -srckeystore signKey.p12 -destkeystore tlsKey.p12 -alias <sign-key-alias>
+```
+
+### 5. Change MAGs configuration file
+In the application.yml file for the MAG instance add a section to "mag.iua.idps". A section looks like this:
+
+```
+mag:
+  iua:
+     idps:
+        <idp-name>:
+          metadata-url: <metadata-url>
+          key-alias: <sign-key-alias>
+          key-password: <sign-key-password>
+          tls-key-alias: <tls-key-alias>
+          tls-key-password: <tls-key-password>    
+```
+The <metadata-url> is either the URL from step 2 or if you have a file instead it is the file path (without a prefix) for example "secret/metadata.xml".
+If the IDP has problems with the artifact resolution step you can put "noArtifactResolution: true" into the section.
+For the <sign-key-password> and <tls-key-password> use the keystore password for keys without additional password.
+
+### 6. Run MAG and retrieve SP metadata file/url
+Run the MAG with the updated configuration. You can now download the SP metadata file which needs to be communicated to the IDP provider.
+The metadata XML file may be downloaded from <baseurl>/saml/metadata/alias/<idp-name>
+This file contains certificates, the SP entityID and URLs.
+
+### 7. Register instance to IDP
+Write an email to the IDP provider with either the metadata file itself and/or the URL where the metadata file can be downloaded. 
+
+### 8. Adopt frontend
+In angular/src/app/mag/mag.component.html is the provider select list which may be extended with new entries.

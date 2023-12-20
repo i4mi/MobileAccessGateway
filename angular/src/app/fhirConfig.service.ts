@@ -26,6 +26,11 @@ export class FhirConfigService {
     return service ? service : '/mag/fhir';
   }
 
+  getMobileAccessGatewayIDPEnumerationUrl(): string {
+    const service = localStorage.getItem('magMicroService');
+    return service.replace('/fhir', '/camel/idps');
+  }
+
   getMobileAccessGatewayLoginUrl(): string {
     const service = localStorage.getItem('magMicroService');
     return service.replace('/fhir', '/camel/authorize');
@@ -64,11 +69,11 @@ export class FhirConfigService {
     return new FhirClient({ baseUrl: this.getMobileAccessGatewayService() });
   }
 
-  getAuthCodeFlowConfig(): AuthConfig {
+  getAuthCodeFlowConfig(provider: string): AuthConfig {
     return {
       // Url of the Identity Provider
 
-      loginUrl: this.getMobileAccessGatewayLoginUrl(),
+      loginUrl: this.getMobileAccessGatewayLoginUrl()+(provider ? ("/alias/"+provider) : ""),
       // URL of the SPA to redirect the user to after login
       // redirectUri: window.location.origin + '/index.html',
       redirectUri: this.getRedirectUri(),

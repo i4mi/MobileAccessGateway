@@ -118,6 +118,15 @@
           <option value="TCU">TCU</option>
         </select>
       </mat-form-field>
+      &nbsp;
+      <mat-form-field class="column50">
+        <mat-label>Provider</mat-label>
+        <select matNativeControl [formControl]="provider">
+          <option *ngFor="let idp of idps" [value]="idp.id">
+            {{ idp.name }}
+          </option>         
+        </select>
+      </mat-form-field>
     </div>
 
     <div *ngIf="getScopes()">

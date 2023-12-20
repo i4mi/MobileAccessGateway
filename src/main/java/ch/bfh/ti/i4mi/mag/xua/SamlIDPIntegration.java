@@ -31,6 +31,7 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.velocity.app.VelocityEngine;
+import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.provider.AbstractReloadingMetadataProvider;
 import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
 import org.opensaml.saml2.metadata.provider.HTTPMetadataProvider;
@@ -43,6 +44,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -72,6 +74,7 @@ import org.springframework.security.saml.metadata.MetadataDisplayFilter;
 import org.springframework.security.saml.metadata.MetadataGenerator;
 import org.springframework.security.saml.metadata.MetadataGeneratorFilter;
 import org.springframework.security.saml.metadata.MetadataManager;
+import org.springframework.security.saml.metadata.MetadataMemoryProvider;
 import org.springframework.security.saml.parser.ParserPoolHolder;
 import org.springframework.security.saml.processor.HTTPArtifactBinding;
 import org.springframework.security.saml.processor.HTTPPAOS11Binding;
@@ -118,7 +121,49 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements InitializingBean, DisposableBean {
 	
-	 
+	public final static String DEFAULT_IDP = "default";
+	private Timer backgroundTaskTimer;
+	private MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager;
+
+    @Value("${mag.iua.idp.key-store}")
+    private String samlKeystore;
+    
+    @Value("${mag.iua.idp.key-store-password}")
+    private String keystorePass;
+    
+    @Value("${mag.iua.idp.key-alias}")
+    private String keyAlias;
+    
+    @Value("${mag.iua.idp.tls-key-alias:}")
+    private String tlsKeyAlias;
+    
+    @Value("${mag.iua.idp.sign-key-alias:}")
+    private String signKeyAlias;
+    
+    @Value("${mag.iua.idp.key-password}")
+    private String keyPassword;
+    
+    @Value("${mag.iua.idp.tls-key-password:}")
+    private String tlsKeyPassword;
+    
+    @Value("${mag.iua.idp.sign-key-password:}")
+    private String signKeyPassword;
+
+    @Value("${mag.iua.sp.entity-id}")
+    private String spEntityId;
+    
+    @Value("${mag.baseurl}")
+    private String baseUrl;
+    
+    @Value("${server.servlet.context-path:/}")
+    private String context;
+	
+	 // Initialization of OpenSAML library
+    @Bean
+    public static SAMLBootstrap sAMLBootstrap() {
+        return new MySAMLBootstrap();
+    }
+    
 	 @Override
 	 protected void configure(HttpSecurity http) throws Exception {
 		       
@@ -126,13 +171,13 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
          .httpBasic()
                .authenticationEntryPoint(samlEntryPoint());      
           http
-     		.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
+     		//.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
      		.addFilterAfter(samlFilter(), BasicAuthenticationFilter.class)
      		.addFilterBefore(samlFilter(), CsrfFilter.class);
 		 
 			http.authorizeRequests()
 			.antMatchers("/login").authenticated()
-			.antMatchers("/camel/authorize").authenticated()
+			.antMatchers("/camel/authorize/**").authenticated()
 			.antMatchers("/camel/token").permitAll()
 			.antMatchers("/saml/**").permitAll()
 	        .antMatchers("/**").permitAll();
@@ -152,9 +197,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 		
 	 }
 	 
-	 private Timer backgroundTaskTimer;
-	 private MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager;
-
+	
 		public void init() {
 			this.backgroundTaskTimer = new Timer(true);
 			this.multiThreadedHttpConnectionManager = new MultiThreadedHttpConnectionManager();
@@ -165,6 +208,21 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 			this.backgroundTaskTimer.cancel();
 			this.multiThreadedHttpConnectionManager.shutdown();
 		}
+		
+	 @ConfigurationProperties("mag.iua.idps")
+	 @Bean(name = "idps")
+    public Map<String, IDPConfig> getIDPs() {
+        Map<String, IDPConfig> result = new HashMap<String, IDPConfig>();
+        IDPConfig defaultIdp = getDefaultIdp();
+        if (defaultIdp != null && defaultIdp.getMetadataUrl() != null) result.put(DEFAULT_IDP, defaultIdp);
+        return result;
+    }
+
+    @ConfigurationProperties("mag.iua.idp")
+    @Bean(name = "idp")
+    public IDPConfig getDefaultIdp() {
+        return new IDPConfig();
+    }
 	 
 	 @Bean
 	    public FilterChainProxy samlFilter() throws Exception {
@@ -186,8 +244,6 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        return new FilterChainProxy(chains);
 	    }
 
-	  //@Autowired
-	  // private SAMLUserDetailsServiceImpl samlUserDetailsServiceImpl;
 	     
 	    // Initialization of the velocity engine
 	    @Bean
@@ -210,7 +266,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    @Bean
 	    public HttpClient httpClient() {
 	        HttpClient result = new HttpClient(this.multiThreadedHttpConnectionManager);
-	        result.getParams().setParameter(ClientPNames.COOKIE_POLICY,
+	        result.getParams().setParameter("http.protocol.cookie-policy",
 	                CookiePolicy.BROWSER_COMPATIBILITY);
 	        return result;
 	    }
@@ -228,17 +284,15 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    // Provider of default SAML Context
 	    @Bean
 	    public SAMLContextProviderImpl contextProvider() {
-	    	SAMLContextProviderImpl result = new SAMLContextProviderImpl();
-	    	//result.setStorageFactory(new EmptyStorageFactory());
-	    	return result;
+	        String serverName = baseUrl;
+	        serverName = baseUrl.substring(baseUrl.indexOf("://") + 3);
+	        int p = serverName.indexOf("/");
+	        if (p > 0) serverName = serverName.substring(0, p);
+	        SAMLContextProviderImpl result = new MySAMLContextProvider(serverName, context);
+	        //result.setStorageFactory(new EmptyStorageFactory());
+	        return result;
 	    }
-	 
-	    // Initialization of OpenSAML library
-	    @Bean
-	    public static SAMLBootstrap sAMLBootstrap() {
-	        return new MySAMLBootstrap();
-	    }
-	 
+	 	   	 
 	    // Logger for SAML messages and events
 	    @Bean
 	    public SAMLDefaultLogger samlLogger() {
@@ -286,47 +340,30 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        return new SingleLogoutProfileImpl();
 	    }
 	 
-	    @Value("${mag.iua.idp.key-store}")
-	    private String samlKeystore;
-	    
-	    @Value("${mag.iua.idp.key-store-password}")
-	    private String keystorePass;
-	    
-	    @Value("${mag.iua.idp.key-alias}")
-	    private String keyAlias;
-	    
-	    @Value("${mag.iua.idp.tls-key-alias:}")
-	    private String tlsKeyAlias;
-	    
-	    @Value("${mag.iua.idp.sign-key-alias:}")
-	    private String signKeyAlias;
-	    
-	    @Value("${mag.iua.idp.key-password}")
-	    private String keyPassword;
-	    
-	    @Value("${mag.iua.idp.tls-key-password:}")
-	    private String tlsKeyPassword;
-	    
-	    @Value("${mag.iua.idp.sign-key-password:}")
-	    private String signKeyPassword;
-	    
+		    
 	    // Central storage of cryptographic keys
 	    @Bean	    
 	    public KeyManager keyManager() {
-	        DefaultResourceLoader loader = new DefaultResourceLoader();
-	        Resource storeFile = loader
-	                .getResource(samlKeystore);
-	        String storePass = keystorePass;
-	        Map<String, String> passwords = new HashMap<String, String>();
-	        passwords.put(keyAlias, keyPassword);
-	        if (signKeyAlias != null && signKeyAlias.length()>0) {
-	          passwords.put(signKeyAlias, signKeyPassword);
-	        }
-	        if (tlsKeyAlias != null && tlsKeyAlias.length()>0) {
-	          passwords.put(tlsKeyAlias, tlsKeyPassword);
-	        }
-	        String defaultKey = keyAlias;
-	        return new JKSKeyManager(storeFile, storePass, passwords, defaultKey);
+	    	  DefaultResourceLoader loader = new DefaultResourceLoader();
+	          Resource storeFile = loader
+	              .getResource(samlKeystore);
+	          String storePass = keystorePass;
+	          Map<String, String> passwords = new HashMap<String, String>();
+
+	          passwords.put(keyAlias, keyPassword);
+
+	          for (IDPConfig conf : getIDPs().values()) {
+	              passwords.put(conf.getKeyAlias(), conf.getKeyPassword());
+	              if (conf.getSignKeyAlias() != null && conf.getSignKeyAlias().length() > 0) {
+	                  passwords.put(conf.getSignKeyAlias(), conf.getSignKeyPassword());
+	              }
+	              if (conf.getTlsKeyAlias() != null && conf.getTlsKeyAlias().length() > 0) {
+	                  passwords.put(conf.getTlsKeyAlias(), conf.getTlsKeyPassword());
+	              }
+	          }
+
+	          // String defaultKey = conf.getKeyAlias();
+	          return new JKSKeyManager(storeFile, storePass, passwords, keyAlias);
 	    	
 	    }
 	    
@@ -350,23 +387,27 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    }
 	    
 	    // Setup advanced info about metadata
-	    @Bean
-	    public ExtendedMetadata extendedMetadata() {
-		    ExtendedMetadata extendedMetadata = new ExtendedMetadata();
-		    extendedMetadata.setIdpDiscoveryEnabled(false);		    
-		    extendedMetadata.setSigningAlgorithm("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
-		    extendedMetadata.setDigestMethodAlgorithm("http://www.w3.org/2001/04/xmlenc#sha512");
-		    extendedMetadata.setSignMetadata(true);
-		    extendedMetadata.setEcpEnabled(true);		    
-		    
-		    extendedMetadata.setRequireArtifactResolveSigned(true);
-		    if (tlsKeyAlias != null && tlsKeyAlias.length()>0) {
-		      extendedMetadata.setTlsKey(tlsKeyAlias);
-		    }
-		    if (signKeyAlias != null && signKeyAlias.length()>0) {
-		      extendedMetadata.setSigningKey(signKeyAlias);
-		    }
-		    return extendedMetadata;
+	    //@Bean
+	    public ExtendedMetadata extendedMetadata(String entityId, boolean sp) {
+	        IDPConfig conf = getIDPs().get(entityId);
+
+	        ExtendedMetadata extendedMetadata = new ExtendedMetadata();
+	        extendedMetadata.setIdpDiscoveryEnabled(false);
+	        extendedMetadata.setSigningAlgorithm("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
+	        extendedMetadata.setDigestMethodAlgorithm("http://www.w3.org/2001/04/xmlenc#sha512");
+	        extendedMetadata.setSignMetadata(true);
+	        extendedMetadata.setEcpEnabled(true);
+	        extendedMetadata.setLocal(true);
+	        extendedMetadata.setAlias(sp ? entityId : entityId + "idp");
+
+	        extendedMetadata.setRequireArtifactResolveSigned(true);
+	        if (conf.getTlsKeyAlias() != null && conf.getTlsKeyAlias().length() > 0) {
+	            extendedMetadata.setTlsKey(conf.getTlsKeyAlias());
+	        }
+	        if (conf.getSignKeyAlias() != null && conf.getSignKeyAlias().length() > 0) {
+	            extendedMetadata.setSigningKey(conf.getSignKeyAlias());
+	        }
+	        return extendedMetadata;
 	    }
 	    
 	    // IDP Discovery Service
@@ -377,32 +418,32 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        return idpDiscovery;
 	    }
 	    
-	    @Value("${mag.iua.idp.metadata-url}")
-	    private String metadataUrl;
+	   // @Value("${mag.iua.idp.metadata-url}")
+	   // private String metadataUrl;
 	    
-		@Bean
-		@Qualifier("${mag.iua.idp.name}")
-		public ExtendedMetadataDelegate ssoCircleExtendedMetadataProvider()
-				throws MetadataProviderException {
-			String idpSSOCircleMetadataURL = metadataUrl;
-			AbstractReloadingMetadataProvider prov;
-			if (metadataUrl.startsWith("http:") || metadataUrl.startsWith("https:")) {
-			        prov = new HTTPMetadataProvider(
-					this.backgroundTaskTimer, httpClient(), idpSSOCircleMetadataURL);
-			} else if (metadataUrl.startsWith("classpath:")) {
-				 URL fileUrl = getClass().getResource(metadataUrl.substring("classpath:".length()));
-				 prov = new FilesystemMetadataProvider(new File(fileUrl.getFile()));
-			} else {
-				prov = new FilesystemMetadataProvider(new File(metadataUrl));
-			}
-			prov.setParserPool(parserPool());
-			ExtendedMetadataDelegate extendedMetadataDelegate = 
-					new ExtendedMetadataDelegate(prov, extendedMetadata());
-			extendedMetadataDelegate.setMetadataTrustCheck(true);
-			extendedMetadataDelegate.setMetadataRequireSignature(false);
-			backgroundTaskTimer.purge();
-			return extendedMetadataDelegate;
-		}
+	    public ExtendedMetadataDelegate ssoCircleExtendedMetadataProvider(String entityId)
+	            throws MetadataProviderException {
+	            IDPConfig conf = getIDPs().get(entityId);
+	            if (conf == null) return null;
+	            String idpSSOCircleMetadataURL = conf.getMetadataUrl();
+	            AbstractReloadingMetadataProvider prov;
+	            if (idpSSOCircleMetadataURL.startsWith("http:") || idpSSOCircleMetadataURL.startsWith("https:")) {
+	                prov = new HTTPMetadataProvider(
+	                    this.backgroundTaskTimer, httpClient(), idpSSOCircleMetadataURL);
+	            } else if (idpSSOCircleMetadataURL.startsWith("classpath:")) {
+	                URL fileUrl = getClass().getResource(idpSSOCircleMetadataURL.substring("classpath:".length()));
+	                prov = new FilesystemMetadataProvider(new File(fileUrl.getFile()));
+	            } else {
+	                prov = new FilesystemMetadataProvider(new File(idpSSOCircleMetadataURL));
+	            }
+	            prov.setParserPool(parserPool());
+	            ExtendedMetadataDelegate extendedMetadataDelegate =
+	                new ExtendedMetadataDelegate(prov, extendedMetadata(entityId, false));
+	            extendedMetadataDelegate.setMetadataTrustCheck(true);
+	            extendedMetadataDelegate.setMetadataRequireSignature(false);
+	            backgroundTaskTimer.purge();
+	            return extendedMetadataDelegate;
+	        }
 
 	    // IDP Metadata configuration - paths to metadata of IDPs in circle of trust
 	    // is here
@@ -411,37 +452,69 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	    @Qualifier("metadata")
 	    public CachingMetadataManager metadata() throws MetadataProviderException {
 	        List<MetadataProvider> providers = new ArrayList<MetadataProvider>();
-	        providers.add(ssoCircleExtendedMetadataProvider());
-	        return new CachingMetadataManager(providers);
+	        Map<String, IDPConfig> idps = getIDPs();
+	        if (idps != null) {
+	            for (Map.Entry<String, IDPConfig> entry : idps.entrySet()) {
+	                // Generate metadata for each IDP
+	                MetadataProvider prov = ssoCircleExtendedMetadataProvider(entry.getKey());
+	                providers.add(prov);
+
+	                // Also generate one SP for each IDP (so that there can be different config for each IDP)
+	                providers.add(generateSP(entry.getKey()));
+
+	            }
+	        }
+
+	        CachingMetadataManager metadata = new CachingMetadataManager(providers);
+	        metadata.setHostedSPName(spEntityId);
+	        metadata.setDefaultIDP(DEFAULT_IDP + "idp");
+	        return metadata;
 	    }
 	    	   
+	    public MetadataProvider generateSP(String entityId) throws MetadataProviderException {
+	        MetadataGenerator generator = metadataGenerator(entityId);
+	        EntityDescriptor descriptor = generator.generateMetadata();
+	        ExtendedMetadata extendedMetadata = generator.generateExtendedMetadata();
+
+	        MetadataMemoryProvider memoryProvider = new MetadataMemoryProvider(descriptor);
+	        memoryProvider.initialize();
+	        MetadataProvider metadataProvider = new ExtendedMetadataDelegate(memoryProvider, extendedMetadata);
+
+	        return metadataProvider;
+	    } 
 	 
-	    @Value("${mag.iua.sp.entity-id}")
-	    private String entityId;
-	    
-	    @Value("${mag.baseurl}")
-	    private String baseUrl;
-	    
-	    @Value("${server.servlet.context-path:/}")
-	    private String context;
 	    
 	    // Filter automatically generates default SP metadata
-	    @Bean
-	    public MetadataGenerator metadataGenerator() {
+	    //@Bean
+	    public MetadataGenerator metadataGenerator(String entityId) {
 	        MetadataGenerator metadataGenerator = new MetadataGenerator();
-	        metadataGenerator.setEntityId(entityId);
+	        IDPConfig conf = getIDPs().get(entityId);
+
+	        if (DEFAULT_IDP.equals(entityId)) {
+	            metadataGenerator.setEntityId(spEntityId);
+	        } else {
+	            metadataGenerator.setEntityId(spEntityId + "/alias/" + entityId);
+	        }
 	        metadataGenerator.setEntityBaseURL(baseUrl);//+(context.equals("/")?"":context));
-	        metadataGenerator.setExtendedMetadata(extendedMetadata());
+
+	        metadataGenerator.setExtendedMetadata(extendedMetadata(entityId, true));
 	        metadataGenerator.setIncludeDiscoveryExtension(false);
+
 	        metadataGenerator.setKeyManager(keyManager());
 	        Collection<String> bindings = new ArrayList<String>();
 	        bindings.add("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact");
-	        // Uncomment to use HTTP-Artificat
-	        metadataGenerator.setBindingsSSO(bindings);
+
+	        if (conf.isNoArtifactResolution()) {
+	            metadataGenerator.setWantAssertionSigned(false);
+	        } else {
+	            metadataGenerator.setBindingsSSO(bindings);
+	        }
+
 	        return metadataGenerator;
-	        
-	       
+
+
 	    }
+
 	    
 	    // The filter is waiting for connections on URL suffixed with filterSuffix
 	    // and presents SP metadata there
@@ -487,11 +560,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());	        	       
 	        return samlWebSSOProcessingFilter;
 	    }
-	     
-	    @Bean
-	    public MetadataGeneratorFilter metadataGeneratorFilter() {
-	        return new MetadataGeneratorFilter(metadataGenerator());
-	    }
+	     	   
 	     
 	    // Handler for successful logout
 	    @Bean
