@@ -240,8 +240,10 @@ public class Iti78ResponseConverter extends BasePMIRResponseConverter implements
 			contactPoint.setValue(telecomParts[1]);
 			return contactPoint;
 		}
-		// No value, no contactPoint
-		return null;
+		else {
+			contactPoint.setValue(telecom.getValue());
+			return contactPoint;
+		}
 	}
 	
 	public List<Patient> translateToFhir(byte[] input, Map<String, Object> parameters)  {
