@@ -25,6 +25,7 @@ import org.openehealth.ipf.commons.ihe.fhir.iti67_v401.Iti67RequestUpdateConvert
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Response;
 import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.rs.RegistryRequestType;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
@@ -38,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty({"mag.xds.iti-18.url", "mag.xds.iti-57.url"})
 class Iti67RouteBuilder extends RouteBuilder {
 
     private final Config config;

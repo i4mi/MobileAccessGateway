@@ -3,7 +3,6 @@ package ch.bfh.ti.i4mi.mag.ppqm;
 import ch.bfh.ti.i4mi.mag.Config;
 import org.openehealth.ipf.commons.ihe.fhir.chppqm.translation.FhirToXacmlTranslator;
 import org.openehealth.ipf.commons.ihe.xacml20.ChPpqMessageCreator;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
