@@ -13,6 +13,7 @@ import org.openehealth.ipf.commons.ihe.xacml20.ChPpqMessageCreator;
 import org.openehealth.ipf.commons.ihe.xacml20.stub.ehealthswiss.AssertionBasedRequestType;
 import org.openehealth.ipf.commons.ihe.xacml20.stub.ehealthswiss.EprPolicyRepositoryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -22,6 +23,7 @@ import java.util.List;
  * @author Dmytro Rud
  */
 @Component
+@ConditionalOnProperty({"mag.ppq.ppq-1.url", "mag.ppq.ppq-2.url"})
 @Slf4j
 public class Ppq3RouteBuilder extends PpqmFeedRouteBuilder {
 

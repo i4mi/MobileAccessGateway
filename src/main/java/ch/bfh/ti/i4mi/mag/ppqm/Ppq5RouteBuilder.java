@@ -11,6 +11,7 @@ import org.openehealth.ipf.commons.ihe.xacml20.stub.saml20.protocol.ResponseType
 import org.openehealth.ipf.commons.ihe.xacml20.stub.xacml20.saml.protocol.XACMLPolicyQueryType;
 import org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelValidators;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
  * @author Dmytro Rud
  */
 @Component
+@ConditionalOnProperty("mag.ppq.ppq-2.url")
 @Slf4j
 public class Ppq5RouteBuilder extends PpqmRouteBuilder {
 

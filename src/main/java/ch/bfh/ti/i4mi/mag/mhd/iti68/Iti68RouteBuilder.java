@@ -18,6 +18,7 @@ package ch.bfh.ti.i4mi.mag.mhd.iti68;
 
 import org.apache.camel.builder.RouteBuilder;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
@@ -33,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty("mag.xds.iti-43.url")
 class Iti68RouteBuilder extends RouteBuilder {
 
     private final Config config;
