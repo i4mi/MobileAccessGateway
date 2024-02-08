@@ -1,19 +1,9 @@
 # Mobile Access Gateway
 
 The Mobile Access Gateway is an implementation based on the [CH EPR mHealth](https://fhir.ch/ig/ch-epr-mhealth/index.html) [(CI-Build)](http://build.fhir.org/ig/ehealthsuisse/ch-epr-mhealth/index.html) implementation guide.  
-It provides a FHIR Gateway supporting the PMIR and MHD server actors and uses XDS/PIXV3 to communicate with an XDS Affinity Domain.
+It provides a FHIR Gateway supporting the PIXm and MHD server actors and uses XDS/PIXV3 to communicate with an XDS Affinity Domain.
 
 It uses [IPF](https://oehf.github.io/ipf/) and [HAPI-FHIR](https://hapifhir.io/).
-
-| IHE-Profile | ITI    | Transacation Name                              | IHE Actor                     | Implemented in the Gateway with following actors   |
-| ----------- | ------ | ---------------------------------------------- | ----------------------------- | -------------------------------------------------- |
-| PDQm        | ITI-78 | Mobile Patient Demographics Query              | Patient Demographics Supplier | PDQv3 Patient Demographics Consumer                |
-| PMIR        | ITI-83 | Mobile Patient Identifier Crossreference Query | Patient Identity Manager      | PIX V3 Patient Identifier Cross-reference Consumer |
-| PMIR        | ITI-93 | Mobile Patient Identity Feed                   | Patient Identity Manager      | PIX V3 Patient Identitiy Source                    |
-| MHD         | ITI-65 | Provide Document Bundle                        | Document Recipient            | XDS Document Source, X-Service-User                |
-| MHD         | ITI-66 | Find Document Manifests                        | Document Responder            | XDS Document Consumer, X-Service-User              |
-| MHD         | ITI-67 | Find Document References                       | Document Responder            | XDS Document Consumer, X-Service-User              |
-| MHD         | ITI-68 | Retrieve Document                              | Document Responder            | XDS Document Consumer, X-Service-User              |
 
 ## Test setup
 
@@ -35,6 +25,16 @@ To run your own configuration stored in a properties file use the `-Dspring.conf
 Any config parameter that is not specified in the file will be taken from the defaults.
 If your config file is called "myownconfig.properties" run it using:
 `mvn clean compile && mvn exec:java -Dexec.mainClass="ch.bfh.ti.i4mi.mag.MobileAccessGateway" -Dspring.config.additional-location=file:myownconfig.properties`
+
+
+### publish docs
+
+documentation is maintained in docs folder using [mkdocs-material](https://squidfunk.github.io/mkdocs-material/):
+
+- develop docs: mkdocs serve
+- publish docs: mkdocs gh-deploy --force
+
+docs are then available at https://ahdis.github.io/matchbox/
 
 ## Caution
 

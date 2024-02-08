@@ -1,0 +1,49 @@
+# General configuration of the IPF application.
+mag:
+  baseurl: http://localhost:8080/mag
+  client-ssl:
+    enabled: false
+  xds:
+    https: true
+    iti-18:
+      url: epdplayground.i4mi.bfh.ch:7443/Registry/services/RegistryService    
+    iti-43:
+      url: epdplayground.i4mi.bfh.ch:6443/Repository/services/RepositoryService         
+    iti-41:
+      url: epdplayground.i4mi.bfh.ch:6443/Repository/services/RepositoryService      
+    retrieve:
+      url: http://localhost:8080/mag/camel/xdsretrieve
+      repositoryUniqueId: 1.1.1.2.31  
+  pix:
+    https: true
+    iti-45:
+      url: epdplayground.i4mi.bfh.ch:7443/PIXPDQ/services/PIXPDQV3ManagerService 
+    iti-44:
+      url: epdplayground.i4mi.bfh.ch:7443/PIXPDQ/services/PIXPDQV3ManagerService
+#      url: epdplayground.i4mi.bfh.ch:7443/UPIProxy/services/PIXPDQV3ManagerService      
+    iti-47:      
+      url: epdplayground.i4mi.bfh.ch:7443/PIXPDQ/services/PIXPDQV3ManagerService
+    oids:
+      sender: 2.16.756.5.30.1.178.1.1
+      mpi-pid: 1.1.1.99.1      
+      receiver: 1.3.6.1.4.1.21367.2017.2.4.98                
+      query: 1.3.6.1.4.1.21367.2017.2.1.104  
+  audit:
+    audit-enabled: true
+    audit-tls-enabled: false 
+    # in productive system audit-source-id must be same as audit-enterprise-site-id
+    audit-source-id: CCC_BFH_MAG
+    audit-enterprise-site-id: 1.3.6.1.4.1.21367.2017.2.7.109    
+    audit-repository-host: 147.87.117.70
+    audit-repository-port: 5234
+    audit-repository-transport: TLS
+  iua:
+    idp:
+      name: idp-ehealthsuisse
+      metadata-url: https://ehealthsuisse.ihe-europe.net/metadata/idp-metadata.xml                
+server:
+  servlet:
+    context-path: /mag
+spring:
+  application:
+    name: mag
