@@ -21,6 +21,8 @@ import java.util.Arrays;
 
 import javax.servlet.Filter;
 
+import ca.uhn.fhir.rest.server.*;
+import ch.bfh.ti.i4mi.mag.fhir.MagCapabilityStatementProvider;
 import org.apache.camel.support.jsse.KeyManagersParameters;
 import org.apache.camel.support.jsse.KeyStoreParameters;
 import org.apache.camel.support.jsse.SSLContextParameters;
@@ -43,10 +45,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.filter.CorsFilter;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
-import ca.uhn.fhir.rest.server.IServerConformanceProvider;
-import ca.uhn.fhir.rest.server.ResourceBinding;
-import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
@@ -369,20 +367,19 @@ public class Config {
     }
 
     @Bean
-    public IServerConformanceProvider<IBaseConformance> serverConformanceProvider(FhirContext fhirContext,
-            RestfulServerConfiguration theServerConfiguration) {
-        return new ServerCapabilityStatementProvider(fhirContext, theServerConfiguration);
+    public MagCapabilityStatementProvider serverConformanceProvider(
+            final RestfulServer fhirServer,
+            @Value("${mag.baseurl}") final String baseUrl) {
+        return new MagCapabilityStatementProvider(fhirServer, baseUrl);
     }
 
     // use to fix https://github.com/i4mi/MobileAccessGateway/issues/56, however we have the CapabilityStatement not filled out anymore
-    @SuppressWarnings("unchecked")
 	@Bean
     public RestfulServerConfiguration serverConfiguration() {
         RestfulServerConfiguration config = new RestfulServerConfiguration();
-        config.setResourceBindings(new ArrayList<ResourceBinding>());
-        config.setServerBindings(new ArrayList());
+        config.setResourceBindings(new ArrayList<>());
+        config.setServerBindings(new ArrayList<>());
         config.setServerAddressStrategy(new HardcodedServerAddressStrategy(getUriFhirEndpoint()));
         return config;
     }
-
 }

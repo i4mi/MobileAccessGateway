@@ -120,84 +120,87 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Configuration
 @EnableWebSecurity
 public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements InitializingBean, DisposableBean {
-	
+
 	public final static String DEFAULT_IDP = "default";
 	private Timer backgroundTaskTimer;
 	private MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager;
 
     @Value("${mag.iua.idp.key-store}")
     private String samlKeystore;
-    
+
     @Value("${mag.iua.idp.key-store-password}")
     private String keystorePass;
-    
+
     @Value("${mag.iua.idp.key-alias}")
     private String keyAlias;
-    
+
     @Value("${mag.iua.idp.tls-key-alias:}")
     private String tlsKeyAlias;
-    
+
     @Value("${mag.iua.idp.sign-key-alias:}")
     private String signKeyAlias;
-    
+
     @Value("${mag.iua.idp.key-password}")
     private String keyPassword;
-    
+
     @Value("${mag.iua.idp.tls-key-password:}")
     private String tlsKeyPassword;
-    
+
     @Value("${mag.iua.idp.sign-key-password:}")
     private String signKeyPassword;
 
     @Value("${mag.iua.sp.entity-id}")
     private String spEntityId;
-    
+
     @Value("${mag.baseurl}")
     private String baseUrl;
-    
+
     @Value("${server.servlet.context-path:/}")
     private String context;
-	
+
+	@Value("${cxf.path:/}")
+	private String cxfPath;
+
 	 // Initialization of OpenSAML library
     @Bean
     public static SAMLBootstrap sAMLBootstrap() {
         return new MySAMLBootstrap();
     }
-    
+
 	 @Override
 	 protected void configure(HttpSecurity http) throws Exception {
-		       
+
 		 http
          .httpBasic()
-               .authenticationEntryPoint(samlEntryPoint());      
+               .authenticationEntryPoint(samlEntryPoint());
           http
      		//.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
      		.addFilterAfter(samlFilter(), BasicAuthenticationFilter.class)
      		.addFilterBefore(samlFilter(), CsrfFilter.class);
-		 
+
 			http.authorizeRequests()
 			.antMatchers("/login").authenticated()
-			.antMatchers("/camel/authorize/**").authenticated()
-			.antMatchers("/camel/token").permitAll()
+			.antMatchers(String.format("/camel/%s/**", Iti71RouteBuilder.AUTHORIZE_PATH)).authenticated()
+			.antMatchers(String.format("/camel/%s", TokenEndpointRouteBuilder.TOKEN_PATH)).permitAll()
 			.antMatchers("/saml/**").permitAll()
 	        .antMatchers("/**").permitAll();
-			
+
 		http
     		.logout()
-    			.disable();	
-		
-		http.sessionManagement()		    
+    			.disable();
+
+		http.sessionManagement()
 	        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 	        .sessionFixation().none();
-		
+
 		//http.cors().and().csrf().disable();
-		
+
 		http.cors().disable();
 		http.csrf().disable();
-		
+
 	 }
-	 
-	
+
+
 		public void init() {
 			this.backgroundTaskTimer = new Timer(true);
 			this.multiThreadedHttpConnectionManager = new MultiThreadedHttpConnectionManager();
@@ -208,7 +211,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 			this.backgroundTaskTimer.cancel();
 			this.multiThreadedHttpConnectionManager.shutdown();
 		}
-		
+
 	 @ConfigurationProperties("mag.iua.idps")
 	 @Bean(name = "idps")
     public Map<String, IDPConfig> getIDPs() {
@@ -223,7 +226,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
     public IDPConfig getDefaultIdp() {
         return new IDPConfig();
     }
-	 
+
 	 @Bean
 	    public FilterChainProxy samlFilter() throws Exception {
 	        List<SecurityFilterChain> chains = new ArrayList<SecurityFilterChain>();
@@ -244,24 +247,24 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        return new FilterChainProxy(chains);
 	    }
 
-	     
+
 	    // Initialization of the velocity engine
 	    @Bean
 	    public VelocityEngine velocityEngine() {
 	        return VelocityFactory.getEngine();
 	    }
-	 
+
 	    // XML parser pool needed for OpenSAML parsing
 	    @Bean(initMethod = "initialize")
 	    public StaticBasicParserPool parserPool() {
 	        return new StaticBasicParserPool();
 	    }
-	 
+
 	    @Bean(name = "parserPoolHolder")
 	    public ParserPoolHolder parserPoolHolder() {
 	        return new ParserPoolHolder();
 	    }
-	 
+
 	    // Bindings, encoders and decoders used for creating and parsing messages
 	    @Bean
 	    public HttpClient httpClient() {
@@ -270,7 +273,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	                CookiePolicy.BROWSER_COMPATIBILITY);
 	        return result;
 	    }
-	 
+
 	    // SAML Authentication Provider responsible for validating of received SAML
 	    // messages
 	    @Bean
@@ -280,7 +283,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        samlAuthenticationProvider.setForcePrincipalAsString(false);
 	        return samlAuthenticationProvider;
 	    }
-	 
+
 	    // Provider of default SAML Context
 	    @Bean
 	    public SAMLContextProviderImpl contextProvider() {
@@ -292,7 +295,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        //result.setStorageFactory(new EmptyStorageFactory());
 	        return result;
 	    }
-	 	   	 
+
 	    // Logger for SAML messages and events
 	    @Bean
 	    public SAMLDefaultLogger samlLogger() {
@@ -302,7 +305,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        log.setLogErrors(true);
 	        return log;
 	    }
-	 
+
 	    // SAML 2.0 WebSSO Assertion Consumer
 	    @Bean
 	    public WebSSOProfileConsumer webSSOprofileConsumer() {
@@ -310,39 +313,39 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        ret.setReleaseDOM(false);
 	        return ret;
 	    }
-	 
+
 	    // SAML 2.0 Holder-of-Key WebSSO Assertion Consumer
 	    @Bean
 	    public WebSSOProfileConsumerHoKImpl hokWebSSOprofileConsumer() {
 	        return new WebSSOProfileConsumerHoKImpl();
 	    }
-	 
+
 	    // SAML 2.0 Web SSO profile
 	    @Bean
 	    public WebSSOProfile webSSOprofile() {
 	        return new WebSSOProfileImpl();
 	    }
-	 
+
 	    // SAML 2.0 Holder-of-Key Web SSO profile
 	    @Bean
 	    public WebSSOProfileConsumerHoKImpl hokWebSSOProfile() {
 	        return new WebSSOProfileConsumerHoKImpl();
 	    }
-	 
+
 	    // SAML 2.0 ECP profile
 	    @Bean
 	    public WebSSOProfileECPImpl ecpprofile() {
 	        return new WebSSOProfileECPImpl();
 	    }
-	 
+
 	    @Bean
 	    public SingleLogoutProfile logoutprofile() {
 	        return new SingleLogoutProfileImpl();
 	    }
-	 
-		    
+
+
 	    // Central storage of cryptographic keys
-	    @Bean	    
+	    @Bean
 	    public KeyManager keyManager() {
 	    	  DefaultResourceLoader loader = new DefaultResourceLoader();
 	          Resource storeFile = loader
@@ -364,18 +367,18 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 
 	          // String defaultKey = conf.getKeyAlias();
 	          return new JKSKeyManager(storeFile, storePass, passwords, keyAlias);
-	    	
+
 	    }
-	    
+
 	    @Bean
 	    public WebSSOProfileOptions defaultWebSSOProfileOptions() {
 	        WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
-	        webSSOProfileOptions.setIncludeScoping(false);	
+	        webSSOProfileOptions.setIncludeScoping(false);
 	        //webSSOProfileOptions.setForceAuthN(true);
 	        webSSOProfileOptions.setPassive(false);
 	        return webSSOProfileOptions;
 	    }
-	 
+
 	    // Entry point to initialize authentication, default values taken from
 	    // properties file
 	    @Bean
@@ -383,9 +386,9 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        SAMLEntryPoint samlEntryPoint = new SAMLEntryPoint();
 	        samlEntryPoint.setDefaultProfileOptions(defaultWebSSOProfileOptions());
 	        return samlEntryPoint;
-	      
+
 	    }
-	    
+
 	    // Setup advanced info about metadata
 	    //@Bean
 	    public ExtendedMetadata extendedMetadata(String entityId, boolean sp) {
@@ -409,7 +412,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        }
 	        return extendedMetadata;
 	    }
-	    
+
 	    // IDP Discovery Service
 	    //@Bean
 	    public SAMLDiscovery samlIDPDiscovery() {
@@ -417,10 +420,10 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        idpDiscovery.setIdpSelectionPath("/saml/discovery");
 	        return idpDiscovery;
 	    }
-	    
+
 	   // @Value("${mag.iua.idp.metadata-url}")
 	   // private String metadataUrl;
-	    
+
 	    public ExtendedMetadataDelegate ssoCircleExtendedMetadataProvider(String entityId)
 	            throws MetadataProviderException {
 	            IDPConfig conf = getIDPs().get(entityId);
@@ -470,7 +473,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        metadata.setDefaultIDP(DEFAULT_IDP + "idp");
 	        return metadata;
 	    }
-	    	   
+
 	    public MetadataProvider generateSP(String entityId) throws MetadataProviderException {
 	        MetadataGenerator generator = metadataGenerator(entityId);
 	        EntityDescriptor descriptor = generator.generateMetadata();
@@ -481,9 +484,9 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        MetadataProvider metadataProvider = new ExtendedMetadataDelegate(memoryProvider, extendedMetadata);
 
 	        return metadataProvider;
-	    } 
-	 
-	    
+	    }
+
+
 	    // Filter automatically generates default SP metadata
 	    //@Bean
 	    public MetadataGenerator metadataGenerator(String entityId) {
@@ -515,14 +518,14 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 
 	    }
 
-	    
+
 	    // The filter is waiting for connections on URL suffixed with filterSuffix
 	    // and presents SP metadata there
 	    @Bean
 	    public MetadataDisplayFilter metadataDisplayFilter() {
-	        return new MetadataDisplayFilter();	        
+	        return new MetadataDisplayFilter();
 	    }
-	     
+
 	    // Handler deciding where to redirect user after successful login
 	    @Bean
 	    public SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler() {
@@ -531,7 +534,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        successRedirectHandler.setDefaultTargetUrl("/camel/token");
 	        return successRedirectHandler;
 	    }
-	    
+
 		// Handler deciding where to redirect user after failed login
 	    @Bean
 	    public SimpleUrlAuthenticationFailureHandler authenticationFailureHandler() {
@@ -541,7 +544,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 		    	failureHandler.setDefaultFailureUrl("/not-authenticated.html");
 		    	return failureHandler;
 	    }
-	     
+
 	    @Bean
 	    public SAMLWebSSOHoKProcessingFilter samlWebSSOHoKProcessingFilter() throws Exception {
 	        SAMLWebSSOHoKProcessingFilter samlWebSSOHoKProcessingFilter = new SAMLWebSSOHoKProcessingFilter();
@@ -550,18 +553,18 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        samlWebSSOHoKProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
 	        return samlWebSSOHoKProcessingFilter;
 	    }
-	    
+
 	    // Processing filter for WebSSO profile messages
 	    @Bean
 	    public SAMLProcessingFilter samlWebSSOProcessingFilter() throws Exception {
 	        SAMLProcessingFilter samlWebSSOProcessingFilter = new SAMLProcessingFilter();
 	        samlWebSSOProcessingFilter.setAuthenticationManager(authenticationManager());
 	        samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler());
-	        samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());	        	       
+	        samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
 	        return samlWebSSOProcessingFilter;
 	    }
-	     	   
-	     
+
+
 	    // Handler for successful logout
 	    @Bean
 	    public SimpleUrlLogoutSuccessHandler successLogoutHandler() {
@@ -569,17 +572,17 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        successLogoutHandler.setDefaultTargetUrl("/");
 	        return successLogoutHandler;
 	    }
-	     
+
 	    // Logout handler terminating local session
 	    @Bean
 	    public SecurityContextLogoutHandler logoutHandler() {
-	        SecurityContextLogoutHandler logoutHandler = 
+	        SecurityContextLogoutHandler logoutHandler =
 	        		new SecurityContextLogoutHandler();
 	        logoutHandler.setInvalidateHttpSession(true);
 	        logoutHandler.setClearAuthentication(true);
 	        return logoutHandler;
 	    }
-	 
+
 	    // Filter processing incoming logout messages
 	    // First argument determines URL user will be redirected to after successful
 	    // global logout
@@ -588,7 +591,7 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	        return new SAMLLogoutProcessingFilter(successLogoutHandler(),
 	                logoutHandler());
 	    }
-	     
+
 	    // Overrides default logout processing filter with the one processing SAML
 	    // messages
 	    @Bean
@@ -597,67 +600,67 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 	                new LogoutHandler[] { logoutHandler() },
 	                new LogoutHandler[] { logoutHandler() });
 	    }
-		
+
 	    // Bindings
 	    private ArtifactResolutionProfile artifactResolutionProfile() throws MetadataProviderException {
-	        final ArtifactResolutionProfileImpl artifactResolutionProfile = 
+	        final ArtifactResolutionProfileImpl artifactResolutionProfile =
 	        		new ArtifactResolutionProfileImpl(httpClient());
 	        artifactResolutionProfile.setProcessor(new SAMLProcessorImpl(soapBinding()));
 	        MetadataManager metadataManager = metadata();
 	        metadataManager.refreshMetadata();
 	        artifactResolutionProfile.setMetadata(metadataManager);
 	        return artifactResolutionProfile;
-	        
+
 	    }
-	    
+
 	    @Bean
 	    public HTTPArtifactBinding artifactBinding(ParserPool parserPool, VelocityEngine velocityEngine) throws MetadataProviderException {
 	        return new HTTPArtifactBinding(parserPool, velocityEngine, artifactResolutionProfile());
 	    }
-	 
+
 	    @Bean
 	    public HTTPSOAP11Binding soapBinding() {
 	        return new HTTPSOAP11Binding(parserPool());
 	    }
-	    
+
 	    @Bean
 	    public HTTPPostBinding httpPostBinding() {
 	    		return new HTTPPostBinding(parserPool(), velocityEngine());
 	    }
-	    
+
 	    @Bean
 	    public HTTPRedirectDeflateBinding httpRedirectDeflateBinding() {
 	    		return new HTTPRedirectDeflateBinding(parserPool());
 	    }
-	    
+
 	    @Bean
 	    public HTTPSOAP11Binding httpSOAP11Binding() {
 	    	return new HTTPSOAP11Binding(parserPool());
 	    }
-	    
+
 	    @Bean
 	    public HTTPPAOS11Binding httpPAOS11Binding() {
 	    		return new HTTPPAOS11Binding(parserPool());
 	    }
-	    
+
 	    // Processor
 		@Bean
 		public SAMLProcessorImpl processor() throws MetadataProviderException {
 			Collection<SAMLBinding> bindings = new ArrayList<SAMLBinding>();
 			bindings.add(artifactBinding(parserPool(), velocityEngine()));
 			bindings.add(httpPostBinding());
-			bindings.add(httpRedirectDeflateBinding());			
+			bindings.add(httpRedirectDeflateBinding());
 			bindings.add(httpSOAP11Binding());
 			bindings.add(httpPAOS11Binding());
 			return new SAMLProcessorImpl(bindings);
 		}
-		
+
 		@Bean
 	    @Override
 	    public AuthenticationManager authenticationManagerBean() throws Exception {
 	        return super.authenticationManagerBean();
 	    }
-		
+
 		@Override
 	    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 	        auth

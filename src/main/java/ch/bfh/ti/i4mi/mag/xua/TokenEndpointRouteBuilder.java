@@ -22,29 +22,29 @@ import org.springframework.stereotype.Component;
 
 /**
  * IUA ITI-71: Route for token exchange
- * @author alexander kreutz
  *
+ * @author alexander kreutz
  */
 @Component
 public class TokenEndpointRouteBuilder extends RouteBuilder {
 
-	@Override
-	public void configure() throws Exception {
-									
-		from("servlet://token?httpMethodRestrict=POST&matchOnUriPrefix=true").routeId("tokenEndpoint")
-		.doTry()
-	      .bean(TokenEndpoint.class, "handle")
-	    .doCatch(AuthException.class)
-	      .setBody(simple("${exception}"))
-	      .bean(TokenEndpoint.class, "handleError")
-	      .setHeader(Exchange.HTTP_RESPONSE_CODE, simple("${exception.status}"))
-	    .end()
-	    .removeHeaders("*", Exchange.HTTP_RESPONSE_CODE)
-	    .setHeader("Cache-Control", constant("no-store"))
-	    .setHeader("Pragma", constant("no-cache"))
-		.marshal().json();		
-		
-	}
+    public static final String TOKEN_PATH = "token";
 
-	
+    @Override
+    public void configure() throws Exception {
+        from(String.format("servlet://%s?httpMethodRestrict=POST&matchOnUriPrefix=true", TOKEN_PATH))
+                .routeId("tokenEndpoint")
+                .doTry()
+                    .bean(TokenEndpoint.class, "handle")
+                .doCatch(AuthException.class)
+                    .setBody(simple("${exception}"))
+                    .bean(TokenEndpoint.class, "handleError")
+                    .setHeader(Exchange.HTTP_RESPONSE_CODE, simple("${exception.status}"))
+                .end()
+                .removeHeaders("*", Exchange.HTTP_RESPONSE_CODE)
+                .setHeader("Cache-Control", constant("no-store"))
+                .setHeader("Pragma", constant("no-cache"))
+                .marshal()
+                .json();
+    }
 }
