@@ -33,6 +33,8 @@ import ch.bfh.ti.i4mi.mag.mhd.Utils;
 @Component
 public class Iti71RouteBuilder extends RouteBuilder {
 
+	public static final String AUTHORIZE_PATH = "authorize";
+
 	@Value("${mag.iua.ap.url}")
 	private String assertionEndpointUrl;
 	
@@ -60,7 +62,7 @@ public class Iti71RouteBuilder extends RouteBuilder {
                 (clientSsl ? "&sslContextParameters=#sslContext" : ""),
 				assertionEndpointUrl, wsdl);
 			
-		from("servlet://authorize?matchOnUriPrefix=true").routeId("iti71")	
+		from(String.format("servlet://%s?matchOnUriPrefix=true", AUTHORIZE_PATH)).routeId("iti71")
 		.doTry()
 		    .setHeader("oauthrequest").method(converter, "buildAuthenticationRequest")
 		    
