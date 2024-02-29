@@ -15,7 +15,7 @@ docker run -d -it --name mag -p 9090:9090 -v /Users/oegger/Documents/github/Mobi
 docker logs --follow mag
 ```
 
-Server endpoint will the be accessible at http://localhost:9090/mag/fhir/metadata
+Server endpoint will then be accessible at http://localhost:9090/mag/fhir/metadata
 
 You can check for example a PIXm query against the EPD playground:
 
@@ -25,7 +25,7 @@ http://localhost:9090/mag/fhir/Patient/$ihe-pix?sourceIdentifier=urn%3Aoid%3A2.1
 
 The mobile access gateway supports also a GUI which is accessible at http://localhost:9090/mag/#/.
 
-## Live and Readyness checks
+## Live and Readiness checks
 
 To check if the container is live and ready you can check the health:
 
