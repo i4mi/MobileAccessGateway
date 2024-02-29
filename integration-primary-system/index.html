@@ -1,0 +1,1250 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../endpoints/">
+      
+      
+        <link rel="next" href="../docker/">
+      
+      <link rel="icon" href="../assets/favicon-256x256.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.1.21">
+    
+    
+      
+        <title>EPR Integration - Mobile Access Gateway</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.eebd395e.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ecc896b0.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="mag" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#epr-primary-system-integration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Mobile Access Gateway" class="md-header__button md-logo" aria-label="Mobile Access Gateway" data-md-component="logo">
+      
+  <img src="../assets/mag_logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Mobile Access Gateway
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              EPR Integration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/i4mi/MobileAccessGateway" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Mobile Access Gateway" class="md-nav__button md-logo" aria-label="Mobile Access Gateway" data-md-component="logo">
+      
+  <img src="../assets/mag_logo.png" alt="logo">
+
+    </a>
+    Mobile Access Gateway
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/i4mi/MobileAccessGateway" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/" class="md-nav__link">
+        Features
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../endpoints/" class="md-nav__link">
+        Endpoints
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          EPR Integration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        EPR Integration
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    Authentication
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#patient-directory" class="md-nav__link">
+    Patient directory
+  </a>
+  
+    <nav class="md-nav" aria-label="Patient directory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#retrieving-patient-identifiers" class="md-nav__link">
+    Retrieving patient identifiers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrieving-patient-demographics" class="md-nav__link">
+    Retrieving patient demographics
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feeding-patient-information" class="md-nav__link">
+    Feeding patient information
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#document-directory" class="md-nav__link">
+    Document directory
+  </a>
+  
+    <nav class="md-nav" aria-label="Document directory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#searching" class="md-nav__link">
+    Searching
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading" class="md-nav__link">
+    Reading
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#publishing" class="md-nav__link">
+    Publishing
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#professional-and-organization-directory" class="md-nav__link">
+    Professional and organization directory
+  </a>
+  
+    <nav class="md-nav" aria-label="Professional and organization directory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#searching_1" class="md-nav__link">
+    Searching
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating" class="md-nav__link">
+    Updating
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audit-messages" class="md-nav__link">
+    Audit messages
+  </a>
+  
+    <nav class="md-nav" aria-label="Audit messages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating" class="md-nav__link">
+    Creating
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading_1" class="md-nav__link">
+    Reading
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker/" class="md-nav__link">
+        Container
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    Authentication
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#patient-directory" class="md-nav__link">
+    Patient directory
+  </a>
+  
+    <nav class="md-nav" aria-label="Patient directory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#retrieving-patient-identifiers" class="md-nav__link">
+    Retrieving patient identifiers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrieving-patient-demographics" class="md-nav__link">
+    Retrieving patient demographics
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feeding-patient-information" class="md-nav__link">
+    Feeding patient information
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#document-directory" class="md-nav__link">
+    Document directory
+  </a>
+  
+    <nav class="md-nav" aria-label="Document directory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#searching" class="md-nav__link">
+    Searching
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading" class="md-nav__link">
+    Reading
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#publishing" class="md-nav__link">
+    Publishing
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#professional-and-organization-directory" class="md-nav__link">
+    Professional and organization directory
+  </a>
+  
+    <nav class="md-nav" aria-label="Professional and organization directory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#searching_1" class="md-nav__link">
+    Searching
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating" class="md-nav__link">
+    Updating
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audit-messages" class="md-nav__link">
+    Audit messages
+  </a>
+  
+    <nav class="md-nav" aria-label="Audit messages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating" class="md-nav__link">
+    Creating
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading_1" class="md-nav__link">
+    Reading
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="epr-primary-system-integration">EPR Primary System Integration</h1>
+<p>The REST variants of XDS transactions presented here are based on <a href="https://fhir.ch/ig/ch-epr-mhealth/index.html">CH EPR mHealth</a>,
+itself based on various IHE profiles.</p>
+<p><svg width="20" height="20" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path fill="#ffce31" d="M5.9 62c-3.3 0-4.8-2.4-3.3-5.3L29.3 4.2c1.5-2.9 3.9-2.9 5.4 0l26.7 52.5c1.5 2.9 0 5.3-3.3 5.3H5.9z"/><g fill="#231f20"><path d="m27.8 23.6l2.8 18.5c.3 1.8 2.6 1.8 2.9 0l2.7-18.5c.5-7.2-8.9-7.2-8.4 0"/><circle cx="32" cy="49.6" r="4.2"/></g></svg>
+Don't forget to properly encode the HTTP parameters in the queries (especially colons and pipes).
+In the following examples, they are shown decoded for a better readability.
+<code>Authorization</code> and <code>Accept</code> headers are not shown in the examples.</p>
+<p><svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="21" fill="#2196F3"/><path fill="#fff" d="M22 22h4v11h-4z"/><circle cx="24" cy="16.5" r="2.5" fill="#fff"/></svg>
+For HTTP GET requests, there is usually an equivalent HTTP POST request that should be supported.</p>
+<h2 id="authentication">Authentication</h2>
+<p><img alt="Sequence diagram for authentication" src="../assets/auth.png" /></p>
+<p>The sequence diagram shows the currently implemented authentication flow.</p>
+<p>You should integrate one of the supported IDPs in your application.
+The OAuth/IUA flow is supported for clients, the SAML flow is the only one implemented between the 
+MobileAccessGateway and the IDP.</p>
+<p>Once you get the IDP SAML assertion, you can trade it for the community SAML assertion, which binds your IDP
+identification to a specific patient and a purpose of use.
+It is an HTTP POST request to <code>/assertion</code>, with the header <code>Scope</code> and the IDP SAML assertion as body.
+The header <code>Scope</code> contains the following values:</p>
+<ul>
+<li><code>purpose_of_use</code> (<em><a href="http://hl7.org/fhir/R4/search.html#token" title="Token search type">token</a></em>, required): a value from <a href="https://fhir.ch/ig/ch-epr-term/ValueSet-EprPurposeOfUse.html">EprPurposeOfUse</a>.</li>
+<li><code>subject_role</code> (<em><a href="http://hl7.org/fhir/R4/search.html#token" title="Token search type">token</a></em>, required): either <code>HCP</code>, <code>ASS</code>, <code>PAT</code> or <code>REP</code> in the system <code>urn:oid:2.16.756.5.30.1.127.3.10.6</code>.</li>
+<li><code>person_id</code> (<em><a href="http://hl7.org/fhir/R4/search.html#string" title="String search type">string</a></em>, required): the patient EPR-SPID in the CX format.</li>
+<li><code>principal</code> (<em><a href="http://hl7.org/fhir/R4/search.html#string" title="String search type">string</a></em>, only if role is ASS): the name of the healthcare professional an assistant is acting on
+  behalf of.</li>
+<li><code>principal_id</code> (<em><a href="http://hl7.org/fhir/R4/search.html#token" title="Token search type">token</a></em>, only if role is ASS): the GLN of the healthcare professional an assistant is acting on
+  behalf of.</li>
+<li><code>group</code> (<em><a href="http://hl7.org/fhir/R4/search.html#string" title="String search type">string</a></em>, only if role is ASS): the name of the organization or group an assistant is acting on
+  behalf of.</li>
+<li><code>group_id</code> (<em><a href="http://hl7.org/fhir/R4/search.html#token" title="Token search type">token</a></em>, only if role is ASS): the OID of the organization or group an assistant is acting on
+  behalf of.</li>
+</ul>
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="nf">POST</span> <span class="nn">/assertion</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Scope</span><span class="o">:</span> <span class="l">person_id=761337610445502987^^^&amp;2.16.756.5.30.1.127.3.10.3&amp;ISO purpose_of_use=urn:oid:2.16.756.5.30.1.127.3.10.5|NORM subject_role=urn:oid:2.16.756.5.30.1.127.3.10.6|HCP</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/xml</span>
+
+<span class="nt">&lt;saml2:Assertion</span><span class="w"> </span><span class="na">xmlns:saml2=</span><span class="s">&quot;urn:oasis:names:tc:SAML:2.0:assertion&quot;</span><span class="w"> </span><span class="na">Version=</span><span class="s">&quot;2.0&quot;</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="cm">&lt;!-- Content of the IDP assertion… --&gt;</span>
+<span class="nt">&lt;/saml2:Assertion&gt;</span>
+</code></pre></div>
+<p>The response then looks like:</p>
+<div class="highlight"><span class="filename">Response</span><pre><span></span><code><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;U0FNTGFzc2VydGlvbg&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IHE-SAML&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;expires_in&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60000</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;resourceId/761337610445502987 purposeOfUse/NORM role/HCP&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The <a href="https://datatracker.ietf.org/doc/html/rfc4648#section-5">base64-url</a> encoded SAML assertion is given in
+<code>access_token</code>, and that value has to be prefixed with <code>Bearer</code> and inserted in an <code>Authorization</code> HTTP header for
+all transactions that requires it.</p>
+<div class="highlight"><span class="filename">Example of request with the XUA</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/...</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer U0FNTGFzc2VydGlvbg</span>
+</code></pre></div>
+<h2 id="patient-directory">Patient directory</h2>
+<p>The patient directory (called MPI) contains identifiers and demographics for all registered patients.
+Identifiers include the MPI-PID and EPR-SPID, and identifiers used by primary systems that choose to share them.
+Demographics include the given and family names, date of birth, gender, nationality and telecoms.
+It can be queried and updated.</p>
+<h3 id="retrieving-patient-identifiers">Retrieving patient identifiers</h3>
+<p>Patient identifiers (commonly the MPI-PID and EPR-SPID) can be queried with an
+<a href="https://fhir.ch/ig/ch-epr-mhealth/iti-83.html">ITI-83 (<em>Mobile Patient Identifier Cross-reference Query</em>) transaction</a>.</p>
+<p>The transaction is an HTTP GET request to the endpoint <code>/Patient/$ihe-pix</code>, with the following parameters:</p>
+<ol>
+<li>sourceIdentifier (<em><a href="http://hl7.org/fhir/R4/search.html#token" title="Token search type">token</a></em>, mandatory): the known patient identifier</li>
+<li>targetSystem (<em><a href="http://hl7.org/fhir/R4/search.html#uri" title="URI search type">uri</a></em>, optional): to restrict the results to the MPI-PID and/or EPR-SPID.</li>
+</ol>
+<details><summary>Examples</summary>
+
+<div class="highlight"><span class="filename">To retrieve all known identifiers from a local identifier ('1234' in the system 2.999.42)</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/Patient/$ihe-pix?sourceIdentifier=urn:oid:2.999.42|1234</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+
+<div class="highlight"><span class="filename">To retrieve the EPR-SPID from the MPI-PID</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/Patient/$ihe-pix?sourceIdentifier=urn:oid:2.16.756.5.30.1.191.1.0.12.3.101|{mpi-pid}&amp;targetSystem=urn:oid:2.16.756.5.30.1.127.3.10.3</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+
+</details>
+
+<h3 id="retrieving-patient-demographics">Retrieving patient demographics</h3>
+<p>Patient demographics can be queried with an
+<a href="https://fhir.ch/ig/ch-epr-mhealth/iti-78.html">ITI-78 (<em>Mobile Patient Demographics Query</em>) transaction</a>.</p>
+<p>The transaction can be done in two ways, either by specifying the MPI-PID to retrieve a single patient, or by
+specifying other information.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">With the MPI-PID</label><label for="__tabbed_1_2">With other information</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>If the MPI-PID is known, the transaction is an HTTP GET request to the endpoint <code>/Patient/{id}</code>, where {id} is
+the system OID and the identifier value, separated by a dash.</p>
+<div class="highlight"><span class="filename">Retrieve by MPI-PID</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/Patient/2.16.756.5.30.1.191.1.0.2.1-e7963774-9098-445f-9cab-5d52234b52c3</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Retrieve by EPR-SPID</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/Patient/2.16.756.5.30.1.127.3.10.3-761337615866818761</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Otherwise, parameters can be used to search patients with other information:</p>
+<ul>
+<li><code>family</code> and <code>given</code> (<em><a href="http://hl7.org/fhir/R4/search.html#string" title="String search type">string</a></em>)</li>
+<li><code>identifier</code> (<em><a href="http://hl7.org/fhir/R4/search.html#token" title="Token search type">token</a></em>)</li>
+<li><code>telecom</code> (<em><a href="http://hl7.org/fhir/R4/search.html#token" title="Token search type">token</a></em>)</li>
+<li><code>birthdate</code> (<em><a href="http://hl7.org/fhir/R4/search.html#date" title="Date search type">date</a></em>)</li>
+<li><code>address</code> (<em><a href="http://hl7.org/fhir/R4/search.html#string" title="String search type">string</a></em>): to search in any part of the address.</li>
+<li><code>address-city</code>,
+  <code>address-country</code>,
+  <code>address-postalcode</code>,
+  <code>address-state</code> (<em><a href="http://hl7.org/fhir/R4/search.html#string" title="String search type">string</a></em>)</li>
+<li><code>gender</code> (<em><a href="http://hl7.org/fhir/R4/search.html#token" title="Token search type">token</a></em>)</li>
+</ul>
+<div class="highlight"><span class="filename">Example</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/Patient?family=MOHR&amp;given=ALICE&amp;gender=female</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="feeding-patient-information">Feeding patient information</h3>
+<p>Feeding patient information can be done with the <a href="https://fhir.ch/ig/ch-epr-mhealth/iti-104.html">ITI-104 (<em>Patient Identity Feed FHIR</em>) transaction</a>.
+The following profile shall be used: <code>http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition-ch-pixm-patient.html</code>.</p>
+<p>The MPI-PID is required in <code>identifier</code>.
+You don't have to re-specify the other identifiers, they won't be deleted if they're missing from the request.
+If you want to add an identifier, you can put it in <code>identifier</code>.</p>
+<details><summary>Examples</summary>
+
+<div class="highlight"><span class="filename">Add an identifier</span><pre><span></span><code><span class="nf">PUT</span> <span class="nn">/Patient?identifier=urn:oid:2.16.756.5.30.1.196.3.2.1|MAGMED001</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/fhir+json</span>
+
+<span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;birthDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1987-10-08&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;gender&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;male&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.16.756.5.30.1.127.3.10.3-761337611735842172&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.16.756.5.30.1.196.3.2.1&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MAGMED001&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.999.42&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;new-identifier-value&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;family&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NEFF-WINGEIER&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;given&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s2">&quot;Trong Sang&quot;</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Patient&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<h2 id="document-directory">Document directory</h2>
+<p>The document directory stores documents (in the document repository) and their metadata (in the document registry).</p>
+<h3 id="searching">Searching</h3>
+<p>You can search the document registry with the <a href="https://fhir.ch/ig/ch-epr-mhealth/iti-67.html">ITI-67 (<em>Find Document References</em>) transaction</a>.</p>
+<p>The transaction is an HTTP GET request to the endpoint <code>/DocumentReference</code>, the search parameters are described in
+the <a href="https://profiles.ihe.net/ITI/MHD/ITI-67.html">MHD ITI-67 specifications</a>.</p>
+<details><summary>Examples</summary>
+
+<div class="highlight"><span class="filename">Search all documents from a patient</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/DocumentReference?patient.identifier=urn:oid:2.999|11111111&amp;status=current</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+
+<div class="highlight"><span class="filename">Search by class and type codes</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/DocumentReference?patient.identifier=urn:oid:2.999|11111111&amp;category=http://snomed.info/sct|371531000&amp;type=http://snomed.info/sct|419891008</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+
+<div class="highlight"><span class="filename">Search by creation date</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/DocumentReference?patient.identifier=urn:oid:2.999|11111111&amp;creation=ge2023-07-10&amp;creation=le2023-07-17</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+
+</details>
+
+<p>You can also search for <em>SubmissionSets</em> with the <a href="https://fhir.ch/ig/ch-epr-mhealth/iti-66.html">ITI-66 (<em>Find Document Lists</em>) transaction</a>.</p>
+<details><summary>Examples</summary>
+
+<div class="highlight"><span class="filename">Search all by patient identifier</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/List?patient.identifier=urn:oid:2.999|11111111</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+
+<div class="highlight"><span class="filename">Search with additional parameters</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/List?patient.identifier=urn:oid:2.999|11111111&amp;code=submissionset&amp;status=current&amp;designationType=http://loinc.org|1234-5</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+
+</details>
+
+<h3 id="reading">Reading</h3>
+<p>Retrieving a document is done with the <a href="https://fhir.ch/ig/ch-epr-mhealth/iti-68.html">ITI-68 (<em>Retrieve Document</em>) transaction</a>.
+It is a simple HTTP GET request to a URL that you will find in the linked <em>DocumentReference</em> (that you can obtain
+with search results): <code>DocumentReference.content.attachment.url</code>.</p>
+<h3 id="publishing">Publishing</h3>
+<p>You can publish a document with the <a href="https://fhir.ch/ig/ch-epr-mhealth/iti-65.html">ITI-65 (<em>Provide Document Bundle</em>) transaction</a>.</p>
+<p>The transaction is an HTTP POST request to the endpoint <code>/</code>. The following profile shall be used:
+<code>https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle</code>.</p>
+<details><summary>Examples</summary>
+
+<div class="highlight"><span class="filename">Publish a PDF file</span><pre><span></span><code><span class="nf">POST</span> <span class="nn">/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/fhir+json;charset=UTF-8</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;entry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;fullUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:uuid:59f3a738-11c1-4a0e-a89b-c4552d0fe9a7&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;request&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;POST&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Binary&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;contentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application/pdf&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;VGhlIHBkZiBmaWxlIGdvZXMgaGVyZQ==&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Binary&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;fullUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:uid:eb00c215-61cf-43a3-b99a-020ab21828fa&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;request&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;POST&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;List&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;coding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;submissionset&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SubmissionSet as a FHIR List&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-01-06T14:23:14+01:00&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;entry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;item&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;reference&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:uuid:5ae558f6-c103-4566-9a7e-63242abd24ab&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;extension&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;valueIdentifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.16.756.5.30.1.145.20.1&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-author-authorrole&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;valueCoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HCP&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Healthcare professional&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.16.756.5.30.1.127.3.10.6&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;valueCodeableConcept&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;coding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span>
+<span class="w">                  </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;71388002&quot;</span><span class="p">,</span>
+<span class="w">                  </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Procedure (procedure)&quot;</span><span class="p">,</span>
+<span class="w">                  </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://snomed.info/sct&quot;</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">              </span><span class="p">],</span>
+<span class="w">              </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Procedure (procedure)&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:ietf:rfc:3986&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;use&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;official&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:uuid:ab1862da-e31e-4ca9-ab01-24883cda5404&quot;</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:ietf:rfc:3986&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;use&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;usual&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.999.123&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;mode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;working&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;List&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;current&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;reference&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Patient/2.16.756.5.30.1.191.1.0.2.1-c55f4ca7-bd4e-4134-8dcd-56b793ade958&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;fullUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:uuid:5ae558f6-c103-4566-9a7e-63242abd24ab&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;request&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;POST&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DocumentReference&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;reference&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#practrole&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;coding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">              </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;405624007&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Administrative documentation (record artifact)&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://snomed.info/sct&quot;</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;contained&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;birthDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1993-01-27&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;gender&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;male&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">              </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.16.756.5.30.1.191.1.0.12.3.101&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MAGMED006&quot;</span>
+<span class="w">              </span><span class="p">},</span>
+<span class="w">              </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.16.756.5.30.1.191.1.0.2.1&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c55f4ca7-bd4e-4134-8dcd-56b793ade958&quot;</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">              </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;family&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sesztáková&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;given&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                  </span><span class="s2">&quot;Jett Flynn&quot;</span>
+<span class="w">                </span><span class="p">]</span>
+<span class="w">              </span><span class="p">},</span>
+<span class="w">              </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;family&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sesztáková&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;given&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                  </span><span class="s2">&quot;Jett Flynn&quot;</span>
+<span class="w">                </span><span class="p">]</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Patient&quot;</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">              </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;city&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Zürich&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CH&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;line&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                  </span><span class="s2">&quot;Krankenstrasse 2&quot;</span>
+<span class="w">                </span><span class="p">],</span>
+<span class="w">                </span><span class="nt">&quot;postalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;8005&quot;</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">              </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.51.1.3&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7601000234438&quot;</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hausarzt&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Organization&quot;</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pract&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">              </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.51.1.3&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7601000234438&quot;</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">              </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;family&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hausarzt&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;given&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                  </span><span class="s2">&quot;Familien&quot;</span>
+<span class="w">                </span><span class="p">]</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Practitioner&quot;</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;practrole&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;organization&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;reference&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#org&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;practitioner&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;reference&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#pract&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PractitionerRole&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;attachment&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;contentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application/pdf&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;creation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2011-11-29T11:00:00+01:00&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;language&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;de-CH&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:uuid:59f3a738-11c1-4a0e-a89b-c4552d0fe9a7&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Document example title&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:che:epr:EPR_Unstructured_Document&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.16.756.5.30.1.127.3.10.10&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;facilityType&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;coding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">              </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;264358009&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;General practice premises(environment)&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://snomed.info/sct&quot;</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;practiceSetting&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;coding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">              </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;394802001&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;General medicine(qualifier value)&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://snomed.info/sct&quot;</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;sourcePatientInfo&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;reference&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#1&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2011-11-29T11:00:00+01:00&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;file.pdf&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;extension&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-author-authorrole&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;valueCoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HCP&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Healthcare professional&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.16.756.5.30.1.127.3.10.6&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:ietf:rfc:3986&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;use&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;usual&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:oid:2.25.161286146254585515369612173924762763705&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;masterIdentifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:uuid:f3b905a6-f0e4-4ba6-9b6e-c7e7692c0438&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DocumentReference&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;securityLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;coding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">              </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;17621005&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Normally accessible&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://snomed.info/sct&quot;</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;current&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;reference&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Patient/2.16.756.5.30.1.191.1.0.2.1-c55f4ca7-bd4e-4134-8dcd-56b793ade958&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;coding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;772786005&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Medical certificate (record artifact)&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://snomed.info/sct&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;profile&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle&quot;</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bundle&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;transaction&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<h2 id="professional-and-organization-directory">Professional and organization directory</h2>
+<p>The HPD (Healthcare Provider Directory) contains information about the healthcare professionals and organizations that
+are part of the EPR.
+Relationships between them (i.e. membership of professionals to organizations, or relationships between
+organizations) are also available.</p>
+<h3 id="searching_1">Searching</h3>
+<p>Professionals, organizations and relationships can be queried with an
+<a href="https://fhir.ch/ig/ch-epr-mhealth/iti-90.html">ITI-90 (<em>Find Matching Care Services</em>) transaction</a>. See the
+specifications for the complete list of search parameters.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Professionals</label><label for="__tabbed_2_2">Organizations</label><label for="__tabbed_2_3">Relationships</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>For professionals, the endpoint is <code>/Practitioner</code>.</p>
+<div class="highlight"><span class="filename">Search for 'Müller'</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/Practitioner?family=Müller</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Search by GLN</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/Practitioner?identifier=urn:oid:2.51.1.3|7601000102737</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Retrieve from identifier</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/Practitioner/DrPeterPan</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>For organizations, the endpoint is <code>/Organization</code>.</p>
+<div class="highlight"><span class="filename">Search for active Organization whose name contains 'Medical'</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/Organization?active=true&amp;name:contains=Medical</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Retrieve from identifier</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/Organization/SpitalXDept3</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>For relationships (memberships), the endpoint is <code>/PractitionerRole</code>.</p>
+<div class="highlight"><span class="filename">Search for all professionals working at the 'HUG' organization</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/PractitionerRole?organization=Organization/HUG&amp;_include=PractitionerRole:practitioner</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Retrieve from identifier</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/PractitionerRole/PeterPanPraxisP</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="updating">Updating</h3>
+<p>The HPD update is not supported in a REST transaction. Please use the
+<a href="https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_HPD.pdf">ITI-59 (<em>Provider Information Feed</em>) transaction</a>.</p>
+<h2 id="audit-messages">Audit messages</h2>
+<h3 id="creating">Creating</h3>
+<p>For all transactions, it is required to send the same audit messages. You can use the regular ITI-20 transaction,
+or use the <a href="https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_RESTful-ATNA.pdf">restful one</a>.</p>
+<p>See the <a href="https://hl7.org/fhir/R4/auditevent-mappings.html#dicom">mapping from DICOM to FHIR</a>.</p>
+<details><summary>Examples</summary>
+
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/ARR/fhir/AuditEvent</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/fhir+xml</span>
+
+<span class="nt">&lt;Bundle&gt;</span>
+<span class="w">  </span><span class="nt">&lt;entry&gt;</span>
+<span class="w">    </span>...
+<span class="w">    </span><span class="nt">&lt;request&gt;</span>
+<span class="w">      </span><span class="nt">&lt;method</span><span class="w"> </span><span class="na">value=</span><span class="s">&quot;POST&quot;</span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/request&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/entry&gt;</span>
+<span class="nt">&lt;/Bundle&gt;</span>
+</code></pre></div>
+
+</details>
+
+<h3 id="reading_1">Reading</h3>
+<p>You can read the audit messages for a given patient with an ITI-81 transaction.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The endpoint for this transaction is the EPR community itself, not the Mobile Access Gateway.
+This transaction is still implemented on a previous CH:ATC specification (March 2020), based on the <a href="https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_RESTful-ATNA_Rev2.2_TI_2017-07-21.pdf">IHE Restful
+ATNA supplement rev. 2.2</a>.
+A lot have changed since.</p>
+</div>
+<p>The transaction is an HTTP GET request on the endpoint, with the parameter <code>entity-id</code> that contain the patient EPR-SPID,
+and <code>date</code> to constraint the audit message date.
+The <code>Authorization</code> header uses the prefix <code>IHE-SAML</code> and the SAML assertion is encoded with the <a href="https://datatracker.ietf.org/doc/html/rfc4648#section-4">regular base64
+alphabet</a>.</p>
+<p>The community will ask other communities for their audit messages and regroup them all.
+If a foreign community is not reachable, an OperationOutcome may be added to the response Bundle.</p>
+<details><summary>Examples</summary>
+
+<div class="highlight"><pre><span></span><code><span class="nf">GET</span> <span class="nn">/ARR/fhir/AuditEvent?entity-id=urn:oid:2.16.756.5.30.1.127.3.10.3|{epr-spid}&amp;date=ge2023-07-10&amp;date=le2023-07-17</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">IHE-SAML Zm9vYmE=</span>
+</code></pre></div>
+
+</details>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate"], "search": "../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.220ee61c.min.js"></script>
+      
+    
+  </body>
+</html>

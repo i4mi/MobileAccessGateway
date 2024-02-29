@@ -1,0 +1,68 @@
+@startuml
+title Current login workflow
+
+participant App
+participant WebView
+participant MAG
+participant IDP
+participant STS
+
+App-[#green]>WebView: Open webview
+activate WebView
+
+group OAuth/IUA flow
+  WebView-[#red]>MAG: **Step 1**\n**[ITI-71]** GET /authorize\nextended access request
+  note right
+    The IUA callback url and client secret must
+    be registered in the MAG
+  end note
+end
+
+group SAML 2 artifact binding
+  MAG-->WebView: Redirect to the IDP
+  WebView->IDP: **[AuthnRequest]** POST with SAMLRequest
+  note right
+    The MAG generates and signes the
+    AuthnRequest with its private key
+  end note
+
+  IDP-->WebView: Show login form
+  App-[#green]>IDP: Sends login info
+
+  note over IDP: The SAML callback URL, entity ID, public key and\nclient TLS certificate must be registered with the IDP
+  IDP-->WebView: Redirect to /SSO (SAML callback URL)\nWith the SAML Artifact
+
+  WebView->MAG: Get SAML Artifact
+  activate MAG
+
+  MAG->IDP: **[ArtifactResolve]** POST
+  note right
+    The MAG uses its client TLS certificate
+  end note
+  IDP-->MAG: Returns the IDP Assertion
+
+  MAG-->WebView: Redirect to /authorize
+  deactivate MAG
+end
+
+WebView->MAG: GET /authorize
+activate MAG
+MAG->STS: **[ITI-40]** Get X-User Assertion
+STS-->MAG: Returns the XUA
+
+
+group OAuth/IUA flow
+  MAG--[#red]>WebView: **Step 2**\nRedirect to IUA callback URL\nWith the code
+  deactivate MAG
+  App<--WebView: Close webview
+  note right
+    The app can monitor the webview URL, or use
+    deep-linking to detect this specific redirect,
+    extract the code and close the webview
+  end note
+  deactivate WebView
+
+  App-[#red]>MAG: **Step 3**\n**[ITI-71]** POST /token\nwith the code
+  MAG-->App: access_token is the XUA
+end
+@enduml
