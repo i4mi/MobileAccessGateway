@@ -1,7 +1,16 @@
-2024/02/08 Preparing upcoming Release 1.0.0
+## To be released
+
+- Added OAuth URLs to the CapabilityStatement [#135](https://github.com/i4mi/MobileAccessGateway/issues/135)
+- Implemented PPQm routes [#126](https://github.com/i4mi/MobileAccessGateway/issues/126)
+- Upgraded to IPF 4.8-m2
+- Removed dependency on IHE-Europe STS simulator
+
+## 2024/02/08 v062
 
 - `docker pull europe-west6-docker.pkg.dev/ahdis-ch/ahdis/mag:v062`
-- updated documentation on [https://i4mi.github.io/MobileAccessGateway/](https://i4mi.github.io/MobileAccessGateway/) for containers [#132](https://github.com/i4mi/MobileAccessGateway/issues/132)
+- Updated documentation on [https://i4mi.github.io/MobileAccessGateway/](https://i4mi.github.io/MobileAccessGateway/)
+  for containers [#132](https://github.com/i4mi/MobileAccessGateway/issues/132)
 
-for older releases see github [tags](https://github.com/i4mi/MobileAccessGateway/tags)
+## Older releases
 
+For older releases see github [tags](https://github.com/i4mi/MobileAccessGateway/tags)
