@@ -241,6 +241,9 @@ public class Iti78ResponseConverter extends BasePMIRResponseConverter implements
 			return contactPoint;
 		}
 		else {
+			if (telecom.getValue().contains("@")) {
+				contactPoint.setSystem(ContactPoint.ContactPointSystem.EMAIL);
+			}
 			contactPoint.setValue(telecom.getValue());
 			return contactPoint;
 		}
