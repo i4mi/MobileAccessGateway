@@ -4,6 +4,7 @@
 - Implemented PPQm routes [#126](https://github.com/i4mi/MobileAccessGateway/issues/126)
 - Upgraded to IPF 4.8-m2
 - Removed dependency on IHE-Europe STS simulator
+- Support for email in real case scenario with invalid contact infos
 
 ## 2024/02/08 v062
 
