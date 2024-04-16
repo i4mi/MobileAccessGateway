@@ -19,6 +19,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseQueryResponseConverter;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContentComponent;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
@@ -144,7 +145,7 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                     // representing the XDS Affinity Domain Patient.                  
                     if (documentEntry.getPatientId() != null) {
                         final Identifiable patient = documentEntry.getPatientId();
-                        if (this.config.getUriExternalPatientEndpoint() != null) {
+                        if (StringUtils.isNotBlank(this.config.getUriExternalPatientEndpoint())) {
                             final GenericClient client = new GenericClient(FhirContext.forR4Cached(), null,
                                                                            this.config.getUriExternalPatientEndpoint(),
                                                                            null);

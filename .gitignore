@@ -35,3 +35,5 @@ hs_err_pid*
 .settings/org.eclipse.m2e.core.prefs
 
 .idea
+
+src/main/resources/Dev_Support.pfx

@@ -26,10 +26,10 @@
 		<spring-boot-plugin-version>2.6.7</spring-boot-plugin-version>
 
 		<!-- libraries -->
-		<camel-version>3.21.1</camel-version>
+		<camel-version>3.21.4</camel-version>
 		<hibernate-version>5.2.5.Final</hibernate-version>
 		<hl7v3-code-jar-version>1.3.7</hl7v3-code-jar-version>
-		<ipf-version>4.8-m2</ipf-version>
+		<ipf-version>4.8.0</ipf-version>
 		<opensaml-version>2.6.6</opensaml-version>
 		<spring-security-saml2-core-version>1.0.10.RELEASE</spring-security-saml2-core-version>
 		<velocity-version>2.3</velocity-version>
@@ -113,7 +113,7 @@
 			<artifactId>ipf-fhir-r4-spring-boot-starter</artifactId>
 			<exclusions>
 				<exclusion>
-					<groupId>xpp3</groupId>
+					<groupId>org.ogce</groupId>
 					<artifactId>xpp3</artifactId>
 				</exclusion>
 			</exclusions>
@@ -180,6 +180,12 @@
             <groupId>org.openehealth.ipf.commons</groupId>
             <artifactId>ipf-commons-ihe-xua</artifactId>
         </dependency>
+
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-cxf-spring-soap</artifactId>
+			<version>${camel-version}</version>
+		</dependency>
 		<!-- nsatisfied dependency expressed through field 'config'; nested exception
 			is org.springframework.boot.context.properties.ConfigurationPropertiesBindException:
 			Error creating bean with name 'ipf.fhir-org.openehealth.ipf.boot.fhir.IpfFhirConfigurationProperties':
