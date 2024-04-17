@@ -16,13 +16,18 @@
 
 package ch.bfh.ti.i4mi.mag;
 
+import java.io.*;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 
 import javax.servlet.Filter;
 
-import ca.uhn.fhir.rest.server.*;
-import ch.bfh.ti.i4mi.mag.fhir.MagCapabilityStatementProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.support.jsse.KeyManagersParameters;
 import org.apache.camel.support.jsse.KeyStoreParameters;
 import org.apache.camel.support.jsse.SSLContextParameters;
@@ -45,6 +50,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.filter.CorsFilter;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
+import ca.uhn.fhir.rest.server.ResourceBinding;
+import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
@@ -57,27 +66,22 @@ import lombok.Data;
  * see application.yml
  *
  */
+@Slf4j
 @Configuration
 @Data
 public class Config {
 
 
-   /**
-    * Use HTTPS for XDS ?
-    */
-	@Value("${mag.xds.https:true}")
-    private boolean https;
-
     /**
-     * home community ID with prefix
+     * Use HTTPS for XDS ?
      */
-    @Value("${mag.homeCommunityId}")
-    private String homeCommunity;
+    @Value("${mag.xds.https:true}")
+    private boolean https;
 
     /**
      * URL of ITI-18 endpoint (
      */
-	@Value("${mag.xds.iti-18.url:}")
+    @Value("${mag.xds.iti-18.url:}")
     private String iti18HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
     /**
      * URL of ITI-18 endpoint (
@@ -87,84 +91,73 @@ public class Config {
     /**
      * URL of ITI-43 endpoint
      */
-	@Value("${mag.xds.iti-43.url:}")
+    @Value("${mag.xds.iti-43.url:}")
     private String iti43HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/ret"; // http
-    
+
     /**
      * URL of ITI-41 endpoint
      */
-	@Value("${mag.xds.iti-41.url:}")
+    @Value("${mag.xds.iti-41.url:}")
     private String iti41HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/rep/prb"; // http
-	
-	
-	@Value("${mag.xds.iti-57.url:}")
+
+
+    @Value("${mag.xds.iti-57.url:}")
     private String iti57HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
 
-    /**
-     * URL of CH:PPQ-1 endpoint
-     */
-    @Value("${mag.ppq.ppq-1.url:}")
-    private String ppq1HostUrl;
 
     /**
-     * URL of CH:PPQ-2 endpoint
+     * Own full URL where clients can retrieve documents from
      */
-    @Value("${mag.ppq.ppq-2.url:}")
-    private String ppq2HostUrl;
-
-    /**
-     * Own full URL where clients can retrieve documents from 
-     */
-	@Value("${mag.xds.retrieve.url:}")
+    @Value("${mag.xds.retrieve.url:}")
     private String uriMagXdsRetrieve;// = "https://localhost:9091/camel/xdsretrieve";
-    
-	@Value("${mag.xds.retrieve.repositoryUniqueId:}")
-	private String repositoryUniqueId;
-	
+
+    @Value("${mag.xds.retrieve.repositoryUniqueId:}")
+    private String repositoryUniqueId;
+
     //private String hostUrl45Http = "gazelle.interopsante.org/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType"; // http
     //private String hostUrl45Http = "gazelle.ihe.net/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType"; // http
-    
-    
+
+
     // ------------------------------------
     // PIX / PMIR Configuration
     // ------------------------------------
-    
+
     /**
      * Use HTTPS for PIX V3?
      */
-	@Value("${mag.pix.https:true}")
+    @Value("${mag.pix.https:true}")
     private boolean pixHttps;// = true;
-    
+
     /**
      * URL of ITI-45 endpoint
      */
-	@Value("${mag.pix.iti-45.url:}")
+    @Value("${mag.pix.iti-45.url:}")
     private String iti45HostUrl;// = "ehealthsuisse.ihe-europe.net:10443/PAMSimulator-ejb/PIXManager_Service/PIXManager_PortType";
-    
+
     /**
      * URL of ITI-44 endpoint
      */
-	@Value("${mag.pix.iti-44.url:}")
+    @Value("${mag.pix.iti-44.url:}")
     private String iti44HostUrl;// = iti45HostUrl;
-	
-	/**
-	 * URL of ITI-47 endpoint
-	 */
-	@Value("${mag.pix.iti-47.url:}")
+
+    /**
+     * URL of ITI-47 endpoint
+     */
+    @Value("${mag.pix.iti-47.url:}")
     private String iti47HostUrl;
 
     /**
      * sender OID used when sending requests
      */
-	@Value("${mag.pix.oids.sender:}")
+    @Value("${mag.pix.oids.sender:}")
     private String pixMySenderOid;// = "1.3.6.1.4.1.12559.11.1.2.2.5.7";
-    
+
     /**
      * receiver OID (of target system) used when sending requests
      */
-	@Value("${mag.pix.oids.receiver:}")
+    @Value("${mag.pix.oids.receiver:}")
     private String pixReceiverOid;// = "1.3.6.1.4.1.12559.11.1.2.2.5.11";
-    
+
     /**
      * oid of MPI-PID (Master Patient indext oid in affinity domain this mobile access gateway is configured)
      */
@@ -175,38 +168,36 @@ public class Config {
     /**
      * OID for queries
      */
-	@Value("${mag.pix.oids.query:}")
+    @Value("${mag.pix.oids.query:}")
     private String pixQueryOid;// = pixMySenderOid;
-	
-	@Value("${mag.pix.oids.custodian:}")
-	private String custodianOid;
-	
-	@Value("${mag.pix.oids.local-patient-id-aa:}")
-	private String localPatientIDAssigningAuthority;
-	
-    
-   /**
-    * baseurl of gateway
-    */
-	@Value("${mag.baseurl:}")
-	private String baseurl;
 
-    @Value("${mag.extpatienturl:}")
-	private String extpatienturl;
+    @Value("${mag.pix.oids.custodian:}")
+    private String custodianOid;
 
-    public String getUriExternalPatientEndpoint() { return extpatienturl; };
+    @Value("${mag.pix.oids.local-patient-id-aa:}")
+    private String localPatientIDAssigningAuthority;
 
-	/**
+
+    /**
+     * baseurl of gateway
+     */
+    @Value("${mag.baseurl:}")
+    private String baseurl;
+
+    /**
      * Own full URL of patient endpoint
      */
     public String getUriPatientEndpoint() { return baseurl+"/fhir/Patient"; };
-   
+
     public String getUriFhirEndpoint() { return baseurl+"/fhir"; };
-    
-   
+
+
     @Value("${mag.client-ssl.keystore.path:}")
     private String keystore;
-    
+
+    @Value("${mag.client-ssl.keystore.base64:}")
+    private String keystoreBase64;
+
     @Value("${mag.client-ssl.keystore.password:}")
     private String keystorePassword;
 
@@ -216,101 +207,112 @@ public class Config {
     @Value("${mag.client-ssl.truststore.password:}")
     private String truststorePassword;
 
-    
     @Value("${mag.client-ssl.cert-alias:}")
     private String certAlias;
-    
+
     @Value("${mag.audit.audit-tls-enabled:false}")
     private boolean auditTlsEnabled;
 
     /**
      * Connection security : Use client certificate
-     */    
+     */
     @Bean(name = "sslContext")
     @ConditionalOnProperty(
-    	    value="mag.client-ssl.enabled", 
-    	    havingValue = "true", 
-    	    matchIfMissing = false)
-    public SSLContextParameters getPixSSLContext() {
-    	KeyStoreParameters ksp = new KeyStoreParameters();
-    	// Keystore file may be found at src/main/resources
-    	ksp.setResource(keystore); 
-    	ksp.setPassword(keystorePassword);    	
+            value="mag.client-ssl.enabled",
+            havingValue = "true",
+            matchIfMissing = false)
+    public SSLContextParameters getPixSSLContext() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
 
-    	KeyManagersParameters kmp = new KeyManagersParameters();
-    	kmp.setKeyStore(ksp);
-    	kmp.setKeyPassword(keystorePassword);       	
-    	
+        KeyStoreParameters ksp = new KeyStoreParameters();
+        // Keystore file may be found at src/main/resources
+        //ksp.setResource(keystore);
+        //ksp.setPassword(keystorePassword);
+
+        // https://www.baeldung.com/java-keystore
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        log.info("keystore base64 valued: " + (keystoreBase64 != null && !keystoreBase64.trim().isEmpty()));
+        ks.load(ReadCertificateStream(), keystorePassword.toCharArray());
+        ksp.setKeyStore(ks);
+
+        KeyManagersParameters kmp = new KeyManagersParameters();
+        kmp.setKeyStore(ksp);
+        kmp.setKeyPassword(keystorePassword);
 
         KeyStoreParameters tsp = new KeyStoreParameters();
-    	// Keystore file may be found at src/main/resources
-    	tsp.setResource(truststore); 
-    	tsp.setPassword(truststorePassword);
+        // Keystore file may be found at src/main/resources
+        tsp.setResource(truststore);
+        tsp.setPassword(truststorePassword);
 
-    	TrustManagersParameters tmp = new TrustManagersParameters();
-    	tmp.setKeyStore(tsp);    	
-    
-    	SSLContextParameters scp = new SSLContextParameters();
-    	scp.setKeyManagers(kmp);
-    	scp.setTrustManagers(tmp);
-    	scp.setCertAlias(certAlias);
-       
-    	return scp;
+        TrustManagersParameters tmp = new TrustManagersParameters();
+        tmp.setKeyStore(tsp);
+
+        SSLContextParameters scp = new SSLContextParameters();
+        scp.setKeyManagers(kmp);
+        scp.setTrustManagers(tmp);
+        //scp.setCertAlias(certAlias);
+
+        return scp;
+        //return new SSLContextParameters();
     }
-       
-    public SSLContextParameters getAuditSSLContext() {
-    	KeyStoreParameters ksp = new KeyStoreParameters();
-    	// Keystore file may be found at src/main/resources
-    	ksp.setResource(keystore); 
-    	ksp.setPassword(keystorePassword);    	
 
-    	KeyManagersParameters kmp = new KeyManagersParameters();
-    	kmp.setKeyStore(ksp);
-    	kmp.setKeyPassword(keystorePassword);       	
-    	
-    	TrustManagersParameters tmp = new TrustManagersParameters();
-    	tmp.setKeyStore(ksp);    	
-    
-    	SSLContextParameters scp = new SSLContextParameters();
-    	scp.setKeyManagers(kmp);
-    	scp.setTrustManagers(tmp);
-    	scp.setCertAlias(certAlias);
+    public SSLContextParameters getAuditSSLContext() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+        KeyStoreParameters ksp = new KeyStoreParameters();
+        // Keystore file may be found at src/main/resources
+        //ksp.setResource(keystore);
+        //ksp.setPassword(keystorePassword);
+
+        // https://www.baeldung.com/java-keystore
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        ks.load(ReadCertificateStream(), keystorePassword.toCharArray());
+        ksp.setKeyStore(ks);
+
+        KeyManagersParameters kmp = new KeyManagersParameters();
+        kmp.setKeyStore(ksp);
+        kmp.setKeyPassword(keystorePassword);
+
+        TrustManagersParameters tmp = new TrustManagersParameters();
+        tmp.setKeyStore(ksp);
+
+        SSLContextParameters scp = new SSLContextParameters();
+        scp.setKeyManagers(kmp);
+        scp.setTrustManagers(tmp);
+        scp.setCertAlias(certAlias);
         //scp.setClientParameters(null);
         //scp.setSessionTimeout("60");
-    	return scp;
+        return scp;
     }
-            
+
     @Bean(name = "myAuditContext")
     @ConfigurationProperties(prefix = "mag.audit")
-    public AuditContext getAuditContext() {
-    	DefaultAuditContext context = new DefaultAuditContext();
-    	if (this.auditTlsEnabled) {
-    	    context.setTlsParameters(new TlsParameterTest(getAuditSSLContext()));
-    	}
-    	context.setAuditTransmissionProtocol(new TCPSyslogSender());
-    	//context.setAuditTransmissionProtocol(new TLSCloseSocket(context.getTlsParameters()));
-    	//CustomTlsParameters p = new CustomTlsParameters();
-    	
-    	//p.setKeyStoreFile("270.jks");
-    	//p.setKeyStorePassword("a1b2c3");
-    	//p.setCertAlias("gateway");
-    	 
-    
-    	//context.setTlsParameters(p);
+    public AuditContext getAuditContext() throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
+        DefaultAuditContext context = new DefaultAuditContext();
+        if (this.auditTlsEnabled) {
+            context.setTlsParameters(new TlsParameterTest(getAuditSSLContext()));
+        }
+        context.setAuditTransmissionProtocol(new TCPSyslogSender());
+        //context.setAuditTransmissionProtocol(new TLSCloseSocket(context.getTlsParameters()));
+        //CustomTlsParameters p = new CustomTlsParameters();
+
+        //p.setKeyStoreFile("270.jks");
+        //p.setKeyStorePassword("a1b2c3");
+        //p.setCertAlias("gateway");
+
+
+        //context.setTlsParameters(p);
     	/*context.setAuditEnabled(true);
-    	context.setAuditSourceId("CCC_BFH_MAG"); 
+    	context.setAuditSourceId("CCC_BFH_MAG");
         context.setAuditEnterpriseSiteId("BFH");
-        
+
         context.setAuditRepositoryHost("147.135.232.177");
         context.setAuditRepositoryPort(3001);
-        context.setAuditRepositoryTransport("UDP");        
+        context.setAuditRepositoryTransport("UDP");
         */
         //context.setAuditSource(AuditSource.of("code","system","display"));
-        //context.setSendingApplication("Mobile Access Gateway");
-            	    	
-        return context;	
+        //context.setSendingApplication("MobileAccessGateway");
+
+        return context;
     }
-    
+
     @Bean
     @ConditionalOnMissingBean(name = "corsFilterRegistration")
     @ConditionalOnWebApplication
@@ -321,6 +323,14 @@ public class Config {
         frb.addUrlPatterns("/fhir/*", "/camel/*");
         frb.setFilter(new CorsFilter(request -> defaultCorsConfiguration()));
         return frb;
+    }
+
+    private InputStream ReadCertificateStream () throws FileNotFoundException {
+        if (keystoreBase64 == null || keystoreBase64.trim().isEmpty()){
+            return new FileInputStream(keystore);
+        }
+        byte[] decodedBytes = Base64.getDecoder().decode(keystoreBase64);
+        return  new ByteArrayInputStream(decodedBytes);
     }
 
     private static CorsConfiguration defaultCorsConfiguration() {
@@ -336,11 +346,11 @@ public class Config {
         return cors;
     }
 
-        
+
     // ---------------------------------------------
     // Logging configuration
     // ---------------------------------------------
-    
+
     // see https://oehf.github.io/ipf-docs/docs/ihe/wsPayloadLogging
     @Bean
     public OutPayloadLoggerInterceptor soapRequestLogger() {
@@ -351,35 +361,36 @@ public class Config {
     public InPayloadLoggerInterceptor soapResponseLogger() {
         return new InPayloadLoggerInterceptor("./logs/[date('yyyyMMdd-HH00')]/[sequenceId]-soap-response.txt");
     }
-    
+
     // ---------------------------------------------
     // Other beans used
     // ---------------------------------------------
-    
+
     @Bean
     public SchemeMapper getSchemeMapper() {
-    	return new SchemeMapper();
-    }
-    
-    @Bean
-    public PatientReferenceCreator getPatientReferenceCreator() {
-    	return new PatientReferenceCreator();
+        return new SchemeMapper();
     }
 
     @Bean
-    public MagCapabilityStatementProvider serverConformanceProvider(
-            final RestfulServer fhirServer,
-            @Value("${mag.baseurl}") final String baseUrl) {
-        return new MagCapabilityStatementProvider(fhirServer, baseUrl);
+    public PatientReferenceCreator getPatientReferenceCreator() {
+        return new PatientReferenceCreator();
+    }
+
+    @Bean
+    public IServerConformanceProvider<IBaseConformance> serverConformanceProvider(FhirContext fhirContext,
+                                                                                  RestfulServerConfiguration theServerConfiguration) {
+        return new ServerCapabilityStatementProvider(fhirContext, theServerConfiguration);
     }
 
     // use to fix https://github.com/i4mi/MobileAccessGateway/issues/56, however we have the CapabilityStatement not filled out anymore
-	@Bean
+    @SuppressWarnings("unchecked")
+    @Bean
     public RestfulServerConfiguration serverConfiguration() {
         RestfulServerConfiguration config = new RestfulServerConfiguration();
-        config.setResourceBindings(new ArrayList<>());
-        config.setServerBindings(new ArrayList<>());
+        config.setResourceBindings(new ArrayList<ResourceBinding>());
+        config.setServerBindings(new ArrayList());
         config.setServerAddressStrategy(new HardcodedServerAddressStrategy(getUriFhirEndpoint()));
         return config;
     }
+
 }
