@@ -196,9 +196,13 @@ public class Iti65RequestConverter extends BaseRequestConverter {
         		DocumentEntry entry = new DocumentEntry();        		        		        		
                 processDocumentReference(documentReference, entry);
                 doc.setDocumentEntry(entry);
-                entry.setRepositoryUniqueId(config.getRepositoryUniqueId());
-                
-                // create associations
+
+				String uniqueRepositoryId = config.getRepositoryUniqueId();
+				if (uniqueRepositoryId != null && !uniqueRepositoryId.isBlank()) {
+					entry.setRepositoryUniqueId(uniqueRepositoryId);
+				}
+
+				// create associations
                 for (DocumentReferenceRelatesToComponent relatesTo : documentReference.getRelatesTo()) {
                 	Reference target = relatesTo.getTarget();
                 	DocumentRelationshipType code = relatesTo.getCode();
