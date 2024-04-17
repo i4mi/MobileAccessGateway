@@ -2,9 +2,12 @@
 
 - Added OAuth URLs to the CapabilityStatement [#135](https://github.com/i4mi/MobileAccessGateway/issues/135)
 - Implemented PPQm routes [#126](https://github.com/i4mi/MobileAccessGateway/issues/126)
-- Upgraded to IPF 4.8-m2
+- Upgraded to IPF 4.8.0
 - Removed dependency on IHE-Europe STS simulator
 - Support for email in real case scenario with invalid contact infos [#138](https://github.com/i4mi/MobileAccessGateway/pull/138)
+- Added missing document entry attributes
+- Certificate can be injected by environment variables 
+
 
 ## 2024/02/08 v062
 
