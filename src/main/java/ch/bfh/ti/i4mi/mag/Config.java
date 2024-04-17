@@ -27,6 +27,8 @@ import java.util.Base64;
 
 import javax.servlet.Filter;
 
+import ca.uhn.fhir.rest.server.*;
+import ch.bfh.ti.i4mi.mag.fhir.MagCapabilityStatementProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.support.jsse.KeyManagersParameters;
 import org.apache.camel.support.jsse.KeyStoreParameters;
@@ -50,10 +52,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.filter.CorsFilter;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
-import ca.uhn.fhir.rest.server.IServerConformanceProvider;
-import ca.uhn.fhir.rest.server.ResourceBinding;
-import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
@@ -77,6 +75,12 @@ public class Config {
      */
     @Value("${mag.xds.https:true}")
     private boolean https;
+
+    /**
+     * home community ID with prefix
+     */
+    @Value("${mag.homeCommunityId}")
+    private String homeCommunity;
 
     /**
      * URL of ITI-18 endpoint (
@@ -104,6 +108,17 @@ public class Config {
     @Value("${mag.xds.iti-57.url:}")
     private String iti57HostUrl;// = "ehealthsuisse.ihe-europe.net:8280/xdstools7/sim/default__ahdis/reg/sq"; // http
 
+    /**
+     * URL of CH:PPQ-1 endpoint
+     */
+    @Value("${mag.ppq.ppq-1.url:}")
+    private String ppq1HostUrl;
+
+    /**
+     * URL of CH:PPQ-2 endpoint
+     */
+    @Value("${mag.ppq.ppq-2.url:}")
+    private String ppq2HostUrl;
 
     /**
      * Own full URL where clients can retrieve documents from
@@ -184,6 +199,11 @@ public class Config {
     @Value("${mag.baseurl:}")
     private String baseurl;
 
+    @Value("${mag.extpatienturl:}")
+    private String extpatienturl;
+
+    public String getUriExternalPatientEndpoint() { return extpatienturl; };
+
     /**
      * Own full URL of patient endpoint
      */
@@ -212,6 +232,9 @@ public class Config {
 
     @Value("${mag.audit.audit-tls-enabled:false}")
     private boolean auditTlsEnabled;
+
+    @Value("${mag.documentSourceId}")
+    private String documentSourceId;
 
     /**
      * Connection security : Use client certificate
@@ -377,18 +400,24 @@ public class Config {
     }
 
     @Bean
+    public MagCapabilityStatementProvider serverConformanceProvider(
+            final RestfulServer fhirServer,
+            @Value("${mag.baseurl}") final String baseUrl) {
+        return new MagCapabilityStatementProvider(fhirServer, baseUrl);
+    }
+
+    @Bean
     public IServerConformanceProvider<IBaseConformance> serverConformanceProvider(FhirContext fhirContext,
                                                                                   RestfulServerConfiguration theServerConfiguration) {
         return new ServerCapabilityStatementProvider(fhirContext, theServerConfiguration);
     }
 
     // use to fix https://github.com/i4mi/MobileAccessGateway/issues/56, however we have the CapabilityStatement not filled out anymore
-    @SuppressWarnings("unchecked")
     @Bean
     public RestfulServerConfiguration serverConfiguration() {
         RestfulServerConfiguration config = new RestfulServerConfiguration();
-        config.setResourceBindings(new ArrayList<ResourceBinding>());
-        config.setServerBindings(new ArrayList());
+        config.setResourceBindings(new ArrayList<>());
+        config.setServerBindings(new ArrayList<>());
         config.setServerAddressStrategy(new HardcodedServerAddressStrategy(getUriFhirEndpoint()));
         return config;
     }

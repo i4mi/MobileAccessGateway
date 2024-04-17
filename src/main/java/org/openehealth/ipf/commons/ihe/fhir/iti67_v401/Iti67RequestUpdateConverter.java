@@ -90,6 +90,13 @@ public class Iti67RequestUpdateConverter extends Iti65RequestConverter {
     RegisterDocumentSetBuilder builder = new RegisterDocumentSetBuilder(true, submissionSet); // TODO should be
                                                                                               // true?
     DocumentEntry entry = new DocumentEntry();
+
+    Extension proprietaryType = documentReference
+            .getExtensionByUrl("http://post.ch/e-health/windseeker/repositoryUniqueId");
+    if (proprietaryType != null && proprietaryType.getValue() instanceof Identifier) {
+      entry.setRepositoryUniqueId(proprietaryType.getValue().getId());
+    }
+
     processDocumentReference(documentReference, entry);
 
     entry.setLogicalUuid(new URN(UUID.randomUUID()).toString());
