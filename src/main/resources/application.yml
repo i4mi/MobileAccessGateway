@@ -6,7 +6,7 @@ mag:
   client-ssl:
     enabled: true
     key-store:
-      path: example-client-certificate.jks
+      path: src/main/resources/keystore.jks
       password: a1b2c3
     truststore:
       path: example-client-certificate.jks
@@ -23,7 +23,7 @@ mag:
     iti-57:
       url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/rep/prb
     retrieve:
-      url: http://localhost:9090/camel/xdsretrieve
+      url:  ${DOCUMENT_RETRIEVE_URL:/camel/xdsretrieve}
       repositoryUniqueId: 1.1.4567332.1.2
   pix:
     https: true
