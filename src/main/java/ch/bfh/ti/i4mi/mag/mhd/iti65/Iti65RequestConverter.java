@@ -1031,7 +1031,7 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 			result.setAuthorPerson(transform((Practitioner) authorObj));
 			for (ContactPoint contactPoint : practitioner.getTelecom()) result.getAuthorTelecom().add(transform(contactPoint));
 			if (authorRole==null) {
-			    authorRole = new Identifiable("HCP", new AssigningAuthority("2.16.756.5.30.1.127.3.10.1.41"));
+			    authorRole = new Identifiable("HCP", new AssigningAuthority("2.16.756.5.30.1.127.3.10.6"));
 			}
 			result.getAuthorRole().add(authorRole);
 			return result;
@@ -1041,7 +1041,7 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 			result.setAuthorPerson(transform(patient));
 			for (ContactPoint contactPoint : patient.getTelecom()) result.getAuthorTelecom().add(transform(contactPoint));
             if (authorRole==null) {
-                authorRole = new Identifiable("PAT", new AssigningAuthority("2.16.756.5.30.1.127.3.10.1.41"));
+                authorRole = new Identifiable("PAT", new AssigningAuthority("2.16.756.5.30.1.127.3.10.6"));
             }
             result.getAuthorRole().add(authorRole);
 			return result;

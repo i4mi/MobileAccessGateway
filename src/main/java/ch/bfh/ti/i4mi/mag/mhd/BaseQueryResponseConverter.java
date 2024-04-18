@@ -387,8 +387,8 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     	if (author == null) return false;
     	if (author.getAuthorRole()==null) return false;
     	for (Identifiable roles : author.getAuthorRole()) {
-    		if ("PAT".equals(roles.getId()) && "2.16.756.5.30.1.127.3.10.1.41".equals(roles.getAssigningAuthority().getUniversalId())) return true;
-    		if ("REP".equals(roles.getId()) && "2.16.756.5.30.1.127.3.10.1.41".equals(roles.getAssigningAuthority().getUniversalId())) return true;
+    		if ("PAT".equals(roles.getId()) && "2.16.756.5.30.1.127.3.10.6".equals(roles.getAssigningAuthority().getUniversalId())) return true;
+    		if ("REP".equals(roles.getId()) && "2.16.756.5.30.1.127.3.10.6".equals(roles.getAssigningAuthority().getUniversalId())) return true;
     	}
     	return false;
     }
