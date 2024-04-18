@@ -7,6 +7,7 @@
 - Support for email in real case scenario with invalid contact infos [#138](https://github.com/i4mi/MobileAccessGateway/pull/138)
 - Added missing document entry attributes
 - Certificate can be injected by environment variables 
+- Fixed coding system OIDs of document author and uploader role codes
 
 
 ## 2024/02/08 v062
