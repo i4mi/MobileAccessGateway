@@ -406,12 +406,6 @@ public class Config {
         return new MagCapabilityStatementProvider(fhirServer, baseUrl);
     }
 
-    @Bean
-    public IServerConformanceProvider<IBaseConformance> serverConformanceProvider(FhirContext fhirContext,
-                                                                                  RestfulServerConfiguration theServerConfiguration) {
-        return new ServerCapabilityStatementProvider(fhirContext, theServerConfiguration);
-    }
-
     // use to fix https://github.com/i4mi/MobileAccessGateway/issues/56, however we have the CapabilityStatement not filled out anymore
     @Bean
     public RestfulServerConfiguration serverConfiguration() {
