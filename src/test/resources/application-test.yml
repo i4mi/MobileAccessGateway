@@ -6,7 +6,7 @@ mag:
   client-ssl:
     enabled: true
     key-store:
-      path: example-client-certificate.jks
+      path: src/main/resources/keystore.jks
       password: a1b2c3
     truststore:
       path: example-client-certificate.jks
