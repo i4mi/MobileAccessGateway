@@ -245,17 +245,20 @@ public class Config {
             havingValue = "true",
             matchIfMissing = false)
     public SSLContextParameters getPixSSLContext() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
-
+        
         KeyStoreParameters ksp = new KeyStoreParameters();
-        // Keystore file may be found at src/main/resources
-        //ksp.setResource(keystore);
-        //ksp.setPassword(keystorePassword);
-
+            
         // https://www.baeldung.com/java-keystore
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         log.info("keystore base64 valued: " + (keystoreBase64 != null && !keystoreBase64.trim().isEmpty()));
-        ks.load(ReadCertificateStream(), keystorePassword.toCharArray());
-        ksp.setKeyStore(ks);
+        if (keystoreBase64 != null && !keystoreBase64.trim().isEmpty()) {
+          ks.load(ReadCertificateStream(), keystorePassword.toCharArray());        
+          ksp.setKeyStore(ks);
+        } else {
+          // Keystore file may be found at src/main/resources
+          ksp.setResource(keystore); 
+          ksp.setPassword(keystorePassword);   
+        }
 
         KeyManagersParameters kmp = new KeyManagersParameters();
         kmp.setKeyStore(ksp);
@@ -280,14 +283,18 @@ public class Config {
 
     public SSLContextParameters getAuditSSLContext() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
         KeyStoreParameters ksp = new KeyStoreParameters();
-        // Keystore file may be found at src/main/resources
-        //ksp.setResource(keystore);
-        //ksp.setPassword(keystorePassword);
-
+       
         // https://www.baeldung.com/java-keystore
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        ks.load(ReadCertificateStream(), keystorePassword.toCharArray());
-        ksp.setKeyStore(ks);
+        log.info("keystore base64 valued: " + (keystoreBase64 != null && !keystoreBase64.trim().isEmpty()));
+        if (keystoreBase64 != null && !keystoreBase64.trim().isEmpty()) {
+          ks.load(ReadCertificateStream(), keystorePassword.toCharArray());        
+          ksp.setKeyStore(ks);
+        } else {
+          // Keystore file may be found at src/main/resources
+          ksp.setResource(keystore); 
+          ksp.setPassword(keystorePassword);   
+        }
 
         KeyManagersParameters kmp = new KeyManagersParameters();
         kmp.setKeyStore(ksp);
@@ -348,10 +355,7 @@ public class Config {
         return frb;
     }
 
-    private InputStream ReadCertificateStream () throws FileNotFoundException {
-        if (keystoreBase64 == null || keystoreBase64.trim().isEmpty()){
-            return new FileInputStream(keystore);
-        }
+    private InputStream ReadCertificateStream () throws FileNotFoundException {        
         byte[] decodedBytes = Base64.getDecoder().decode(keystoreBase64);
         return  new ByteArrayInputStream(decodedBytes);
     }
