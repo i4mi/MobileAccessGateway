@@ -220,6 +220,11 @@
 			<version>${camel-version}</version>
         </dependency>
         <dependency>
+          <groupId>com.sun.xml.messaging.saaj</groupId>
+          <artifactId>saaj-impl</artifactId>
+          <version>3.0.3</version>
+        </dependency>  
+        <dependency>
 	       <groupId>org.apache.cxf</groupId>
 	       <artifactId>cxf-core</artifactId>
         </dependency>
