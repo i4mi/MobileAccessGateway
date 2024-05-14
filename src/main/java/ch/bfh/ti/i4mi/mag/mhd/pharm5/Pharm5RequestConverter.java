@@ -38,6 +38,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryReturnType;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * ITI-67 to PHARM-1 request converter
@@ -45,6 +46,7 @@ import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
  * @author Oliver Egger
  *
  */
+@Slf4j
 public class Pharm5RequestConverter extends BaseRequestConverter {
 
   public Timestamp timestampFromDate(Type date) {
@@ -95,10 +97,14 @@ public class Pharm5RequestConverter extends BaseRequestConverter {
       List<AvailabilityStatus> availabilites = new ArrayList<AvailabilityStatus>();
       for (Parameters.ParametersParameterComponent status : statusTypes) {
         String tokenValue = status.primitiveValue();
-        if (tokenValue.equals("current"))
-          availabilites.add(AvailabilityStatus.APPROVED);
-        else if (tokenValue.equals("superseded"))
-          availabilites.add(AvailabilityStatus.DEPRECATED);
+        if (tokenValue !=null) {
+          if (tokenValue.equals("current"))
+            availabilites.add(AvailabilityStatus.APPROVED);
+          else if (tokenValue.equals("superseded"))
+            availabilites.add(AvailabilityStatus.DEPRECATED);
+        } else {
+          log.error("token status value is null, status is: " + status.fhirType() + " - " + status.getValue().toString());
+        }
       }
       query.setStatus(availabilites);
     }
