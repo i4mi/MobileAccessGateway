@@ -569,13 +569,16 @@ export class MagComponent implements OnInit {
       authCodeFlowConfig.scope = `person_id=${this.targetIdentifier2Value}^^^&2.16.756.5.30.1.127.3.10.3&ISO purpose_of_use=urn:oid:2.16.756.5.30.1.127.3.10.5|NORM subject_role=urn:oid:2.16.756.5.30.1.127.3.10.6|HCP`;
       this.oauthService.configure(authCodeFlowConfig);
       this.oauthService.initCodeFlow();
-    } else {
-      if (this.authenticate.value === 'TCU') {
-        this.getSamlToken().then((value) => (this.json = value));
-      } else {
-        this.oauthService.logOut();
-      }
-    }
+    } 
+    if (this.authenticate.value === 'Patient') {
+      let authCodeFlowConfig = this.fhirConfigService.getAuthCodeFlowConfig(this.provider.value);
+      authCodeFlowConfig.scope = `person_id=${this.targetIdentifier2Value}^^^&2.16.756.5.30.1.127.3.10.3&ISO purpose_of_use=urn:oid:2.16.756.5.30.1.127.3.10.5|NORM subject_role=urn:oid:2.16.756.5.30.1.127.3.10.6|PAT`;
+      this.oauthService.configure(authCodeFlowConfig);
+      this.oauthService.initCodeFlow();      
+    } 
+    if (this.authenticate.value === 'TCU') {
+      this.getSamlToken().then((value) => (this.json = value));
+    } 
   }
 
   getAppcDocument(eprspid: string, uniqueId: string): string {
@@ -795,12 +798,7 @@ export class MagComponent implements OnInit {
       return Promise.resolve(this.oauthService.getAccessToken());
     }
     if (this.authenticate.value === 'Patient') {
-      return Promise.resolve(
-        this.getSimulatedSamlPmpAssertion(
-          toLocaleDateTime(new Date()),
-          this.targetIdentifier2Value
-        )
-      );
+      return Promise.resolve(this.oauthService.getAccessToken());
     }
     if (this.authenticate.value === 'TCU') {
       //      const now = new Date();

@@ -1,4 +1,9 @@
-## To be released
+## 2024/05/15 v068
+- support for multiple IDP's [128](https://github.com/i4mi/MobileAccessGateway/issues/128)
+- reenable $find-medication-list
+- use IdP also for patient access in web app
+
+## 2024/05/08 v064
 
 - Added OAuth URLs to the CapabilityStatement [#135](https://github.com/i4mi/MobileAccessGateway/issues/135)
 - Implemented PPQm routes [#126](https://github.com/i4mi/MobileAccessGateway/issues/126)

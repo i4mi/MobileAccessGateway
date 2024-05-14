@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty("mag.xds.pharm-1.url")
+@ConditionalOnProperty("mag.xds.pharm-5.url")
 class Pharm5RouteBuilder extends RouteBuilder {
 
     private final Config config;
