@@ -96,7 +96,7 @@ public class Pharm5RequestConverter extends BaseRequestConverter {
     if (statusTypes != null) {
       List<AvailabilityStatus> availabilites = new ArrayList<AvailabilityStatus>();
       for (Parameters.ParametersParameterComponent status : statusTypes) {
-        String tokenValue = status.primitiveValue();
+        String tokenValue = status.getValue().toString();
         if (tokenValue !=null) {
           if (tokenValue.equals("current"))
             availabilites.add(AvailabilityStatus.APPROVED);
