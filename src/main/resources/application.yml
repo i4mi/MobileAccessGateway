@@ -110,12 +110,3 @@ management:
     health:
       probes:
         enabled: true
-    shutdown:
-      enabled: true
-    info:
-      enabled: true
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-        exclude: "env,beans"
