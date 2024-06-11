@@ -105,7 +105,10 @@ management:
     health:
       probes:
         enabled: true
-
+  endpoints:
+    web:
+      exposure:
+        include: ["metrics","prometheus"]
 
 # https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#core-properties
 spring:
