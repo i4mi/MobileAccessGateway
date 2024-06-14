@@ -16,12 +16,15 @@
 
 package ch.bfh.ti.i4mi.mag.xua;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 
 import javax.ws.rs.BadRequestException;
 
 import org.apache.camel.Body;
+import org.apache.camel.ExchangeProperty;
 import org.apache.camel.Header;
 import org.apache.camel.Headers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import net.sourceforge.plantuml.utils.Log;
 
 /**
  * Convert OAuth2 request to SAML Assertion Request
@@ -86,7 +90,7 @@ public class AuthRequestConverter {
 		return request;
 	}
 	
-	public AssertionRequest buildAssertionRequest(@Header("response_type") String responseType, @Header("oauthrequest") AuthenticationRequest request) throws AuthException {
+	public AssertionRequest buildAssertionRequest(@Header("response_type") String responseType, @ExchangeProperty("oauthrequest") AuthenticationRequest request) throws AuthException {
 		
 		if (!"code".equals(responseType)) throw new AuthException(400, "invalid_request", "response_type must be 'code'");
 		
@@ -107,6 +111,15 @@ public class AuthRequestConverter {
 	public AssertionRequest buildAssertionRequestFromIdp(@Body String authorization, @Header("scope") String scope) throws AuthException {
 		return buildAssertionRequestInternal(authorization, scope);
 	}
+	
+	public AssertionRequest buildAssertionRequestFromToken(@Body String authorization, @Header("scope") String scope) throws AuthException {
+	    System.out.println("BODY:"+authorization);
+	    try {
+	    authorization = new String(Base64.getDecoder().decode(authorization), "UTF-8");
+	    } catch (UnsupportedEncodingException e) {}
+	    System.out.println("BODY2:"+authorization);
+        return buildAssertionRequestInternal(authorization, scope);
+    }
 		
 	private AssertionRequest buildAssertionRequestInternal(Object authorization, String scope) throws AuthException {
 		
