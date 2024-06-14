@@ -95,8 +95,12 @@ public class TokenEndpoint {
 		String encoded = Base64.getEncoder().encodeToString(assertion.getBytes("UTF-8"));
 		log.debug("Encoded token: "+encoded);
 		
+		String idpAssertion = request.getIdpAssertion();
+		String encodedIdp = Base64.getEncoder().encodeToString(idpAssertion.getBytes("UTF-8"));
+		
 		OAuth2TokenResponse result = new OAuth2TokenResponse();
 		result.setAccess_token(encoded);
+		result.setRefresh_token(encodedIdp);
 		result.setExpires_in(defaultTimeout);
 		result.setScope(request.getScope());
 		result.setToken_type("Bearer" /*request.getToken_type()*/);

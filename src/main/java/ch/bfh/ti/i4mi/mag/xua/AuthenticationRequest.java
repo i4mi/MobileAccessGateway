@@ -39,6 +39,8 @@ public class AuthenticationRequest {
 	
 	private String assertion;
 	
+	private String idpAssertion;
+	
 	private String code_challenge;
 		
 }
