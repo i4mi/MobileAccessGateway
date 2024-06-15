@@ -93,6 +93,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.opensaml.common.impl.SecureRandomIdentifierGenerator;
 import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.saml2.binding.encoding.HTTPSOAP11Encoder;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.security.MetadataCriteria;
 
@@ -111,7 +112,8 @@ import java.util.Base64;
 @Component
 public class ScSAMLRenewSecurityTokenBuilder {
     
-    private String renewEndpointUrl =  "https://samlservices.test.epr.fed.hin.ch/saml/2.0/renewassertion";                                                                              
+    //private String renewEndpointUrl =  "https://samlservices.test.epr.fed.hin.ch/saml/2.0/renewassertion";                                                                              
+    private String renewEndpointUrl =  "https://test.ahdis.ch/eprik-cara/camel/hin/ahdis/saml/2.0/renewassertion";
     
     private static SecureRandomIdentifierGenerator secureRandomIdGenerator;
     
@@ -226,12 +228,13 @@ public class ScSAMLRenewSecurityTokenBuilder {
         DocumentInternalIDContentReference timestampReference =
                 new DocumentInternalIDContentReference(timestamp.getWSUId());
         timestampReference.getTransforms().add(CanonicalizationMethod.EXCLUSIVE);
-        
+        timestampReference.setDigestAlgorithm("http://www.w3.org/2001/04/xmlenc#sha256");
         signature.getContentReferences().add(timestampReference);
         
         DocumentInternalIDContentReference bodyReference =
                 new DocumentInternalIDContentReference(WSSecurityHelper.getWSUId(body));
-        bodyReference.getTransforms().add(CanonicalizationMethod.EXCLUSIVE);        
+        bodyReference.getTransforms().add(CanonicalizationMethod.EXCLUSIVE);
+        bodyReference.setDigestAlgorithm("http://www.w3.org/2001/04/xmlenc#sha256");
         signature.getContentReferences().add(bodyReference);
         KeyInfo keyInfo = createSAMLObject(KeyInfo.class);
         SecurityTokenReference securityTokenReference = createSAMLObject(SecurityTokenReference.class);
@@ -248,11 +251,16 @@ public class ScSAMLRenewSecurityTokenBuilder {
         security.getUnknownXMLObjects().add(signature);
         
         marshall(envelope);
-        //sign(signature);
+        sign(signature);
         //securityModule.signObject(envelope, signature);
       
         // Build the W3C DOM representing the SOAP message.
         Element elem = marshall(envelope);
+        
+        //context.setOutboundSAMLMessage(null);
+        //HTTPSOAP11Encoder encode = new HTTPSOAP11Encoder();
+        //encode.encode(context);
+        
         
         log.info(StaxUtils.toString(elem));
         
@@ -359,7 +367,9 @@ public class ScSAMLRenewSecurityTokenBuilder {
             HttpSOAPClient soapClient = new HttpSOAPClient(httpClient, new BasicParserPool());
                        
             BasicSOAPMessageContext soapContext = new BasicSOAPMessageContext();
-            soapContext.setOutboundMessage(envelope);           
+            soapContext.setOutboundMessage(envelope);  
+            log.info("ISSUER="+soapContext.getOutboundMessageIssuer());
+            soapContext.setOutboundMessageIssuer("https://test.ahdis.ch");
             log.info("SEND!");
             soapClient.send(targetUrl, soapContext);
             log.info("POST-SEND!");

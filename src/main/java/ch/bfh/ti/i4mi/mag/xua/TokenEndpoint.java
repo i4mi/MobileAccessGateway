@@ -23,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 import org.apache.camel.Body;
+import org.apache.camel.ExchangeProperty;
 import org.apache.camel.Header;
 import org.ehcache.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,12 +122,16 @@ public class TokenEndpoint {
 		}
 	}
 	
-	public OAuth2TokenResponse handleFromIdp(@Body String assertion, @Header("scope") String scope) throws UnsupportedEncodingException, AuthException {
+	public OAuth2TokenResponse handleFromIdp(@ExchangeProperty("oauthrequest") AuthenticationRequest authRequest, @Body String assertion, @Header("scope") String scope) throws UnsupportedEncodingException, AuthException {
 											
 		String encoded = Base64.getEncoder().encodeToString(assertion.getBytes("UTF-8"));
 		
 		OAuth2TokenResponse result = new OAuth2TokenResponse();
 		result.setAccess_token(encoded);
+		
+		String idpAssertion = authRequest.getIdpAssertion();
+        String encodedIdp = Base64.getEncoder().encodeToString(idpAssertion.getBytes("UTF-8"));
+		result.setRefresh_token(encodedIdp);
 		result.setExpires_in(defaultTimeout);
 		result.setScope(scope);
 		result.setToken_type("Bearer" /*request.getToken_type()*/);

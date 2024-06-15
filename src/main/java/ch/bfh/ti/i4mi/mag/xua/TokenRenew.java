@@ -95,8 +95,17 @@ public class TokenRenew {
         return assertionRequest;
     }
     
+    public AuthenticationRequest emptyAuthRequest() {
+        return new AuthenticationRequest();
+    }
+    
     public AssertionRequest keepIdpAssertion(@ExchangeProperty("oauthrequest") AuthenticationRequest authRequest, @Body AssertionRequest assertionRequest) {
-        String idpAssertion = XMLHelper.nodeToString((Node) assertionRequest.getSamlToken());
+        String idpAssertion;
+        if (assertionRequest.getSamlToken() instanceof String) {
+            idpAssertion = (String) assertionRequest.getSamlToken(); 
+        } else {
+            idpAssertion = XMLHelper.nodeToString((Node) assertionRequest.getSamlToken());
+        }
         authRequest.setIdpAssertion(idpAssertion);
         return assertionRequest;
     }
