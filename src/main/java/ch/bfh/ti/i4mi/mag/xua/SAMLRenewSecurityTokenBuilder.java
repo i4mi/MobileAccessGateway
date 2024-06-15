@@ -118,7 +118,7 @@ import java.util.Base64;
 
 @Slf4j
 @Component
-public class ScSAMLRenewSecurityTokenBuilder {
+public class SAMLRenewSecurityTokenBuilder {
     
     private String renewEndpointUrl =  "https://samlservices.test.epr.fed.hin.ch/saml/2.0/renewassertion";                                                                              
     //private String renewEndpointUrl =  "https://test.ahdis.ch/eprik-cara/camel/hin/ahdis/saml/2.0/renewassertion";
@@ -144,10 +144,7 @@ public class ScSAMLRenewSecurityTokenBuilder {
     
     @Autowired
     SAMLProcessor processor;
-    
-    //@Autowired
-    //private HttpClient httpClient;
-    
+         
     @Value("${mag.iua.idp.key-alias}")
     private String keyAlias;
     
@@ -214,11 +211,7 @@ public class ScSAMLRenewSecurityTokenBuilder {
         expires.setDateTime(created.getDateTime().plusSeconds(5*60));
         timestamp.setExpires(expires);
         security.getUnknownXMLObjects().add(timestamp);
-        
-        // Binary security token is the base64 encoded representation of an X.509 public certificate.
-        //KeyStore.PrivateKeyEntry privateKeyEntry = securityModule.findPrivateKey();
-        //X509Certificate publicCertificate = (X509Certificate) privateKeyEntry.getCertificate();
-        
+                 
         X509Certificate publicCertificate = keyManager.getCertificate(keyAlias);
         log.info("CERT NOT NULL:"+publicCertificate.toString());
         
@@ -262,22 +255,13 @@ public class ScSAMLRenewSecurityTokenBuilder {
         security.getUnknownXMLObjects().add(signature);
         
         marshall(envelope);
-        sign(signature);
-        //securityModule.signObject(envelope, signature);
+        sign(signature);      
       
         // Build the W3C DOM representing the SOAP message.
-        Element elem = marshall(envelope);
-        
-        //context.setOutboundSAMLMessage(null);
-        //HTTPSOAP11Encoder encode = new HTTPSOAP11Encoder();
-        //encode.encode(context);
-        
+        Element elem = marshall(envelope);                 
         
         log.info(StaxUtils.toString(elem));
-        
-        //XMLObject result = send2(renewEndpointUrl, context, envelope);
-        //NodeList lst = result.getDOM().getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion","Assertion");
-        
+                 
         Envelope result = send(renewEndpointUrl, context, envelope);
         NodeList lst = result.getBody().getDOM().getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion","Assertion");
                          
@@ -366,7 +350,7 @@ public class ScSAMLRenewSecurityTokenBuilder {
     private Envelope send(String targetUrl, SAMLMessageContext context, Envelope envelope) throws SOAPException, CertificateEncodingException,
     MarshallingException, SignatureException, IllegalAccessException, org.opensaml.xml.security.SecurityException, URIException, MessageEncodingException {
            HttpClientBuilder clientBuilder = new HttpClientBuilder();
-            //clientBuilder.setHttpsProtocolSocketFactory(SSLProtocolSocketFactory.getSocketFactory());
+          
            CriteriaSet criteriaSet = new CriteriaSet();
            criteriaSet.add(new EntityIDCriteria(context.getPeerEntityId()));
            criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
@@ -380,111 +364,19 @@ public class ScSAMLRenewSecurityTokenBuilder {
                    new TLSProtocolSocketFactory(manager, trustManager));
        
            
-           HttpClient httpClient = clientBuilder.buildClient();
-            httpClient.setHostConfiguration(getHostConfiguration(new URI(targetUrl, true, "UTF-8"), context, httpClient));
-            
-           
+           HttpClient httpClient = clientBuilder.buildClient();                       
             HttpSOAPClient soapClient = new HttpSOAPClient(httpClient, new BasicParserPool());
                        
             BasicSOAPMessageContext soapContext = new BasicSOAPMessageContext();
             soapContext.setOutboundMessage(envelope);  
-            log.info("ISSUER="+soapContext.getOutboundMessageIssuer());
-            //soapContext.setOutboundMessageIssuer("https://test.ahdis.ch");
-            log.info("SEND!");
+                      
             soapClient.send(targetUrl, soapContext);
-            log.info("POST-SEND!");
+           
 
             Envelope soapResponse = (Envelope)soapContext.getInboundMessage();
             
             return soapResponse;
     }
-    
-    protected HostConfiguration getHostConfiguration(URI uri, SAMLMessageContext context, HttpClient httpClient) throws MessageEncodingException {
-
-        try {
-
-            HostConfiguration hc = httpClient.getHostConfiguration();
-
-            if (hc != null) {
-                // Clone configuration from the HTTP Client object
-                log.info("EXIST");
-                hc = new HostConfiguration(hc);
-            } else {
-                // Create brand new configuration when there are no defaults
-                log.info("NOT EXIST");
-                hc = new HostConfiguration();
-            }
-
-            if (uri.getScheme().equalsIgnoreCase("http")) {
-
-                log.info("Using HTTP configuration");
-                hc.setHost(uri);
-
-            } else {
-
-                log.info("Using HTTPS configuration");
-                log.info("PEER="+context.getPeerEntityId());
-                CriteriaSet criteriaSet = new CriteriaSet();
-                criteriaSet.add(new EntityIDCriteria(context.getPeerEntityId()));
-                criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
-                criteriaSet.add(new UsageCriteria(UsageType.UNSPECIFIED));
-
-                X509TrustManager trustManager = new X509TrustManager(criteriaSet, context.getLocalSSLTrustEngine());
-                
-                //X509KeyManager manager1 = new X509KeyManager(context.getLocalSSLCredential());                
-                //log.info("TLS NOT NULL:"+keyManager.getCredential("hintls").toString());
-               
-                X509KeyManager manager = new X509KeyManager((X509Credential) keyManager.getCredential("hintls"));
-                                
-                HostnameVerifier hostnameVerifier = context.getLocalSSLHostnameVerifier();
-
-                ProtocolSocketFactory socketFactory = getSSLSocketFactory(context, manager, trustManager, hostnameVerifier);
-                Protocol protocol = new Protocol("https", socketFactory, 443);
-                hc.setHost(uri.getHost(), uri.getPort(), protocol);
-                               
-                log.info("SET-HOST: "+uri.getHost()+" proto="+protocol.toString());
-            }
-
-            return hc;
-
-        } catch (URIException e) {
-            throw new MessageEncodingException("Error parsing remote location URI", e);
-        }
-
-    }
-
-    /**
-     * Method returns SecureProtocolSocketFactory used to connect to create SSL connections for artifact resolution.
-     * By default we create instance of org.opensaml.ws.soap.client.http.TLSProtocolSocketFactory.
-     *
-     * @param context current SAML context
-     * @param manager keys used for client authentication
-     * @param trustManager trust manager for server verification
-     * @param hostnameVerifier verifier for server hostname, or null
-     * @return socket factory
-     */
-    protected SecureProtocolSocketFactory getSSLSocketFactory(SAMLMessageContext context, X509KeyManager manager, X509TrustManager trustManager, HostnameVerifier hostnameVerifier) {
-        if (isHostnameVerificationSupported()) {
-            return new TLSProtocolSocketFactory(manager, trustManager, hostnameVerifier);
-        } else {
-            return new TLSProtocolSocketFactory(manager, trustManager);
-        }
-    }
-
-    /**
-     * Check for the latest OpenSAML library. Support for HostnameVerification was added in openws-1.5.1 and
-     * customers might use previous versions of OpenSAML.
-     *
-     * @return true when OpenSAML library support hostname verification
-     */
-    protected boolean isHostnameVerificationSupported() {
-        try {
-            TLSProtocolSocketFactory.class.getConstructor(javax.net.ssl.X509KeyManager.class, javax.net.ssl.X509TrustManager.class, javax.net.ssl.HostnameVerifier.class);
-            return true;
-        } catch (NoSuchMethodException e) {
-            log.warn("HostnameVerification is not supported, update your OpenSAML libraries");
-            return false;
-        }
-    }
+         
 
 }
