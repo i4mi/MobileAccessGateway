@@ -41,12 +41,12 @@ public class TokenRenewRouteBuilder extends RouteBuilder {
         
         from(String.format("servlet://%s?httpMethodRestrict=POST&matchOnUriPrefix=true", RENEW_PATH))
                 .routeId("renewEndpoint")
-                .process(ScSAMLRenewSecurityTokenBuilder.keepRequest())
+                .process(SAMLRenewSecurityTokenBuilder.keepRequest())
                 .setProperty("oauthrequest").method(TokenRenew.class, "emptyAuthRequest")
                 .doTry()                          
                     .bean(AuthRequestConverter.class, "buildAssertionRequestFromToken")
                     .setHeader("assertionRequest", body())
-                    .bean(ScSAMLRenewSecurityTokenBuilder.class, "requestRenewToken")                    
+                    .bean(SAMLRenewSecurityTokenBuilder.class, "requestRenewToken")                    
                                       
                     .bean(TokenRenew.class, "buildAssertionRequest")
                     .bean(TokenRenew.class, "keepIdpAssertion")
