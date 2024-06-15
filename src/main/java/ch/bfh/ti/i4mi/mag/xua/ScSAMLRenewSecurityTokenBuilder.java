@@ -1,5 +1,6 @@
 package ch.bfh.ti.i4mi.mag.xua;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
@@ -23,6 +24,7 @@ import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.httpclient.protocol.SSLProtocolSocketFactory;
@@ -31,7 +33,9 @@ import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.http.impl.client.HttpClients;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
+import org.opensaml.common.SAMLException;
 import org.opensaml.common.SignableSAMLObject;
+import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.soap.client.BasicSOAPMessageContext;
 import org.opensaml.ws.soap.client.http.HttpClientBuilder;
@@ -41,6 +45,8 @@ import org.opensaml.ws.soap.common.SOAPException;
 import org.opensaml.ws.soap.soap11.Envelope;
 import org.opensaml.ws.soap.soap11.Header;
 import org.opensaml.ws.soap.util.SOAPHelper;
+import org.opensaml.ws.transport.http.HttpClientInTransport;
+import org.opensaml.ws.transport.http.HttpClientOutTransport;
 import org.opensaml.ws.wssecurity.BinarySecurityToken;
 import org.opensaml.ws.wssecurity.Created;
 import org.opensaml.ws.wssecurity.EncodedString;
@@ -85,6 +91,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.key.KeyManager;
+import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.trust.X509KeyManager;
 import org.springframework.security.saml.trust.X509TrustManager;
 import org.springframework.stereotype.Component;
@@ -95,6 +102,7 @@ import org.opensaml.common.impl.SecureRandomIdentifierGenerator;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.binding.encoding.HTTPSOAP11Encoder;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.security.MetadataCriteria;
 
 import javax.servlet.http.HttpServletRequest;
@@ -112,8 +120,8 @@ import java.util.Base64;
 @Component
 public class ScSAMLRenewSecurityTokenBuilder {
     
-    //private String renewEndpointUrl =  "https://samlservices.test.epr.fed.hin.ch/saml/2.0/renewassertion";                                                                              
-    private String renewEndpointUrl =  "https://test.ahdis.ch/eprik-cara/camel/hin/ahdis/saml/2.0/renewassertion";
+    private String renewEndpointUrl =  "https://samlservices.test.epr.fed.hin.ch/saml/2.0/renewassertion";                                                                              
+    //private String renewEndpointUrl =  "https://test.ahdis.ch/eprik-cara/camel/hin/ahdis/saml/2.0/renewassertion";
     
     private static SecureRandomIdentifierGenerator secureRandomIdGenerator;
     
@@ -133,6 +141,9 @@ public class ScSAMLRenewSecurityTokenBuilder {
     
     @Autowired
     private SAMLContextProvider contextProvider;
+    
+    @Autowired
+    SAMLProcessor processor;
     
     //@Autowired
     //private HttpClient httpClient;
@@ -264,6 +275,9 @@ public class ScSAMLRenewSecurityTokenBuilder {
         
         log.info(StaxUtils.toString(elem));
         
+        //XMLObject result = send2(renewEndpointUrl, context, envelope);
+        //NodeList lst = result.getDOM().getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion","Assertion");
+        
         Envelope result = send(renewEndpointUrl, context, envelope);
         NodeList lst = result.getBody().getDOM().getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion","Assertion");
                          
@@ -271,10 +285,7 @@ public class ScSAMLRenewSecurityTokenBuilder {
         log.debug("NODE: "+node.toString());
         
         StringWriter writer = new StringWriter();
-        TransformerFactory factory = TransformerFactory.newInstance();
-        //factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "all");
-        //factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "all");
-        
+        TransformerFactory factory = TransformerFactory.newInstance();       
         Transformer transformer = factory.newTransformer();
         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         transformer.transform(new DOMSource(node), new StreamResult(writer));
@@ -350,26 +361,35 @@ public class ScSAMLRenewSecurityTokenBuilder {
     public static String randomId() {
         return secureRandomIdGenerator.generateIdentifier();
     }
-  
-  
 
-   
    
     private Envelope send(String targetUrl, SAMLMessageContext context, Envelope envelope) throws SOAPException, CertificateEncodingException,
     MarshallingException, SignatureException, IllegalAccessException, org.opensaml.xml.security.SecurityException, URIException, MessageEncodingException {
            HttpClientBuilder clientBuilder = new HttpClientBuilder();
             //clientBuilder.setHttpsProtocolSocketFactory(SSLProtocolSocketFactory.getSocketFactory());
-            HttpClient httpClient = clientBuilder.buildClient();
-            httpClient.setHostConfiguration(getHostConfiguration(new URI(targetUrl, "UTF-8"), context, httpClient));
-            /*clientBuilder.setHttpsProtocolSocketFactory(
-                    new TLSProtocolSocketFactory(keyManager, trustManager));
-          */
+           CriteriaSet criteriaSet = new CriteriaSet();
+           criteriaSet.add(new EntityIDCriteria(context.getPeerEntityId()));
+           criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
+           criteriaSet.add(new UsageCriteria(UsageType.UNSPECIFIED));
+
+           X509TrustManager trustManager = new X509TrustManager(criteriaSet, context.getLocalSSLTrustEngine());
+           X509KeyManager manager = new X509KeyManager((X509Credential) keyManager.getCredential("hintls"));
+           
+           
+           clientBuilder.setHttpsProtocolSocketFactory(
+                   new TLSProtocolSocketFactory(manager, trustManager));
+       
+           
+           HttpClient httpClient = clientBuilder.buildClient();
+            httpClient.setHostConfiguration(getHostConfiguration(new URI(targetUrl, true, "UTF-8"), context, httpClient));
+            
+           
             HttpSOAPClient soapClient = new HttpSOAPClient(httpClient, new BasicParserPool());
                        
             BasicSOAPMessageContext soapContext = new BasicSOAPMessageContext();
             soapContext.setOutboundMessage(envelope);  
             log.info("ISSUER="+soapContext.getOutboundMessageIssuer());
-            soapContext.setOutboundMessageIssuer("https://test.ahdis.ch");
+            //soapContext.setOutboundMessageIssuer("https://test.ahdis.ch");
             log.info("SEND!");
             soapClient.send(targetUrl, soapContext);
             log.info("POST-SEND!");
@@ -405,9 +425,9 @@ public class ScSAMLRenewSecurityTokenBuilder {
                 log.info("Using HTTPS configuration");
                 log.info("PEER="+context.getPeerEntityId());
                 CriteriaSet criteriaSet = new CriteriaSet();
-                //criteriaSet.add(new EntityIDCriteria(context.getPeerEntityId()));
-                //criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
-                //criteriaSet.add(new UsageCriteria(UsageType.UNSPECIFIED));
+                criteriaSet.add(new EntityIDCriteria(context.getPeerEntityId()));
+                criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
+                criteriaSet.add(new UsageCriteria(UsageType.UNSPECIFIED));
 
                 X509TrustManager trustManager = new X509TrustManager(criteriaSet, context.getLocalSSLTrustEngine());
                 
