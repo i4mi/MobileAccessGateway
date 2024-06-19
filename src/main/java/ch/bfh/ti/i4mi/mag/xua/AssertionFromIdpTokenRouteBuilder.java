@@ -60,7 +60,7 @@ public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
 		    // identity provider assertions cached in spring security session
 		    // this is unrelated to the IDP provider cookie set by the IDP itself
 		    .process(Utils.endHttpSession())
-		    
+		    .setProperty("oauthrequest").method(TokenRenew.class, "emptyAuthRequest")		    
 		    .bean(AuthRequestConverter.class, "buildAssertionRequestFromIdp")
 			.bean(Iti40RequestGenerator.class, "buildAssertion")			
 			.removeHeaders("*", "scope")

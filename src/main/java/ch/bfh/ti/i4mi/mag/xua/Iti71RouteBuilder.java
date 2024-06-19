@@ -64,7 +64,7 @@ public class Iti71RouteBuilder extends RouteBuilder {
 			
 		from(String.format("servlet://%s?matchOnUriPrefix=true", AUTHORIZE_PATH)).routeId("iti71")
 		.doTry()
-		    .setHeader("oauthrequest").method(converter, "buildAuthenticationRequest")
+		    .setProperty("oauthrequest").method(converter, "buildAuthenticationRequest")
 		    
 		    // end spring security session in order to prevent use of already expired
 		    // identity provider assertions cached in spring security session
@@ -72,8 +72,8 @@ public class Iti71RouteBuilder extends RouteBuilder {
 		    .process(Utils.endHttpSession())
 		    
 		    .bean(AuthRequestConverter.class, "buildAssertionRequest")
-			.bean(Iti40RequestGenerator.class, "buildAssertion")
-			
+		    .bean(TokenRenew.class, "keepIdpAssertion")
+			.bean(Iti40RequestGenerator.class, "buildAssertion")			
 			.removeHeaders("*","oauthrequest")
 			.setHeader(CxfConstants.OPERATION_NAME,
 			        constant("Issue"))
