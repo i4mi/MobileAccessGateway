@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import org.apache.camel.Body;
+import org.apache.camel.ExchangeProperty;
 import org.apache.camel.Header;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.cxf.binding.soap.SoapFault;
@@ -37,7 +38,7 @@ public class AuthResponseConverter {
 	@Autowired
 	private Cache<String, AuthenticationRequest> codeToToken;	
 	
-	public String handle(@Body String assertion, @Header("oauthrequest") AuthenticationRequest request) throws UnsupportedEncodingException  {
+	public String handle(@Body String assertion, @ExchangeProperty("oauthrequest") AuthenticationRequest request) throws UnsupportedEncodingException  {
 				
 		String returnurl = request.getRedirect_uri();
 		String state = request.getState();		
@@ -54,7 +55,7 @@ public class AuthResponseConverter {
 		return returnurl;
 	}
 	
-	public String handleerror(@Header("oauthrequest") AuthenticationRequest request, @Body AuthException exception) throws UnsupportedEncodingException{
+	public String handleerror(@ExchangeProperty("oauthrequest") AuthenticationRequest request, @Body AuthException exception) throws UnsupportedEncodingException{
 		
 		String returnurl = request.getRedirect_uri();
 		String state = request.getState();		
@@ -68,7 +69,7 @@ public class AuthResponseConverter {
 		return returnurl;
 	}
 	
-	public String handlesoaperror(@Header("oauthrequest") AuthenticationRequest request, @Body SoapFault exception) throws UnsupportedEncodingException{
+	public String handlesoaperror(@ExchangeProperty("oauthrequest") AuthenticationRequest request, @Body SoapFault exception) throws UnsupportedEncodingException{
 		
 		String returnurl = request.getRedirect_uri();
 		String state = request.getState();		
