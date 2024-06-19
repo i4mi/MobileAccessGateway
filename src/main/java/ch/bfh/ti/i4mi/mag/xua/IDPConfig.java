@@ -29,6 +29,8 @@ public class IDPConfig {
     private String name;
     
 	private String metadataUrl;
+	
+	private String renewUrl;
 
     private String keyAlias;
 
