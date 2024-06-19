@@ -1,11 +1,8 @@
 package ch.bfh.ti.i4mi.mag.xua;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.TrustManager;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -16,26 +13,15 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.camel.Body;
-import org.apache.camel.Exchange;
 import org.apache.camel.ExchangeProperty;
 import org.apache.camel.Processor;
 import org.apache.camel.http.common.HttpMessage;
-import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import org.apache.commons.httpclient.protocol.SSLProtocolSocketFactory;
-import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
 import org.apache.cxf.staxutils.StaxUtils;
-import org.apache.http.impl.client.HttpClients;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
-import org.opensaml.common.SAMLException;
 import org.opensaml.common.SignableSAMLObject;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.soap.client.BasicSOAPMessageContext;
 import org.opensaml.ws.soap.client.http.HttpClientBuilder;
@@ -44,9 +30,6 @@ import org.opensaml.ws.soap.client.http.TLSProtocolSocketFactory;
 import org.opensaml.ws.soap.common.SOAPException;
 import org.opensaml.ws.soap.soap11.Envelope;
 import org.opensaml.ws.soap.soap11.Header;
-import org.opensaml.ws.soap.util.SOAPHelper;
-import org.opensaml.ws.transport.http.HttpClientInTransport;
-import org.opensaml.ws.transport.http.HttpClientOutTransport;
 import org.opensaml.ws.wssecurity.BinarySecurityToken;
 import org.opensaml.ws.wssecurity.Created;
 import org.opensaml.ws.wssecurity.EncodedString;
@@ -73,21 +56,16 @@ import org.opensaml.xml.security.credential.UsageType;
 import org.opensaml.xml.security.criteria.EntityIDCriteria;
 import org.opensaml.xml.security.criteria.UsageCriteria;
 import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
-import org.opensaml.xml.security.x509.BasicX509Credential;
 import org.opensaml.xml.security.x509.X509Credential;
 
 import org.opensaml.xml.signature.DocumentInternalIDContentReference;
 import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.signature.SignableXMLObject;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureConstants;
 import org.opensaml.xml.signature.SignatureException;
 import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.signature.X509Data;
-import org.opensaml.xml.signature.X509IssuerSerial;
-import org.opensaml.xml.signature.impl.X509IssuerSerialBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.key.KeyManager;
@@ -98,13 +76,15 @@ import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
 import org.opensaml.common.impl.SecureRandomIdentifierGenerator;
 import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.binding.encoding.HTTPSOAP11Encoder;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.security.MetadataCriteria;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -115,13 +95,13 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Map;
 
 @Slf4j
 @Component
 public class SAMLRenewSecurityTokenBuilder {
     
-    private String renewEndpointUrl =  "https://samlservices.test.epr.fed.hin.ch/saml/2.0/renewassertion";                                                                              
-    //private String renewEndpointUrl =  "https://test.ahdis.ch/eprik-cara/camel/hin/ahdis/saml/2.0/renewassertion";
+    //private String renewEndpointUrl =  "https://samlservices.test.epr.fed.hin.ch/saml/2.0/renewassertion";                                                                              
     
     private static SecureRandomIdentifierGenerator secureRandomIdGenerator;
     
@@ -144,9 +124,10 @@ public class SAMLRenewSecurityTokenBuilder {
     
     @Autowired
     SAMLProcessor processor;
-         
-    @Value("${mag.iua.idp.key-alias}")
-    private String keyAlias;
+    
+    @Resource
+    Map<String, IDPConfig> idps;
+          
     
     public Element addSecurityHeader(String input) throws XMLStreamException {
         return (Element) StaxUtils.read(new StringReader(input)).getDocumentElement();
@@ -163,10 +144,14 @@ public class SAMLRenewSecurityTokenBuilder {
             
     public String requestRenewToken(@Body ch.bfh.ti.i4mi.mag.xua.AssertionRequest request, @ExchangeProperty("request") HttpServletRequest hrequest, @ExchangeProperty("response") HttpServletResponse hresponse) throws Exception {
         
-        SAMLMessageContext context = contextProvider.getLocalAndPeerEntity(hrequest, hresponse);
-        
+        SAMLMessageContext context = contextProvider.getLocalAndPeerEntity(hrequest, hresponse);        
+        String local = context.getLocalExtendedMetadata().getAlias();
+        IDPConfig config = idps.get(local);      
+        if (config == null || config.getRenewUrl() == null) throw new InvalidRequestException("No 'renewUrl' configured for IDP '"+local+"' in the MAG configuration.");
+        String renewEndpointUrl =  config.getRenewUrl();                                                                              
+                        
         Object token = request.getSamlToken();
-        
+        if (token == null) throw new InvalidRequestException("No token provided for renewal.");
         if (token instanceof String) {
             token = addSecurityHeader((String) token);
         }
@@ -212,8 +197,8 @@ public class SAMLRenewSecurityTokenBuilder {
         timestamp.setExpires(expires);
         security.getUnknownXMLObjects().add(timestamp);
                  
-        X509Certificate publicCertificate = keyManager.getCertificate(keyAlias);
-        log.info("CERT NOT NULL:"+publicCertificate.toString());
+        String signKeyAlias = config.getSignKeyAlias() != null ? config.getSignKeyAlias() : config.getKeyAlias();
+        X509Certificate publicCertificate = keyManager.getCertificate(signKeyAlias);        
         
         BinarySecurityToken binarySecurityToken = createSAMLObject(BinarySecurityToken.class);
         binarySecurityToken.setEncodingType(EncodedString.ENCODING_TYPE_BASE64_BINARY);
@@ -225,7 +210,7 @@ public class SAMLRenewSecurityTokenBuilder {
         
         
         Signature signature = createSAMLObject(Signature.class);
-        Credential cred = keyManager.getCredential(keyAlias);
+        Credential cred = keyManager.getCredential(signKeyAlias);
         signature.setSigningCredential(cred);
         signature.setSignatureAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA512);
         signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
@@ -260,14 +245,13 @@ public class SAMLRenewSecurityTokenBuilder {
         // Build the W3C DOM representing the SOAP message.
         Element elem = marshall(envelope);                 
         
-        log.info(StaxUtils.toString(elem));
+        log.debug(StaxUtils.toString(elem));
                  
-        Envelope result = send(renewEndpointUrl, context, envelope);
+        Envelope result = send(renewEndpointUrl, config, context, envelope);
         NodeList lst = result.getBody().getDOM().getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion","Assertion");
                          
         Node node = lst.item(0);
-        log.debug("NODE: "+node.toString());
-        
+                
         StringWriter writer = new StringWriter();
         TransformerFactory factory = TransformerFactory.newInstance();       
         Transformer transformer = factory.newTransformer();
@@ -347,7 +331,7 @@ public class SAMLRenewSecurityTokenBuilder {
     }
 
    
-    private Envelope send(String targetUrl, SAMLMessageContext context, Envelope envelope) throws SOAPException, CertificateEncodingException,
+    private Envelope send(String targetUrl, IDPConfig config, SAMLMessageContext context, Envelope envelope) throws SOAPException, CertificateEncodingException,
     MarshallingException, SignatureException, IllegalAccessException, org.opensaml.xml.security.SecurityException, URIException, MessageEncodingException {
            HttpClientBuilder clientBuilder = new HttpClientBuilder();
           
@@ -357,7 +341,7 @@ public class SAMLRenewSecurityTokenBuilder {
            criteriaSet.add(new UsageCriteria(UsageType.UNSPECIFIED));
 
            X509TrustManager trustManager = new X509TrustManager(criteriaSet, context.getLocalSSLTrustEngine());
-           X509KeyManager manager = new X509KeyManager((X509Credential) keyManager.getCredential("hintls"));
+           X509KeyManager manager = new X509KeyManager((X509Credential) keyManager.getCredential(config.getTlsKeyAlias()));
            
            
            clientBuilder.setHttpsProtocolSocketFactory(
