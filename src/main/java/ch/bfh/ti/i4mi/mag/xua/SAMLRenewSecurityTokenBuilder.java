@@ -202,7 +202,7 @@ public class SAMLRenewSecurityTokenBuilder {
         security.getUnknownXMLObjects().add(timestamp);
                  
         X509Certificate publicCertificate = keyManager.getCertificate(keyAlias);
-        log.info("CERT NOT NULL:"+publicCertificate.toString());
+        log.debug("CERT NOT NULL:"+publicCertificate.toString());
         
         BinarySecurityToken binarySecurityToken = createSAMLObject(BinarySecurityToken.class);
         binarySecurityToken.setEncodingType(EncodedString.ENCODING_TYPE_BASE64_BINARY);
@@ -249,7 +249,7 @@ public class SAMLRenewSecurityTokenBuilder {
         // Build the W3C DOM representing the SOAP message.
         Element elem = marshall(envelope);                 
         
-        log.info(StaxUtils.toString(elem));
+        log.debug(StaxUtils.toString(elem));
                  
         Envelope result = send(renewEndpointUrl, context, envelope);
         NodeList lst = result.getBody().getDOM().getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion","Assertion");
