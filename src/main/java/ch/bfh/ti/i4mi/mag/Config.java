@@ -420,4 +420,18 @@ public class Config {
         return config;
     }
 
+    @Bean(name = "stsEndpoint")
+    public String getStsEndpoint(final @Value("${mag.iua.ap.url}") String assertionEndpointUrl,
+                                 final @Value("${mag.iua.ap.wsdl}") String wsdl,
+                                 final @Value("${mag.iua.ap.endpoint-name:}") String endpointName,
+                                 final @Value("${mag.client-ssl.enabled}") boolean clientSsl) {
+        return String.format("cxf://%s?dataFormat=CXF_MESSAGE&wsdlURL=%s&loggingFeatureEnabled=true" +
+                                     ((endpointName != null && endpointName.length() > 0) ? "&endpointName=" + endpointName : "") +
+                                     "&inInterceptors=#soapResponseLogger" +
+                                     "&inFaultInterceptors=#soapResponseLogger" +
+                                     "&outInterceptors=#soapRequestLogger" +
+                                     "&outFaultInterceptors=#soapRequestLogger" +
+                                     (clientSsl ? "&sslContextParameters=#sslContext" : ""),
+                             assertionEndpointUrl, wsdl);
+    }
 }

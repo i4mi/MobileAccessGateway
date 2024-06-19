@@ -20,8 +20,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
 import org.apache.cxf.binding.soap.SoapFault;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
@@ -35,32 +34,18 @@ public class Iti71RouteBuilder extends RouteBuilder {
 
 	public static final String AUTHORIZE_PATH = "authorize";
 
-	@Value("${mag.iua.ap.url}")
-	private String assertionEndpointUrl;
-	
-	@Value("${mag.iua.ap.wsdl}")
-	private String wsdl;
-	
-	@Value("${mag.iua.ap.endpoint-name:}")
-	private String endpointName;
-	
-	@Value("${mag.client-ssl.enabled}")
-	private boolean clientSsl;
-	
-	@Autowired
-	private AuthRequestConverter converter;
+	private final AuthRequestConverter converter;
+
+	private final String stsEndpoint;
+
+	public Iti71RouteBuilder(final AuthRequestConverter converter,
+							 final @Qualifier("stsEndpoint") String stsEndpoint) {
+		this.converter = converter;
+		this.stsEndpoint = stsEndpoint;
+	}
 	
 	@Override
 	public void configure() throws Exception {
-				
-		final String assertionEndpoint = String.format("cxf://%s?dataFormat=CXF_MESSAGE&wsdlURL=%s&loggingFeatureEnabled=true"+
-				((endpointName!=null && endpointName.length()>0) ? "&endpointName="+endpointName : "")+
-                "&inInterceptors=#soapResponseLogger" + 
-                "&inFaultInterceptors=#soapResponseLogger"+
-                "&outInterceptors=#soapRequestLogger" + 
-                "&outFaultInterceptors=#soapRequestLogger"+
-                (clientSsl ? "&sslContextParameters=#sslContext" : ""),
-				assertionEndpointUrl, wsdl);
 			
 		from(String.format("servlet://%s?matchOnUriPrefix=true", AUTHORIZE_PATH)).routeId("iti71")
 		.doTry()
@@ -79,7 +64,7 @@ public class Iti71RouteBuilder extends RouteBuilder {
 			        constant("Issue"))
 			.setHeader(CxfConstants.OPERATION_NAMESPACE,
 			        constant("http://docs.oasis-open.org/ws-sx/ws-trust/200512/wsdl"))			
-			.to(assertionEndpoint)		
+			.to(this.stsEndpoint)
 			.bean(AssertionExtractor.class)
 			.bean(LoginAtnaLogger.class, "loginSuccess")
 			.removeHeaders("*","oauthrequest")
