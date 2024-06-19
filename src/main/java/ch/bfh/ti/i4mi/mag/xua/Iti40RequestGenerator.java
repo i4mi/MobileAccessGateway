@@ -180,12 +180,12 @@ public class Iti40RequestGenerator {
 		 		 		
 		 Object token = request.getSamlToken();
 		 if (token == null) throw new AuthException(400, "server_error", "No SAML token found");
-		 log.info(token.getClass().getSimpleName());
+		 log.debug(token.getClass().getSimpleName());
 		 /*if (token.startsWith("IHE-SAML ")) token = token.substring("IHE-SAML ".length());			
 		 byte[] decoded = Base64.getDecoder().decode(token);
 		 token = new String(decoded);*/
 		 if (token instanceof String && token.toString().startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")) token = token.toString().substring("<?xml version=\"1.0\" encoding=\"UTF-8\"?>".length());
-		 log.info("Decoded IDP Token:"+token);
+		 log.debug("Decoded IDP Token:"+token);
 		 
 		 MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
 		 SOAPMessage message = factory.createMessage(new MimeHeaders(), new ByteArrayInputStream(BASE_MSG().getBytes(Charset.forName("UTF-8"))));
