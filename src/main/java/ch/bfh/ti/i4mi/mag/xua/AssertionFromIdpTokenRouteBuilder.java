@@ -70,7 +70,7 @@ public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
 			        constant("http://docs.oasis-open.org/ws-sx/ws-trust/200512/wsdl"))			
 			.to(assertionEndpoint)		
 			.bean(AssertionExtractor.class)
-			.bean(TokenEndpoint.class, "handleFromIdp")	
+			.bean(TokenEndpoint.class, "generateOAuth2TokenResponse")
 			
 	    .doCatch(AuthException.class)
 		    .setBody(simple("${exception}"))		    

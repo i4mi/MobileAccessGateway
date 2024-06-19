@@ -112,8 +112,8 @@ public class AuthRequestConverter {
 		return buildAssertionRequestInternal(authorization, scope);
 	}
 	
-	public AssertionRequest buildAssertionRequestFromToken(@Body String authorization, @Header("scope") String scope) throws AuthException {
-	    
+	public AssertionRequest buildAssertionRequestFromToken(@Header("refresh_token") String authorization,
+														   final @Header("scope") String scope) throws AuthException {
 	    try {
 	    authorization = new String(Base64.getDecoder().decode(authorization), "UTF-8");
 	    } catch (UnsupportedEncodingException e) {}

@@ -150,7 +150,10 @@ public class TokenEndpoint {
 		}
 	}
 	
-	public OAuth2TokenResponse handleFromIdp(@ExchangeProperty("oauthrequest") AuthenticationRequest authRequest, @Body String assertion, @Header("scope") String scope) throws UnsupportedEncodingException, AuthException, XMLParserException, UnmarshallingException {
+	public OAuth2TokenResponse generateOAuth2TokenResponse(final @ExchangeProperty("oauthrequest") AuthenticationRequest authRequest,
+														   final @Body String assertion,
+														   final @Header("scope") String scope) throws UnsupportedEncodingException
+			, XMLParserException, UnmarshallingException {
 											
 		String encoded = Base64.getEncoder().encodeToString(assertion.getBytes("UTF-8"));
 		
@@ -165,7 +168,6 @@ public class TokenEndpoint {
 		result.setScope(scope);
 		result.setToken_type("Bearer" /*request.getToken_type()*/);
 		return result;
-				
 	}
 	
 	public ErrorResponse handleError(@Body AuthException in) {

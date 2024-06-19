@@ -16,12 +16,9 @@
 
 package ch.bfh.ti.i4mi.mag.xua;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.TrustManager;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -32,27 +29,14 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.camel.Body;
-import org.apache.camel.Exchange;
 import org.apache.camel.ExchangeProperty;
 import org.apache.camel.Processor;
 import org.apache.camel.http.common.HttpMessage;
-import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import org.apache.commons.httpclient.protocol.SSLProtocolSocketFactory;
-import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
 import org.apache.cxf.staxutils.StaxUtils;
-import org.apache.http.impl.client.HttpClients;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
-import org.opensaml.common.SAMLException;
 import org.opensaml.common.SignableSAMLObject;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
 import org.opensaml.ws.soap.client.BasicSOAPMessageContext;
 import org.opensaml.ws.soap.client.http.HttpClientBuilder;
 import org.opensaml.ws.soap.client.http.HttpSOAPClient;
@@ -60,9 +44,6 @@ import org.opensaml.ws.soap.client.http.TLSProtocolSocketFactory;
 import org.opensaml.ws.soap.common.SOAPException;
 import org.opensaml.ws.soap.soap11.Envelope;
 import org.opensaml.ws.soap.soap11.Header;
-import org.opensaml.ws.soap.util.SOAPHelper;
-import org.opensaml.ws.transport.http.HttpClientInTransport;
-import org.opensaml.ws.transport.http.HttpClientOutTransport;
 import org.opensaml.ws.wssecurity.BinarySecurityToken;
 import org.opensaml.ws.wssecurity.Created;
 import org.opensaml.ws.wssecurity.EncodedString;
@@ -89,19 +70,15 @@ import org.opensaml.xml.security.credential.UsageType;
 import org.opensaml.xml.security.criteria.EntityIDCriteria;
 import org.opensaml.xml.security.criteria.UsageCriteria;
 import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
-import org.opensaml.xml.security.x509.BasicX509Credential;
 import org.opensaml.xml.security.x509.X509Credential;
 
 import org.opensaml.xml.signature.DocumentInternalIDContentReference;
 import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.signature.SignableXMLObject;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureConstants;
 import org.opensaml.xml.signature.SignatureException;
 import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.signature.X509Data;
-import org.opensaml.xml.signature.X509IssuerSerial;
-import org.opensaml.xml.signature.impl.X509IssuerSerialBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.saml.context.SAMLContextProvider;
@@ -116,9 +93,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.opensaml.common.impl.SecureRandomIdentifierGenerator;
 import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.binding.encoding.HTTPSOAP11Encoder;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.security.MetadataCriteria;
 
 import javax.servlet.http.HttpServletRequest;
@@ -129,7 +104,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.time.Instant;
 import java.util.Base64;
 
 @Slf4j
@@ -140,8 +114,6 @@ public class SAMLRenewSecurityTokenBuilder {
     //private String renewEndpointUrl =  "https://test.ahdis.ch/eprik-cara/camel/hin/ahdis/saml/2.0/renewassertion";
     
     private static SecureRandomIdentifierGenerator secureRandomIdGenerator;
-    
-    private String destination;
     
     static {
         try {
@@ -177,9 +149,10 @@ public class SAMLRenewSecurityTokenBuilder {
         };
     }
             
-    public String requestRenewToken(@Body ch.bfh.ti.i4mi.mag.xua.AssertionRequest request, @ExchangeProperty("request") HttpServletRequest hrequest, @ExchangeProperty("response") HttpServletResponse hresponse) throws Exception {
-        
-        SAMLMessageContext context = contextProvider.getLocalAndPeerEntity(hrequest, hresponse);
+    public String requestRenewToken(final @Body ch.bfh.ti.i4mi.mag.xua.AssertionRequest request,
+                                    final @ExchangeProperty("request") HttpServletRequest hrequest,
+                                    final @ExchangeProperty("response") HttpServletResponse hresponse) throws Exception {
+        final SAMLMessageContext context = this.contextProvider.getLocalAndPeerEntity(hrequest, hresponse);
         
         Object token = request.getSamlToken();
         
@@ -363,8 +336,7 @@ public class SAMLRenewSecurityTokenBuilder {
     }
 
    
-    private Envelope send(String targetUrl, SAMLMessageContext context, Envelope envelope) throws SOAPException, CertificateEncodingException,
-    MarshallingException, SignatureException, IllegalAccessException, org.opensaml.xml.security.SecurityException, URIException, MessageEncodingException {
+    private Envelope send(String targetUrl, SAMLMessageContext context, Envelope envelope) throws SOAPException, org.opensaml.xml.security.SecurityException {
            HttpClientBuilder clientBuilder = new HttpClientBuilder();
           
            CriteriaSet criteriaSet = new CriteriaSet();
