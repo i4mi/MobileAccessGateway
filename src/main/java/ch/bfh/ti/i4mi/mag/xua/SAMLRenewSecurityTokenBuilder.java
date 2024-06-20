@@ -153,6 +153,17 @@ public class SAMLRenewSecurityTokenBuilder {
                                     final @ExchangeProperty("request") HttpServletRequest hrequest,
                                     final @ExchangeProperty("response") HttpServletResponse hresponse) throws Exception {
         final SAMLMessageContext context = this.contextProvider.getLocalAndPeerEntity(hrequest, hresponse);
+        final var localEntityId = context.getLocalEntityId();
+        if (!localEntityId.contains("/alias/")) {
+            throw new AuthException(400, "invalid_request", "Local entity ID does not contain alias");
+        }
+        final var idpAlias = localEntityId.substring(localEntityId.lastIndexOf("/alias/") + 7);
+        final var idp = this.idps.get(idpAlias);
+        if (idp == null || idp.getRenewUrl() == null) {
+            log.debug("No renew URL for IDP alias '{}'", idpAlias);
+            throw new AuthException(400, "invalid_request", "IDP not found or no renew URL configured");
+        }
+        log.debug("IDP alias '{}', renew URL '{}'", idpAlias, idp.getRenewUrl());
         
         Object token = request.getSamlToken();
         
@@ -250,9 +261,9 @@ public class SAMLRenewSecurityTokenBuilder {
         Element elem = marshall(envelope);                 
         
         log.debug(StaxUtils.toString(elem));
-                 
-        Envelope result = send(renewEndpointUrl, context, envelope);
-        NodeList lst = result.getBody().getDOM().getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion","Assertion");
+
+        final Envelope result = send(idp.getRenewUrl(), context, envelope);
+        final NodeList lst = result.getBody().getDOM().getElementsByTagNameNS(SAML2_ASSERTION_NS,"Assertion");
                          
         Node node = lst.item(0);
         log.debug("NODE: "+node.toString());
