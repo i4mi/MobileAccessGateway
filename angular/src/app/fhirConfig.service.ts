@@ -70,15 +70,16 @@ export class FhirConfigService {
   }
 
   getAuthCodeFlowConfig(provider: string): AuthConfig {
+    const idpAlias = provider ? ("/alias/" + provider) : "";
     return {
       // Url of the Identity Provider
 
-      loginUrl: this.getMobileAccessGatewayLoginUrl()+(provider ? ("/alias/"+provider) : ""),
+      loginUrl: this.getMobileAccessGatewayLoginUrl() + idpAlias,
       // URL of the SPA to redirect the user to after login
       // redirectUri: window.location.origin + '/index.html',
       redirectUri: this.getRedirectUri(),
 
-      tokenEndpoint: this.getMobileAccessGatewayTokenEndpoint(),
+      tokenEndpoint: this.getMobileAccessGatewayTokenEndpoint() + idpAlias,
 
       // The SPA's id. The SPA is registerd with this id at the auth-server
       // clientId: 'server.code',

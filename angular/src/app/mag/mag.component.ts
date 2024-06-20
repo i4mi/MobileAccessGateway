@@ -29,7 +29,7 @@ export function toLocaleDateTime(date: Date) {
 
 interface IDP {
   id: string;
-  name: string;  
+  name: string;
 }
 
 class UUIReplace {
@@ -44,6 +44,8 @@ class UUIReplace {
   styleUrls: ['./mag.component.scss'],
 })
 export class MagComponent implements OnInit {
+  private readonly LS_OAUTH_CONF_KEY = "magOAuthConf";
+
   mag: FhirClient;
   json: string;
   doc: string;
@@ -231,12 +233,12 @@ export class MagComponent implements OnInit {
 
     this.searchGiven = new UntypedFormControl();
     this.searchFamily = new UntypedFormControl();
-    
+
     this.documentTitle = new UntypedFormControl();
     this.documentTitle.setValue(
       this.getLocalStorageItemOrDefault('mag.documentTitle', 'Titel')
     );
-    
+
     this.documentDescription = new UntypedFormControl();
     this.documentDescription.setValue(
       this.getLocalStorageItemOrDefault('mag.documentDescription', 'Description')
@@ -253,12 +255,16 @@ export class MagComponent implements OnInit {
 
     this.fhirConfigService = data;
 
-    oauthService.configure(this.fhirConfigService.getAuthCodeFlowConfig(this.provider.value));
-    oauthService.tryLoginCodeFlow().then((_) => {
-      this.scopes = this.oauthService.getGrantedScopes();
-    });
+    // If we have a OAuth configuration in local storage, we use it to configure the service
+    if (localStorage.getItem(this.LS_OAUTH_CONF_KEY) !== null) {
+      const conf = JSON.parse(localStorage.getItem(this.LS_OAUTH_CONF_KEY));
+      this.oauthService.configure(conf);
+      this.oauthService.tryLoginCodeFlow().then((_) => {
+        this.scopes = this.oauthService.getGrantedScopes();
+      });
+    }
 
-    oauthService.events.subscribe((event) => {
+    this.oauthService.events.subscribe((event) => {
       if (event instanceof OAuthErrorEvent) {
         console.error(event);
       } else {
@@ -276,7 +282,7 @@ export class MagComponent implements OnInit {
             this.idps = body;
             this.provider.setValue(
               this.getLocalStorageItemOrDefault('mag.provider', '')
-            );            
+            );
           },
           error: (err: Error) => {
             this.idps = [ { id : "", name : "Default" } ];
@@ -564,21 +570,26 @@ export class MagComponent implements OnInit {
   onAuthenticate() {
     this.cache();
     this.scopes = null;
+    const authCodeFlowConfig = this.fhirConfigService.getAuthCodeFlowConfig(this.provider.value);
     if (this.authenticate.value === 'HCP') {
-      let authCodeFlowConfig = this.fhirConfigService.getAuthCodeFlowConfig(this.provider.value);
       authCodeFlowConfig.scope = `person_id=${this.targetIdentifier2Value}^^^&2.16.756.5.30.1.127.3.10.3&ISO purpose_of_use=urn:oid:2.16.756.5.30.1.127.3.10.5|NORM subject_role=urn:oid:2.16.756.5.30.1.127.3.10.6|HCP`;
+      localStorage.setItem(this.LS_OAUTH_CONF_KEY, JSON.stringify(authCodeFlowConfig));
       this.oauthService.configure(authCodeFlowConfig);
       this.oauthService.initCodeFlow();
-    } 
+    }
     if (this.authenticate.value === 'Patient') {
-      let authCodeFlowConfig = this.fhirConfigService.getAuthCodeFlowConfig(this.provider.value);
       authCodeFlowConfig.scope = `person_id=${this.targetIdentifier2Value}^^^&2.16.756.5.30.1.127.3.10.3&ISO purpose_of_use=urn:oid:2.16.756.5.30.1.127.3.10.5|NORM subject_role=urn:oid:2.16.756.5.30.1.127.3.10.6|PAT`;
+      localStorage.setItem(this.LS_OAUTH_CONF_KEY, JSON.stringify(authCodeFlowConfig));
       this.oauthService.configure(authCodeFlowConfig);
-      this.oauthService.initCodeFlow();      
-    } 
+      this.oauthService.initCodeFlow();
+    }
     if (this.authenticate.value === 'TCU') {
       this.getSamlToken().then((value) => (this.json = value));
-    } 
+    }
+  }
+
+  onRenewToken(): void {
+    this.oauthService.refreshToken().then(r => console.log(r));
   }
 
   getAppcDocument(eprspid: string, uniqueId: string): string {

@@ -124,7 +124,7 @@
         <select matNativeControl [formControl]="provider">
           <option *ngFor="let idp of idps" [value]="idp.id">
             {{ idp.name }}
-          </option>         
+          </option>
         </select>
       </mat-form-field>
     </div>
@@ -141,6 +141,13 @@
         (click)="onAuthenticate()"
       >
         Authenticate
+      </button>
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        (click)="onRenewToken()">
+        Renew the token
       </button>
     </mat-card-actions>
   </mat-card-content>
@@ -161,7 +168,7 @@
           </div>
         </mat-cell>
       </ng-container>
-    
+
       <ng-container matColumnDef="name">
         <mat-header-cell *matHeaderCellDef class="name"
           >Description</mat-header-cell
@@ -170,7 +177,7 @@
           {{ entry.description }}
         </mat-cell>
       </ng-container>
-     
+
       <ng-container matColumnDef="contentType">
         <mat-header-cell *matHeaderCellDef class="contentType"
           >Content-Type</mat-header-cell
