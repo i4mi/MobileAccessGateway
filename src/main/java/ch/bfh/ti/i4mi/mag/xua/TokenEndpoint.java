@@ -75,12 +75,14 @@ public class TokenEndpoint {
 		this.samlParserPool.setNamespaceAware(true);
 	}
 	
-	private void require(String field, String fieldname) throws AuthException {
-		if (field == null || field.trim().length() == 0) throw new AuthException(400, "invalid_request", "'"+fieldname+"' is required");
+	private void require(final String field, final String fieldname) throws AuthException {
+		if (field == null || field.trim().isEmpty()) {
+			throw new AuthException(400, "invalid_request", "'" + fieldname + "' is required");
+		}
 	}
 	
-	private void mustMatch(String field, String mustBe, String fieldName) throws AuthException {
-		if (!mustBe.equals(field)) {			
+	private void mustMatch(final String field, final String mustBe, final String fieldName) throws AuthException {
+		if (!mustBe.equals(field)) {
 			throw new AuthException(400, "invalid_request", "'"+fieldName+"' must be '"+mustBe+"'");
 		}
 	}
@@ -93,85 +95,77 @@ public class TokenEndpoint {
 			@Header("client_secret") String clientSecret,
 			@Header("redirect_uri") String redirectUri)
             throws UnsupportedEncodingException, AuthException, XMLParserException, UnmarshallingException {
-				
-		
-		mustMatch(grantType, "authorization_code", "grant_type");
-		require(code, "code");
-		require(clientId, "client_id");
-		require(redirectUri, "redirect_uri");
-		if (!disableCodeChallenge) {
-		  require(codeVerifier, "code_verifier");
+		this.mustMatch(grantType, "authorization_code", "grant_type");
+		this.require(code, "code");
+		this.require(clientId, "client_id");
+		this.require(redirectUri, "redirect_uri");
+		if (!this.disableCodeChallenge) {
+			this.require(codeVerifier, "code_verifier");
 		}
 	    
-		AuthenticationRequest request = codeToToken.get(code);
+		final AuthenticationRequest request = this.codeToToken.get(code);
 		
-		if (request == null) throw new AuthException(400, "access_denied", "Unknown code");
-		codeToToken.remove(code);
+		if (request == null) {
+			throw new AuthException(400, "access_denied", "Unknown code");
+		}
+		this.codeToToken.remove(code);
 		
 		mustMatch(clientId, request.getClient_id(), "client_id");
 		mustMatch(redirectUri, request.getRedirect_uri(), "redirect_uri");
 		
-		if (!clients.isValidSecret(clientId, clientSecret)) throw new AuthException(400, "access_denied", "Wrong client_secret");
-							
-		if (!disableCodeChallenge) {
-		  if (!sha256ThenBase64(codeVerifier).equals(request.getCode_challenge())) throw new AuthException(400, "access_denied", "Code challenge failed.");
+		if (!this.clients.isValidSecret(clientId, clientSecret)) {
+			throw new AuthException(400, "access_denied", "Wrong client_secret");
 		}
 							
-		String assertion = request.getAssertion();
-		log.debug("Assertion for token: "+assertion);
-		String encoded = Base64.getEncoder().encodeToString(assertion.getBytes("UTF-8"));
-		log.debug("Encoded token: "+encoded);
-		
-		String idpAssertion = request.getIdpAssertion();
-		String encodedIdp = Base64.getEncoder().encodeToString(idpAssertion.getBytes("UTF-8"));
-		
-		OAuth2TokenResponse result = new OAuth2TokenResponse();
-		result.setAccess_token(encoded);
+		if (!this.disableCodeChallenge && !sha256ThenBase64(codeVerifier).equals(request.getCode_challenge())) {
+		  throw new AuthException(400, "access_denied", "Code challenge failed.");
+		}
+							
+		final String assertion = request.getAssertion();
+		log.debug("Assertion for token: {}", assertion);
+		final String encoded = Base64.getEncoder().encodeToString(assertion.getBytes(StandardCharsets.UTF_8));
+		log.debug("Encoded token: {}", encoded);
 
+		String encodedIdp = Base64.getEncoder().encodeToString(request.getIdpAssertion().getBytes(StandardCharsets.UTF_8));
+		
+		final var result = new OAuth2TokenResponse();
+		result.setAccess_token(encoded);
 		result.setRefresh_token(encodedIdp);
 		result.setExpires_in(this.computeExpiresInFromNotOnOrAfter(assertion)); // In seconds
-
 		result.setScope(request.getScope());
 		result.setToken_type("Bearer" /*request.getToken_type()*/);
 		return result;
-				
 	}
 
 	public static String sha256ThenBase64(String input) throws AuthException  {
 		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			md.update(input.getBytes("ASCII")); 
-			byte[] digest = md.digest();
-			return org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(digest);
+			final MessageDigest md = MessageDigest.getInstance("SHA-256");
+			md.update(input.getBytes(StandardCharsets.US_ASCII));
+			return org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(md.digest());
 		} catch (NoSuchAlgorithmException e) {
 			throw new AuthException(400, "access_denied", "Code challenge failed.");
-		} catch (UnsupportedEncodingException e7) {
-			throw new AuthException(400, "access_denied", "Code challenge failed.");
 		}
-	}
+    }
 	
 	public OAuth2TokenResponse generateOAuth2TokenResponse(final @ExchangeProperty("oauthrequest") AuthenticationRequest authRequest,
 														   final @Body String assertion,
-														   final @Header("scope") String scope) throws UnsupportedEncodingException
-			, XMLParserException, UnmarshallingException {
-											
-		String encoded = Base64.getEncoder().encodeToString(assertion.getBytes("UTF-8"));
+														   final @Header("scope") String scope) throws XMLParserException, UnmarshallingException {
+
+		final String encoded = Base64.getEncoder().encodeToString(assertion.getBytes(StandardCharsets.UTF_8));
+		final String idpAssertion = authRequest.getIdpAssertion();
+		final String encodedIdp = Base64.getEncoder().encodeToString(idpAssertion.getBytes(StandardCharsets.UTF_8));
 		
-		OAuth2TokenResponse result = new OAuth2TokenResponse();
+		final var result = new OAuth2TokenResponse();
 		result.setAccess_token(encoded);
-		
-		String idpAssertion = authRequest.getIdpAssertion();
-                String encodedIdp = Base64.getEncoder().encodeToString(idpAssertion.getBytes("UTF-8"));
 		result.setRefresh_token(encodedIdp);
 		result.setExpires_in(this.computeExpiresInFromNotOnOrAfter(assertion)); // In seconds
-
 		result.setScope(scope);
 		result.setToken_type("Bearer" /*request.getToken_type()*/);
 		return result;
 	}
 	
-	public ErrorResponse handleError(@Body AuthException in) {
-		ErrorResponse response = new ErrorResponse();
+	public ErrorResponse handleError(final @Body AuthException in) {
+		final var response = new ErrorResponse();
 		response.setError(in.getError());
 		response.setError_description(in.getMessage());
 		return response;
