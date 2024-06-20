@@ -29,7 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TokenRenew {
 
-    public AssertionRequest buildAssertionRequest(@Header("assertionRequest") AssertionRequest assertionRequest, @Body String renewedIdpAssertion) {
+    public AssertionRequest buildAssertionRequest(final @Header("assertionRequest") AssertionRequest assertionRequest,
+                                                  final @Body String renewedIdpAssertion) {
         assertionRequest.setSamlToken(renewedIdpAssertion);
         return assertionRequest;
     }
@@ -38,8 +39,9 @@ public class TokenRenew {
         return new AuthenticationRequest();
     }
     
-    public AssertionRequest keepIdpAssertion(@ExchangeProperty("oauthrequest") AuthenticationRequest authRequest, @Body AssertionRequest assertionRequest) {
-        String idpAssertion;
+    public AssertionRequest keepIdpAssertion(final @ExchangeProperty("oauthrequest") AuthenticationRequest authRequest,
+                                             final @Body AssertionRequest assertionRequest) {
+        final String idpAssertion;
         if (assertionRequest.getSamlToken() instanceof String) {
             idpAssertion = (String) assertionRequest.getSamlToken(); 
         } else {

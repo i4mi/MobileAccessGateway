@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,12 +34,14 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.camel.Body;
 import org.apache.cxf.staxutils.StaxUtils;
-import org.opensaml.saml2.core.Assertion;
 import org.springframework.beans.factory.annotation.Value;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import lombok.extern.slf4j.Slf4j;
+
+import static org.opensaml.common.xml.SAMLConstants.SAML20_NS;
+import static org.opensaml.common.xml.SAMLConstants.SAML20_PREFIX;
 
 /**
  * Create a Get-X-User-Assertion SOAP Message from AssertionRequest Bean
@@ -74,9 +77,9 @@ public class Iti40RequestGenerator {
 	 		"</env:Envelope>"; };
 	 
 	 public void addResourceId(SOAPElement claims, String id) throws SOAPException {
-	   SOAPElement attribute = claims.addChildElement("Attribute", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+	   SOAPElement attribute = claims.addChildElement("Attribute", SAML20_PREFIX, SAML20_NS);
 	   attribute.setAttribute("Name", "urn:oasis:names:tc:xacml:2.0:resource:resource-id");
-	   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+	   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", SAML20_PREFIX, SAML20_NS);
 	   attributeValue.addNamespaceDeclaration("xs", "http://www.w3.org/2001/XMLSchema");
 	   attributeValue.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:type", "xs:string");
 	   if (id!=null && !id.contains("^") && id.matches("\\d{18}")) {
@@ -90,9 +93,9 @@ public class Iti40RequestGenerator {
 		   if (purposeOfUse.equals("EMER")) purposeOfUseDisplay = "Emergency Access";
 		   else if (purposeOfUse.equals("AUTO")) purposeOfUseDisplay = "Automatic Upload";
 		 
-		   SOAPElement attribute = claims.addChildElement("Attribute", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+		   SOAPElement attribute = claims.addChildElement("Attribute", SAML20_PREFIX, SAML20_NS);
 		   attribute.setAttribute("Name", "urn:oasis:names:tc:xspa:1.0:subject:purposeofuse");
-		   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+		   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", SAML20_PREFIX, SAML20_NS);
 		   attributeValue.addNamespaceDeclaration("xs", "http://www.w3.org/2001/XMLSchema");
 		   attributeValue.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:type", "xs:anyType");
 		   SOAPElement purpose = attributeValue.addChildElement("PurposeOfUse", null, "urn:hl7-org:v3");
@@ -117,10 +120,10 @@ public class Iti40RequestGenerator {
 		   case "PADM":displayName = "Policy Administrator";break;
 		   }		 
 		 
-		   SOAPElement attribute = claims.addChildElement("Attribute", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+		   SOAPElement attribute = claims.addChildElement("Attribute", SAML20_PREFIX, SAML20_NS);
 		   attribute.setAttribute("Name", "urn:oasis:names:tc:xacml:2.0:subject:role");
 		   attribute.setAttribute("NameFormat", "urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified");
-		   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+		   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", SAML20_PREFIX, SAML20_NS);
 		   		   
 		   attributeValue.addNamespaceDeclaration("xs", "http://www.w3.org/2001/XMLSchema");
 		   
@@ -133,16 +136,16 @@ public class Iti40RequestGenerator {
 	}
 	 
 	 public void addPrincipal(SOAPElement claims, String principalId, String principalName) throws SOAPException {
-		   SOAPElement attribute = claims.addChildElement("Attribute", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+		   SOAPElement attribute = claims.addChildElement("Attribute", SAML20_PREFIX, SAML20_NS);
 		   attribute.setAttribute("Name", "urn:e-health-suisse:principal-id");		   
-		   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+		   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", SAML20_PREFIX, SAML20_NS);
 		   attributeValue.addNamespaceDeclaration("xs", "http://www.w3.org/2001/XMLSchema");
 		   attributeValue.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:type", "xs:string");
 	       attributeValue.setTextContent(principalId);		   		  		   		 	   		 
 	       
-	       attribute = claims.addChildElement("Attribute", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+	       attribute = claims.addChildElement("Attribute", SAML20_PREFIX, SAML20_NS);
 		   attribute.setAttribute("Name", "urn:e-health-suisse:principal-name");		   
-		   attributeValue = attribute.addChildElement("AttributeValue", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+		   attributeValue = attribute.addChildElement("AttributeValue", SAML20_PREFIX, SAML20_NS);
 		   attributeValue.addNamespaceDeclaration("xs", "http://www.w3.org/2001/XMLSchema");
 		   attributeValue.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:type", "xs:string");
 	       attributeValue.setTextContent(principalName);
@@ -151,9 +154,9 @@ public class Iti40RequestGenerator {
 	 public void addOrganization(SOAPElement claims, List<String> orgIds, List<String> orgNames) throws SOAPException {
 		 if (orgIds!=null) {
 			 for (String orgId : orgIds) {
-			   SOAPElement attribute = claims.addChildElement("Attribute", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+			   SOAPElement attribute = claims.addChildElement("Attribute", SAML20_PREFIX, SAML20_NS);
 			   attribute.setAttribute("Name", "\"urn:oasis:names:tc:xspa:1.0:sub-ject:organization-id");		   
-			   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+			   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", SAML20_PREFIX, SAML20_NS);
 			   attributeValue.addNamespaceDeclaration("xs", "http://www.w3.org/2001/XMLSchema");
 			   attributeValue.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:type", "xs:string");
 		       attributeValue.setTextContent(orgId);
@@ -161,9 +164,9 @@ public class Iti40RequestGenerator {
 		 }
 		 if (orgNames != null) {
 			 for (String orgName : orgNames) {
-			   SOAPElement attribute = claims.addChildElement("Attribute", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+			   SOAPElement attribute = claims.addChildElement("Attribute", SAML20_PREFIX, SAML20_NS);
 			   attribute.setAttribute("Name", "urn:oasis:names:tc:xspa:1.0:sub-ject:organization");		   
-			   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", "saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
+			   SOAPElement attributeValue = attribute.addChildElement("AttributeValue", SAML20_PREFIX, SAML20_NS);
 			   attributeValue.addNamespaceDeclaration("xs", "http://www.w3.org/2001/XMLSchema");
 			   attributeValue.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:type", "xs:string");
 		       attributeValue.setTextContent(orgName);
@@ -188,7 +191,7 @@ public class Iti40RequestGenerator {
 		 log.debug("Decoded IDP Token:"+token);
 		 
 		 MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
-		 SOAPMessage message = factory.createMessage(new MimeHeaders(), new ByteArrayInputStream(BASE_MSG().getBytes(Charset.forName("UTF-8"))));
+		 SOAPMessage message = factory.createMessage(new MimeHeaders(), new ByteArrayInputStream(BASE_MSG().getBytes(StandardCharsets.UTF_8)));
 
 		 message.getSOAPHeader().addChildElement("MessageID","wsa","http://www.w3.org/2005/08/addressing").addTextNode(UUID.randomUUID().toString());
 		 if (token instanceof String) {

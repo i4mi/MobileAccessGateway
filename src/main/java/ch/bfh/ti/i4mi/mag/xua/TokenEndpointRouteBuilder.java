@@ -72,7 +72,7 @@ public class TokenEndpointRouteBuilder extends RouteBuilder {
                                constant("http://docs.oasis-open.org/ws-sx/ws-trust/200512/wsdl"))
                     // Doing the Get X-User Assertion call
                     .to(this.stsEndpoint)
-                    .bean(AssertionExtractor.class)
+                    .bean(XuaUtils.class, "extractAssertionAsString")
                     .bean(TokenEndpoint.class, "generateOAuth2TokenResponse")
                 .doCatch(AuthException.class)
                     .setBody(simple("${exception}"))

@@ -69,7 +69,7 @@ public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
 			.setHeader(CxfConstants.OPERATION_NAMESPACE,
 			        constant("http://docs.oasis-open.org/ws-sx/ws-trust/200512/wsdl"))			
 			.to(assertionEndpoint)		
-			.bean(AssertionExtractor.class)
+			.bean(XuaUtils.class, "extractAssertionAsString")
 			.bean(TokenEndpoint.class, "generateOAuth2TokenResponse")
 			
 	    .doCatch(AuthException.class)

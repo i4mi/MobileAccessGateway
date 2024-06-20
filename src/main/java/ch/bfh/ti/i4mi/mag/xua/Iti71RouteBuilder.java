@@ -46,7 +46,6 @@ public class Iti71RouteBuilder extends RouteBuilder {
 	
 	@Override
 	public void configure() throws Exception {
-			
 		from(String.format("servlet://%s?matchOnUriPrefix=true", AUTHORIZE_PATH)).routeId("iti71")
 		.doTry()
 		    .setProperty("oauthrequest").method(converter, "buildAuthenticationRequest")
@@ -65,7 +64,7 @@ public class Iti71RouteBuilder extends RouteBuilder {
 			.setHeader(CxfConstants.OPERATION_NAMESPACE,
 			        constant("http://docs.oasis-open.org/ws-sx/ws-trust/200512/wsdl"))			
 			.to(this.stsEndpoint)
-			.bean(AssertionExtractor.class)
+			.bean(XuaUtils.class, "extractAssertionAsString")
 			.bean(LoginAtnaLogger.class, "loginSuccess")
 			.removeHeaders("*","oauthrequest")
 			.setHeader("Location").method(AuthResponseConverter.class, "handle")
@@ -85,9 +84,5 @@ public class Iti71RouteBuilder extends RouteBuilder {
 			.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(302))
 			.setBody(constant(null))
 		.end();
-		
-		
 	}
-
-	
 }

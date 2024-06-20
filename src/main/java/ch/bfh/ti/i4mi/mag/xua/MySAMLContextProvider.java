@@ -23,24 +23,24 @@ import org.springframework.security.saml.context.SAMLMessageContext;
 
 public class MySAMLContextProvider extends SAMLContextProviderLB {
 
-    public MySAMLContextProvider(String serverName, String contextPath) {
-        setScheme("https");
-        setServerName(serverName);
-        setContextPath(contextPath);
+    public MySAMLContextProvider(final String serverName, final String contextPath) {
+        this.setScheme("https");
+        this.setServerName(serverName);
+        this.setContextPath(contextPath);
     }
 
-    protected void populatePeerEntityId(SAMLMessageContext context) throws MetadataProviderException {
-
+    protected void populatePeerEntityId(final SAMLMessageContext context) throws MetadataProviderException {
         String localEntityId = context.getLocalEntityId();
 
-        if (localEntityId != null && localEntityId.indexOf("/alias/") >= 0)
+        if (localEntityId != null && localEntityId.contains("/alias/")) {
             localEntityId = localEntityId.substring(localEntityId.lastIndexOf("/alias/") + 7);
-        String peerEntityId = metadata.getEntityIdForAlias(localEntityId + "idp");
-        if (peerEntityId == null) peerEntityId = metadata.getEntityIdForAlias(metadata.getDefaultIDP());
+        }
+        String peerEntityId = this.metadata.getEntityIdForAlias(localEntityId + "idp");
+        if (peerEntityId == null) {
+            peerEntityId = this.metadata.getEntityIdForAlias(this.metadata.getDefaultIDP());
+        }
 
         context.setPeerEntityId(peerEntityId);
         context.setPeerEntityRole(IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
-
-
     }
 }

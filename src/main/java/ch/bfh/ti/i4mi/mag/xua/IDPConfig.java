@@ -30,6 +30,8 @@ public class IDPConfig {
     
 	private String metadataUrl;
 
+    private String renewUrl;
+
     private String keyAlias;
 
     private String tlsKeyAlias;
