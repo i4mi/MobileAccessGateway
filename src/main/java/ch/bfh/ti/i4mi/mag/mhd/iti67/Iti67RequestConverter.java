@@ -70,7 +70,8 @@ public class Iti67RequestConverter extends BaseRequestConverter {
 	   	        		 query.setUuids(Collections.singletonList(val.substring("urn:uuid:".length())));
 	   	        	 }
            	    } else {
-           		     query.setUuids(Collections.singletonList(searchParameter.get_id().getValue()));
+           		     //query.setUuids(Collections.singletonList(searchParameter.get_id().getValue()));
+					query.getLogicalUuid().add(searchParameter.get_id().getValue());
            	    }            	            	
             	searchQuery = query;
             } else {

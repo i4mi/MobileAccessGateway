@@ -16,6 +16,7 @@
 
 package ch.bfh.ti.i4mi.mag.pmir;
 
+import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
@@ -36,9 +37,11 @@ import lombok.extern.slf4j.Slf4j;
 public class PatientReferenceCreator {
 
 	@Autowired
+	@Setter
 	private Config config;
 	
 	@Autowired
+	@Setter
 	private SchemeMapper schemeMapper;
 	
 	

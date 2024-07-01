@@ -4,7 +4,7 @@ mag:
   homeCommunityId: urn:oid:1.2.3.4.5
   baseurl: http://localhost
   client-ssl:
-    enabled: true
+    enabled: false
     key-store:
       path: src/test/resources/keystore.jks
       password: a1b2c3
@@ -13,15 +13,15 @@ mag:
       password: a1b2c3
     cert-alias: gateway
   xds:
-    https: true
+    https: false
     iti-18:
-      url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/reg/sq
+      url: localhost:9090/services/iti18Endpoint
     iti-43:
-      url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/rep/ret
+      url: localhost:9090/services/iti43Endpoint
     iti-41:
-      url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/rep/prb
+      url: localhost:9090/services/iti41Endpoint
     iti-57:
-      url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/rep/prb
+      url: localhost:9090/services/iti57Endpoint
     retrieve:
       url: http://localhost:9090/camel/xdsretrieve
       repositoryUniqueId: 1.1.4567332.1.2
