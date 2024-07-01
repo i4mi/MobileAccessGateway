@@ -18,6 +18,7 @@ package ch.bfh.ti.i4mi.mag.mhd.iti67;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.MagConstants;
 import ch.bfh.ti.i4mi.mag.mhd.BaseQueryResponseConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.*;
@@ -89,11 +90,6 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
             if (input.getDocumentEntries() != null) {
                 for (DocumentEntry documentEntry : input.getDocumentEntries()) {
                     DocumentReference documentReference = new DocumentReference();
-
-
-                    documentReference.setId(noUuidPrefix(documentEntry.getEntryUuid())); // FIXME do we need to cache this id in
-                    // relation to the DocumentManifest itself
-                    // for
 
                     list.add(documentReference);
                     // limitedMetadata -> meta.profile canonical [0..*] 
@@ -337,7 +333,56 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                         context.getSourcePatientInfo().setResource(sourcePatient);
                     }
 
+                    if (documentEntry.getExtraMetadata() != null) {
+                        List<String> originalProviderRoles = documentEntry.getExtraMetadata().get(MagConstants.XdsExtraMetadataSlotNames.CH_ORIGINAL_PROVIDER_ROLE);
+                        if (originalProviderRoles != null) {
+                            for (String originalProviderRole : originalProviderRoles) {
+                                Identifiable cx = Hl7v2Based.parse(originalProviderRole, Identifiable.class);
+                                documentReference.addExtension(
+                                        MagConstants.FhirExtensionUrls.CH_AUTHOR_ROLE,
+                                        new Coding("urn:oid:" + cx.getAssigningAuthority().getUniversalId(), cx.getId(), null));
+                            }
+                        }
+
+                        List<String> deletionStatuses = documentEntry.getExtraMetadata().get(MagConstants.XdsExtraMetadataSlotNames.CH_DELETION_STATUS);
+                        if (deletionStatuses != null) {
+                            for (String deletionStatus : deletionStatuses) {
+                                documentReference.addExtension(
+                                        MagConstants.FhirExtensionUrls.CH_DELETION_STATUS,
+                                        new Coding("urn:oid:2.16.756.5.30.1.127.3.10.18", deletionStatus, null));
+                            }
+                        }
+                    }
+
+                    if (documentEntry.getRepositoryUniqueId() != null) {
+                        documentReference.addExtension(
+                                MagConstants.FhirExtensionUrls.REPOSITORY_UNIQUE_ID,
+                                new Identifier().setSystem(MagConstants.FhirCodingSystemIds.RFC_3986).setValue("urn:oid:" + documentEntry.getRepositoryUniqueId()));
+                    }
+
+                    if (documentEntry.getVersion() != null) {
+                        documentReference.addExtension(
+                                MagConstants.FhirExtensionUrls.DOCUMENT_ENTRY_VERSION,
+                                new PositiveIntType(documentEntry.getVersion().getVersionName()));
+                    }
+
+                    if (documentEntry.getAvailabilityStatus() != null) {
+                        documentReference.addExtension(
+                                MagConstants.FhirExtensionUrls.DOCUMENT_AVAILABILITY,
+                                new Coding(MagConstants.FhirCodingSystemIds.RFC_3986, documentEntry.getDocumentAvailability().getFullQualified(), null));
+                    }
+
+                    String logicalId = (documentEntry.getLogicalUuid() != null) ? documentEntry.getLogicalUuid() : documentEntry.getEntryUuid();
+                    if (logicalId != null) {
+                        documentReference.addIdentifier()
+                                .setValue(asUuid(logicalId))
+                                .setSystem(MagConstants.FhirCodingSystemIds.RFC_3986)
+                                .setType(new CodeableConcept().addCoding(new Coding(MagConstants.FhirCodingSystemIds.MHD_DOCUMENT_ID_TYPE, "logicalId", "Logical ID")));
+                    }
+
+                    documentReference.setId(noUuidPrefix(logicalId));
                 }
+
             }
         } else {
             processError(input);

@@ -16,40 +16,33 @@
 
 package ch.bfh.ti.i4mi.mag.mhd.iti67;
 
-import java.util.Date;
-import java.util.Map;
-
-import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.ListResource;
-import org.hl7.fhir.r4.model.OperationOutcome;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
 import org.openehealth.ipf.commons.ihe.fhir.translation.ToFhirTranslator;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Response;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 
-import ch.bfh.ti.i4mi.mag.Config;
-import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
-import ch.bfh.ti.i4mi.mag.mhd.Utils;
+import java.util.Map;
 
 public class Iti67FromIti57ResponseConverter extends BaseResponseConverter implements ToFhirTranslator<Response> {
 
-private Config config;
-	
+	private Config config;
+
 	public Iti67FromIti57ResponseConverter(final Config config) {
 		this.config = config;
 	}
-	
+
 	/**
 	 * convert ITI-57 response to ITI-67 response 
 	 */
 	@Override
 	public Object translateToFhir(Response input, Map<String, Object> parameters) {
-		
-		if (input.getStatus().equals(Status.SUCCESS)) {		
-			OperationOutcome response = new OperationOutcome();					
-			return response;		
-		} else {	
+		if (input.getStatus().equals(Status.SUCCESS)) {
+			MethodOutcome methodOutcome = new MethodOutcome();
+			methodOutcome.setResponseStatusCode(200);
+			return methodOutcome;
+		} else {
 			processError(input);
 			return null;
 		}
