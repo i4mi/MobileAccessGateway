@@ -1,0 +1,175 @@
+{
+  "resourceType": "DocumentReference",
+  "id": "18f08725-b77e-4d78-a409-b9f0ab4ef405",
+  "meta": {
+    "profile": [
+      "https://ihe.net/fhir/StructureDefinition/IHE_MHD_Comprehensive_DocumentManifest"
+    ]
+  },
+  "contained": [
+    {
+      "resourceType": "Patient",
+      "id": "1",
+      "name": [
+        {
+          "family": "some-last-name",
+          "given": [
+            "some-first-name"
+          ]
+        }
+      ]
+    },
+    {
+      "resourceType": "Patient",
+      "id": "2",
+      "identifier": [
+        {
+          "use": "official",
+          "system": "urn:oid:2.16.756.5.30.1.190.0.0.2.1",
+          "value": "37b35b8b-b26b-4e7f-9519-df1e68dc411e"
+        }
+      ]
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-author-authorrole",
+      "valueCoding": {
+        "system": "urn:oid:2.16.756.5.30.1.127.3.10.6",
+        "code": "PAT"
+      }
+    },
+    {
+      "url": "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-repositoryUniqueId",
+      "valueIdentifier": {
+        "system": "urn:ietf:rfc:3986",
+        "value": "urn:oid:2.16.756.5.30.1.190.0.0.12.1.101.31"
+      }
+    },
+    {
+      "url": "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-version",
+      "valuePositiveInteger": {
+        "value": 42
+      }
+    },
+    {
+      "url": "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-documentAvailability",
+      "valueCoding": {
+        "system": "urn:ietf:rfc:3986",
+        "code": "urn:ihe:iti:2010:DocumentAvailability:Online"
+      }
+    },
+    {
+      "url": "http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-deletionstatus",
+      "valueCoding": {
+        "system": "http://fhir.ch/ig/ch-epr-mhealth/CodeSysteme/ch-ehealth-codesystem-deletionstatus",
+        "code": "urn:e-health-suisse:2019:deletionStatus:deletionRequested"
+      }
+    }
+  ],
+  "masterIdentifier": {
+    "system": "urn:ietf:rfc:3986",
+    "value": "urn:oid:2.25.304709611975869688989227577335602046635"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:uuid:18f08725-b77e-4d78-a409-b9f0ab4ef405"
+    },
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:uuid:18f08725-b77e-4d78-a409-b9f0ab4ef406",
+      "type": {
+        "coding": [
+          {
+            "system": "https://profiles.ihe.net/ITI/MHD/CodeSystem/DocumentIdentifierTypes",
+            "code": "logicalId"
+          }
+        ]
+      }
+    }
+  ],
+  "status": "current",
+  "type": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "722446000",
+        "display": "722446000"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "184216000",
+          "display": "184216000"
+        }
+      ]
+    }
+  ],
+  "subject": {
+    "reference": "http://localhost/fhir/Patient/2.16.756.5.30.1.190.0.0.2.1-37b35b8b-b26b-4e7f-9519-df1e68dc411e"
+  },
+  "date": "2024-05-16T14:53:29+02:00",
+  "author": [
+    {
+      "reference": "#1"
+    }
+  ],
+  "securityLabel": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "17621005",
+          "display": "17621005"
+        }
+      ]
+    }
+  ],
+  "content": [
+    {
+      "attachment": {
+        "contentType": "application/pdf",
+        "language": "it-CH",
+        "url": "/camel/xdsretrieve?uniqueId=2.25.304709611975869688989227577335602046635&repositoryUniqueId=2.16.756.5.30.1.190.0.0.12.1.101.31",
+        "size": 17191,
+        "hash": "QHN3dtgTmhEOU+LRq7cS977nsLs=",
+        "title": "WithAuthorFromAPI - description -3",
+        "creation": "2024-05-16T14:53:29+02:00"
+      },
+      "format": {
+        "system": "http://ihe.net/fhir/ihe.formatcode.fhir/CodeSystem/formatcode",
+        "code": "urn:ihe:iti:xds:2017:mimeTypeSufficient",
+        "display": "urn:ihe:iti:xds:2017:mimeTypeSufficient"
+      }
+    }
+  ],
+  "context": {
+    "facilityType": {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "22232009",
+          "display": "22232009"
+        }
+      ]
+    },
+    "practiceSetting": {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "394802001",
+          "display": "394802001"
+        }
+      ]
+    },
+    "sourcePatientInfo": {
+      "reference": "#2"
+    }
+  }
+}

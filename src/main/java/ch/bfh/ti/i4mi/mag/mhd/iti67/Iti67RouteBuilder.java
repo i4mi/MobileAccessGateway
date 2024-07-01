@@ -21,7 +21,6 @@ import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslat
 import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.openehealth.ipf.commons.ihe.fhir.Constants;
-import org.openehealth.ipf.commons.ihe.fhir.iti67_v401.Iti67RequestUpdateConverter;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Response;
 import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.rs.RegistryRequestType;
@@ -88,7 +87,7 @@ class Iti67RouteBuilder extends RouteBuilder {
                     .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class))
                     .endChoice()
                   .when(PredicateBuilder.and(header("FhirHttpUri").isNotNull(),header("FhirHttpMethod").isEqualTo("GET")))
-                    .bean(IdRequestConverter.class)                    
+                    .bean(IdRequestConverter.class)
                     .to(endpoint)
                     .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class))
                     .endChoice()

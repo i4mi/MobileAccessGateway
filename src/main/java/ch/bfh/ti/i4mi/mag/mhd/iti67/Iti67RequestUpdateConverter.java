@@ -1,4 +1,4 @@
-package org.openehealth.ipf.commons.ihe.fhir.iti67_v401;
+package ch.bfh.ti.i4mi.mag.mhd.iti67;
 /*
  * Copyright 2020 the original author or authors.
  *
@@ -16,25 +16,14 @@ package org.openehealth.ipf.commons.ihe.fhir.iti67_v401;
  */
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.UUID;
 
+import ch.bfh.ti.i4mi.mag.MagConstants;
 import org.apache.camel.Body;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.*;
 import org.openehealth.ipf.commons.core.URN;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.Association;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssociationLabel;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssociationType;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntry;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.SubmissionSet;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.XDSMetaClass;
+import org.openehealth.ipf.commons.ihe.xds.core.metadata.*;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.builder.RegisterDocumentSetBuilder;
 import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.lcm.SubmitObjectsRequest;
 import org.openehealth.ipf.platform.camel.ihe.xds.core.converters.EbXML30Converters;
@@ -44,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * ITI-67 DocumentReference Update request converter
- * 
+ *
  * @author oliver egger
  *
  */
@@ -53,7 +42,7 @@ public class Iti67RequestUpdateConverter extends Iti65RequestConverter {
 
   /**
    * ITI-67 Response to ITI-57 request converter
-   * 
+   *
    * @param searchParameter
    * @return
    */
@@ -66,16 +55,21 @@ public class Iti67RequestUpdateConverter extends Iti65RequestConverter {
         getExtensionByUrl(documentReference, "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId");
     if (source != null && source.getValue() instanceof Identifier) {
       submissionSet.setSourceId(noPrefix(((Identifier) source.getValue()).getValue()));
+    } else {
+      // todo: use Config.getDocumentSourceId
+      submissionSet.setSourceId("2.16.756.5.30.1.190.0.0.12.2.101.32");
     }
 
     Extension designationType = 
         getExtensionByUrl(documentReference, "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType");
     if (designationType != null && designationType.getValue() instanceof CodeableConcept) {
       submissionSet.setContentTypeCode(transformCodeableConcept((CodeableConcept) designationType.getValue()));
+    } else {
+      submissionSet.setContentTypeCode(new Code("71388002", new LocalizedString("Procedure"), "2.16.840.1.113883.6.96"));
     }
 
-    Extension authorRoleExt = 
-        getExtensionByUrl(documentReference, "https://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-author-authorrole");
+    Extension authorRoleExt =
+        getExtensionByUrl(documentReference, MagConstants.FhirExtensionUrls.CH_AUTHOR_ROLE);
     if (authorRoleExt != null) {
       Identifiable identifiable = null;
       if (authorRoleExt != null) {
@@ -90,21 +84,39 @@ public class Iti67RequestUpdateConverter extends Iti65RequestConverter {
     RegisterDocumentSetBuilder builder = new RegisterDocumentSetBuilder(true, submissionSet); // TODO should be
                                                                                               // true?
     DocumentEntry entry = new DocumentEntry();
-
-    Extension proprietaryType = documentReference
-            .getExtensionByUrl("http://post.ch/e-health/windseeker/repositoryUniqueId");
-    if (proprietaryType != null && proprietaryType.getValue() instanceof Identifier) {
-      entry.setRepositoryUniqueId(proprietaryType.getValue().getId());
-    }
-
+    entry.setExtraMetadata(new HashMap<>());
     processDocumentReference(documentReference, entry);
 
-    entry.setLogicalUuid(new URN(UUID.randomUUID()).toString());
+    Extension repositoryUniqueIdExtension = documentReference
+            .getExtensionByUrl(MagConstants.FhirExtensionUrls.REPOSITORY_UNIQUE_ID);
+    if (repositoryUniqueIdExtension != null && repositoryUniqueIdExtension.getValue() instanceof Identifier) {
+      Identifier identifier = (Identifier) repositoryUniqueIdExtension.getValue();
+      entry.setRepositoryUniqueId(noPrefix(identifier.getValue()));
+    }
+
+    Extension documentAvailabilityExtension = documentReference
+            .getExtensionByUrl(MagConstants.FhirExtensionUrls.DOCUMENT_AVAILABILITY);
+    if (documentAvailabilityExtension != null && documentAvailabilityExtension.getValue() instanceof Coding) {
+      Coding coding = (Coding) documentAvailabilityExtension.getValue();
+      if (MagConstants.FhirCodingSystemIds.RFC_3986.equals(coding.getSystem()) && coding.getCode().startsWith("urn:ihe:iti:2010:DocumentAvailability:")) {
+        entry.setDocumentAvailability(DocumentAvailability.valueOfOpcode(coding.getCode().substring(38)));
+      }
+    }
 
     submissionSet.setPatientId(entry.getPatientId());
     submissionSet.assignEntryUuid();
     builder.withDocument(entry);
-    builder.withAssociation(createHasMemberAssocationWithOriginalPreviousLabel(submissionSet, entry));
+
+    int version;
+    Extension versionExtension = documentReference.getExtensionByUrl(MagConstants.FhirExtensionUrls.DOCUMENT_ENTRY_VERSION);
+    if ((versionExtension != null) && (versionExtension.getValue() instanceof PositiveIntType)) {
+      PositiveIntType versionElement = (PositiveIntType) versionExtension.getValue();
+      version = versionElement.getValue();
+    } else {
+      version = 1;
+    }
+
+    builder.withAssociation(createHasMemberAssociationWithOriginalPreviousLabel(version, submissionSet, entry));
 
     // Submission contains a DocumentEntry object.
     // The logicalID attribute is present in the DocumentEntry object and has a UUID
@@ -116,15 +128,15 @@ public class Iti67RequestUpdateConverter extends Iti65RequestConverter {
     return EbXML30Converters.convert(builder.build());
   }
 
-  private Association createHasMemberAssocationWithOriginalPreviousLabel(SubmissionSet submissionSet,
-      DocumentEntry entry) {
-    var assoc = createHasMemberAssocation(entry.getEntryUuid(), submissionSet);
+  private Association createHasMemberAssociationWithOriginalPreviousLabel(int version, SubmissionSet submissionSet, DocumentEntry entry) {
+    var assoc = createHasMemberAssociation(entry.getEntryUuid(), submissionSet);
     assoc.setLabel(AssociationLabel.ORIGINAL);
-    assoc.setPreviousVersion("1"); // FIXME: how do we get that? maybe we could have more updated versions too
+    assoc.setPreviousVersion(Integer.toString(version));
+    assoc.setAssociationPropagation(true);
     return assoc;
   }
 
-  private Association createHasMemberAssocation(String entryUuid, SubmissionSet submissionSet) {
+  private Association createHasMemberAssociation(String entryUuid, SubmissionSet submissionSet) {
     return new Association(AssociationType.HAS_MEMBER, new URN(UUID.randomUUID()).toString(),
         submissionSet.getEntryUuid(), entryUuid);
 
