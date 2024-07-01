@@ -694,7 +694,7 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 		//}
 
         reference.getIdentifier().stream()
-                .filter(identifier -> identifier.hasType() && identifier.getType().hasCoding(MagConstants.FhirCodingSystemIds.MHD_DOCUMENT_ID_TYPE, "logicalId"))
+                .filter(identifier -> identifier.hasType() && identifier.getType().hasCoding(MagConstants.FhirCodingSystemIds.MHD_DOCUMENT_ID_TYPE, "logicalID"))
                 .findAny()
                 .map(Identifier::getValue)
 				.ifPresent(entry::setLogicalUuid);

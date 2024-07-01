@@ -377,7 +377,7 @@ public class Iti67ResponseConverter extends BaseQueryResponseConverter {
                         documentReference.addIdentifier()
                                 .setValue(asUuid(logicalId))
                                 .setSystem(MagConstants.FhirCodingSystemIds.RFC_3986)
-                                .setType(new CodeableConcept().addCoding(new Coding(MagConstants.FhirCodingSystemIds.MHD_DOCUMENT_ID_TYPE, "logicalId", "Logical ID")));
+                                .setType(new CodeableConcept().addCoding(new Coding(MagConstants.FhirCodingSystemIds.MHD_DOCUMENT_ID_TYPE, "logicalID", "Logical ID")));
                     }
 
                     documentReference.setId(noUuidPrefix(logicalId));
