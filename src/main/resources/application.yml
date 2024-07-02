@@ -97,7 +97,6 @@ logging:
 
 camel:
   springboot:
-    xmlRoutes: false
     main-run-controller: true
 
 # https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#core-properties
