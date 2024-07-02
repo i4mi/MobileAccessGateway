@@ -62,7 +62,8 @@ public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
 		    .process(Utils.endHttpSession())
 		    .setProperty("oauthrequest").method(TokenRenew.class, "emptyAuthRequest")		    
 		    .bean(AuthRequestConverter.class, "buildAssertionRequestFromIdp")
-			.bean(Iti40RequestGenerator.class, "buildAssertion")			
+			.bean(TokenRenew.class, "keepIdpAssertion")
+			.bean(Iti40RequestGenerator.class, "buildAssertion")
 			.removeHeaders("*", "scope")
 			.setHeader(CxfConstants.OPERATION_NAME,
 			        constant("Issue"))
