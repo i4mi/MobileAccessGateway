@@ -57,12 +57,12 @@ mag:
       url: https://epdplayground.i4mi.bfh.ch:7443/EPDSTS/services/SecurityTokenService
       wsdl: classpath:/local-WSDL/wsdl/ws-trust-1.3.wsdl
     clients:
-      oauthdebugger:
-        secret: demosecret
-        redirect: https://oauthdebugger.com/debug
-      playground:
-        secret: secret
-        redirect: https://developers.google.com/oauthplayground
+#      oauthdebugger:
+#        secret: demosecret
+#        redirect: https://oauthdebugger.com/debug
+#      playground:
+#        secret: secret
+#        redirect: https://developers.google.com/oauthplayground
 
   audit:
     audit-enabled: false
