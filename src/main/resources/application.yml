@@ -43,7 +43,7 @@ mag:
   iua:
     idp:
       name: idp-ehealthsuisse
-      metadata-url: classpath:/idp-metadata.xml
+      metadata-url: https://ehealthsuisse.ihe-europe.net/metadata/idp-metadata.xml
       key-store: example-client-certificate.jks
       key-store-password: a1b2c3
       key-alias: gateway
