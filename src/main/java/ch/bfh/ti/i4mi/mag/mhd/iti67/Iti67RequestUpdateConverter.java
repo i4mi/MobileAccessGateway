@@ -19,6 +19,7 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 
+import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.MagConstants;
 import org.apache.camel.Body;
 import org.hl7.fhir.r4.model.*;
@@ -30,6 +31,8 @@ import org.openehealth.ipf.platform.camel.ihe.xds.core.converters.EbXML30Convert
 
 import ch.bfh.ti.i4mi.mag.mhd.iti65.Iti65RequestConverter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * ITI-67 DocumentReference Update request converter
@@ -38,7 +41,15 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
+@Component
 public class Iti67RequestUpdateConverter extends Iti65RequestConverter {
+
+  private final Config config;
+
+  @Autowired
+  public Iti67RequestUpdateConverter(Config config) {
+    this.config = config;
+  }
 
   /**
    * ITI-67 Response to ITI-57 request converter
@@ -56,8 +67,7 @@ public class Iti67RequestUpdateConverter extends Iti65RequestConverter {
     if (source != null && source.getValue() instanceof Identifier) {
       submissionSet.setSourceId(noPrefix(((Identifier) source.getValue()).getValue()));
     } else {
-      // todo: use Config.getDocumentSourceId
-      submissionSet.setSourceId("2.16.756.5.30.1.190.0.0.12.2.101.32");
+      submissionSet.setSourceId(noPrefix(config.getDocumentSourceId()));
     }
 
     Extension designationType = 
