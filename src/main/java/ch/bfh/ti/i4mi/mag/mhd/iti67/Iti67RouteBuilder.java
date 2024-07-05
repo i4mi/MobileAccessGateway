@@ -20,10 +20,11 @@ import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslat
 
 import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.openehealth.ipf.commons.ihe.fhir.Constants;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Response;
-import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.rs.RegistryRequestType;
+import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.lcm.SubmitObjectsRequest;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -42,11 +43,13 @@ import lombok.extern.slf4j.Slf4j;
 class Iti67RouteBuilder extends RouteBuilder {
 
     private final Config config;
+    private final Iti67RequestUpdateConverter iti67RequestUpdateConverter;
 
-    public Iti67RouteBuilder(final Config config) {
+    public Iti67RouteBuilder(final Config config, Iti67RequestUpdateConverter iti67RequestUpdateConverter) {
         super();
         log.debug("Iti67RouteBuilder initialized");
         this.config = config;
+        this.iti67RequestUpdateConverter = iti67RequestUpdateConverter;
     }
 
     @Override
@@ -92,8 +95,11 @@ class Iti67RouteBuilder extends RouteBuilder {
                     .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class))
                     .endChoice()
                   .when(PredicateBuilder.and(header("FhirHttpUri").isNotNull(),header("FhirHttpMethod").isEqualTo("PUT")))
-                    .bean(Iti67RequestUpdateConverter.class)
-                    .convertBodyTo(RegistryRequestType.class)
+                    .process(exchange -> {
+                        DocumentReference documentReference = exchange.getIn().getMandatoryBody(DocumentReference.class);
+                        SubmitObjectsRequest submitObjectsRequest = iti67RequestUpdateConverter.convertDocumentReferenceToDocumentEntry(documentReference);
+                        exchange.getMessage().setBody(submitObjectsRequest);
+                    })
                     .to(endpoint57)
                     .process(translateToFhir(new Iti67FromIti57ResponseConverter(config), Response.class))
                     .endChoice()

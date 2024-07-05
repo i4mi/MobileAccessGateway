@@ -84,7 +84,7 @@
         "coding": [
           {
             "system": "https://profiles.ihe.net/ITI/MHD/CodeSystem/DocumentIdentifierTypes",
-            "code": "logicalId"
+            "code": "logicalID"
           }
         ]
       }

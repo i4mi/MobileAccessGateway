@@ -25,7 +25,7 @@ public class Iti57RequestTranslatorTest {
         PatientReferenceCreator patientReferenceCreator = new PatientReferenceCreator();
         patientReferenceCreator.setConfig(config);
         patientReferenceCreator.setSchemeMapper(schemeMapper);
-        iti67RequestUpdateConverter = new Iti67RequestUpdateConverter();
+        iti67RequestUpdateConverter = new Iti67RequestUpdateConverter(config);
         iti67RequestUpdateConverter.setConfig(config);
         iti67RequestUpdateConverter.setSchemeMapper(schemeMapper);
         iti67RequestUpdateConverter.setPatientRefCreator(patientReferenceCreator);
