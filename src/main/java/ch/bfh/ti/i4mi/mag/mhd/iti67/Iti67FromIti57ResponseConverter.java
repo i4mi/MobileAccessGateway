@@ -22,13 +22,17 @@ import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
 import org.openehealth.ipf.commons.ihe.fhir.translation.ToFhirTranslator;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Response;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Component
 public class Iti67FromIti57ResponseConverter extends BaseResponseConverter implements ToFhirTranslator<Response> {
 
 	private Config config;
 
+	@Autowired
 	public Iti67FromIti57ResponseConverter(final Config config) {
 		this.config = config;
 	}

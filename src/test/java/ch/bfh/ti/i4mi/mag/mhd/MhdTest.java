@@ -8,10 +8,11 @@ import ch.bfh.ti.i4mi.mag.MobileAccessGateway;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.hl7.fhir.r4.model.DocumentReference;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Dmytro Rud
@@ -75,7 +82,20 @@ public class MhdTest {
             errorCatched = true;
         }
         assertTrue(errorCatched);
+    }
 
+    @Test
+    public void testDocumentDeletion() throws IOException {
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            ClassicHttpRequest httpRequest = ClassicRequestBuilder.delete("http://localhost:" + serverPort + "/fhir/DocumentReference/" + UUID.randomUUID())
+                    .setCharset(StandardCharsets.UTF_8)
+                    .build();
+            String response = httpClient.execute(httpRequest, httpResponse -> {
+                assertEquals(200, httpResponse.getCode());
+                return httpResponse.toString();
+            });
+            log.info(response);
+        }
     }
 
 }
