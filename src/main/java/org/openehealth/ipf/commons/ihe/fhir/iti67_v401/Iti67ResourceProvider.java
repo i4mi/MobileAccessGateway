@@ -22,6 +22,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ca.uhn.fhir.rest.annotation.*;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.IdType;
@@ -32,16 +33,6 @@ import org.openehealth.ipf.commons.ihe.fhir.AbstractPlainProvider;
 import org.openehealth.ipf.commons.ihe.fhir.iti67.Iti67SearchParameters;
 
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.IncludeParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -206,7 +197,16 @@ public class Iti67ResourceProvider extends AbstractPlainProvider {
         // Run down the route
         return requestAction(theReference, null, httpServletRequest, httpServletResponse, requestDetails);
     }
-    
 
+    @SuppressWarnings("unused")
+    @Delete(type = DocumentReference.class)
+    public MethodOutcome delete(
+            @IdParam IdType id,
+            RequestDetails requestDetails,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse)
+    {
+        return requestAction(id, null, httpServletRequest, httpServletResponse, requestDetails);
+    }
 
 }

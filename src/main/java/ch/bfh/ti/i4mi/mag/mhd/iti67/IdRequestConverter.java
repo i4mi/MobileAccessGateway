@@ -16,47 +16,41 @@
 
 package ch.bfh.ti.i4mi.mag.mhd.iti67;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 import org.apache.camel.Header;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.QueryRegistry;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.GetDocumentsQuery;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryReturnType;
 
-import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
+import java.util.Collections;
 
 /**
  * ITI-67 to ITI-18 request converter
- * 
- * @author oliver egger
  *
+ * @author oliver egger
  */
 public class IdRequestConverter extends BaseRequestConverter {
 
     /**
      * convert ITI-67 request to ITI-18 request
-     * 
-     * @param searchParameter
-     * @return
      */
     public QueryRegistry idToGetDocumentsQuery(@Header(value = "FhirHttpUri") String fhirHttpUri) {
 
         if (fhirHttpUri != null && fhirHttpUri.contains("/")) {
             boolean getLeafClass = true;
-            String uuid = fhirHttpUri.substring(fhirHttpUri.lastIndexOf("/") + 1);
-            if (!uuid.startsWith("urn:uuid:")) {
-            	uuid = "urn:uuid:"+uuid;
-            }
-            
+
             GetDocumentsQuery query = new GetDocumentsQuery();
-            final QueryRegistry queryRegistry = new QueryRegistry(query);            
-            query.setUuids(Collections.singletonList(uuid));
+            final QueryRegistry queryRegistry = new QueryRegistry(query);
+            query.setLogicalUuid(Collections.singletonList(extractId(fhirHttpUri)));
             queryRegistry.setReturnType((getLeafClass) ? QueryReturnType.LEAF_CLASS : QueryReturnType.OBJECT_REF);
             return queryRegistry;
         }
         return null;
-
     }
+
+    public static String extractId(String fhirHttpUri) {
+        String uuid = fhirHttpUri.substring(fhirHttpUri.lastIndexOf("/") + 1);
+        return uuid.startsWith("urn:uuid:") ? uuid : "urn:uuid:" + uuid;
+    }
+
 }

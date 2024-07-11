@@ -34,6 +34,8 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.*;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
 import org.owasp.esapi.codecs.Hex;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
@@ -42,8 +44,10 @@ import java.util.*;
  *
  * @author alexander kreutz
  */
+@Component
 public class Iti67ResponseConverter extends BaseQueryResponseConverter {
 
+    @Autowired
     public Iti67ResponseConverter(final Config config) {
         super(config);
     }

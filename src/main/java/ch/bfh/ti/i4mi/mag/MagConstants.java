@@ -34,4 +34,12 @@ public class MagConstants {
         public static final String MHD_DOCUMENT_ID_TYPE = "https://profiles.ihe.net/ITI/MHD/CodeSystem/DocumentIdentifierTypes";
     }
 
+    @UtilityClass
+    public static class DeletionStatuses {
+        private static final String PREFIX = "urn:e-health-suisse:2019:deletionStatus:";
+        public static final String NOT_REQUESTED = PREFIX + "deletionNotRequested";
+        public static final String REQUESTED     = PREFIX + "deletionRequested";
+        public static final String PROHIBITED    = PREFIX + "deletionProhibited";
+    }
+
 }

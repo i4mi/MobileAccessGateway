@@ -34,7 +34,7 @@ public class Iti57RequestTranslatorTest {
     @Test
     public void test1() {
         DocumentReference documentReference = (DocumentReference) FhirContext.forR4().newJsonParser().parseResource(Iti57RequestTranslatorTest.class.getClassLoader().getResourceAsStream("update-request-1.json"));
-        SubmitObjectsRequest ebXml = iti67RequestUpdateConverter.convertDocumentReferenceToDocumentEntry(documentReference);
+        SubmitObjectsRequest ebXml = iti67RequestUpdateConverter.createMetadataUpdateRequest(documentReference);
         String ebXmlString = XdsRenderingUtils.renderEbxml(ebXml);
 
         Assertions.assertTrue(ebXmlString.contains(MagConstants.XdsExtraMetadataSlotNames.CH_DELETION_STATUS));
