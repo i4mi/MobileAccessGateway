@@ -152,7 +152,6 @@ class Iti67RouteBuilder extends RouteBuilder {
                             .process(translateToFhir(new Iti67FromIti57ResponseConverter(config), Response.class))
                             .endChoice()
                         .end()
-                    .endChoice()
                 .end();
     }
 }
