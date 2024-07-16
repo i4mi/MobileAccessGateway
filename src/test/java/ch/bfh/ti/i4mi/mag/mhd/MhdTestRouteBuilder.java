@@ -9,6 +9,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Version;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.QueryRegistry;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.RegisterDocumentSet;
+import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindDocumentsQuery;
 import org.openehealth.ipf.commons.ihe.xds.core.requests.query.GetDocumentsQuery;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Response;
@@ -17,9 +18,9 @@ import org.openehealth.ipf.platform.camel.ihe.xds.XdsCamelValidators;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 /**
  * @author Dmytro Rud
@@ -35,15 +36,42 @@ public class MhdTestRouteBuilder extends RouteBuilder {
                 .process(exchange -> {
                     log.info("Received ITI-18 request");
                     QueryRegistry iti18Request = exchange.getIn().getMandatoryBody(QueryRegistry.class);
-                    assertInstanceOf(GetDocumentsQuery.class, iti18Request.getQuery());
+                    QueryResponse iti18Response = null;
 
-                    DocumentEntry documentEntry = SampleData.createDocumentEntry(new Identifiable("testIti18-1", new AssigningAuthority("1.2.3.4.5")));
-                    documentEntry.assignEntryUuid();
-                    documentEntry.setVersion(new Version("42"));
+                    if (iti18Request.getQuery() instanceof FindDocumentsQuery) {
+                        FindDocumentsQuery query = (FindDocumentsQuery) iti18Request.getQuery();
+                        if ("deletion-flag-filtering-test-1".equals(query.getPatientId().getId())) {
+                            iti18Response = new QueryResponse(Status.SUCCESS);
+                            for (int i = 0; i < 4; ++i) {
+                                DocumentEntry documentEntry = SampleData.createDocumentEntry(new Identifiable("deletion-flag-filtering-test-1", new AssigningAuthority("1.2.3.4.5")));
+                                documentEntry.assignEntryUuid();
+                                documentEntry.setUniqueId("uniqueId" + i);
+                                iti18Response.getDocumentEntries().add(documentEntry);
+                            }
+                            iti18Response.getDocumentEntries().get(0).setExtraMetadata(null);
+                            iti18Response.getDocumentEntries().get(1).setExtraMetadata(Map.of(MagConstants.XdsExtraMetadataSlotNames.CH_DELETION_STATUS, List.of(MagConstants.DeletionStatuses.NOT_REQUESTED)));
+                            iti18Response.getDocumentEntries().get(2).setExtraMetadata(Map.of(MagConstants.XdsExtraMetadataSlotNames.CH_DELETION_STATUS, List.of(MagConstants.DeletionStatuses.REQUESTED)));
+                            iti18Response.getDocumentEntries().get(3).setExtraMetadata(Map.of(MagConstants.XdsExtraMetadataSlotNames.CH_DELETION_STATUS, List.of(MagConstants.DeletionStatuses.PROHIBITED)));
+                        }
 
-                    QueryResponse iti18Response = new QueryResponse(Status.SUCCESS);
-                    iti18Response.getDocumentEntries().add(documentEntry);
-                    exchange.getMessage().setBody(iti18Response);
+                    } else if (iti18Request.getQuery() instanceof GetDocumentsQuery) {
+                        GetDocumentsQuery query = (GetDocumentsQuery) iti18Request.getQuery();
+                        if ("urn:uuid:metadata-update-test-1".equals(query.getLogicalUuid().get(0))) {
+                            DocumentEntry documentEntry = SampleData.createDocumentEntry(new Identifiable("metadata-update-test-1", new AssigningAuthority("1.2.3.4.5")));
+                            documentEntry.assignEntryUuid();
+                            documentEntry.setVersion(new Version("42"));
+
+                            iti18Response = new QueryResponse(Status.SUCCESS);
+                            iti18Response.getDocumentEntries().add(documentEntry);
+                            exchange.getMessage().setBody(iti18Response);
+                        }
+                    }
+
+                    if (iti18Response != null) {
+                        exchange.getMessage().setBody(iti18Response);
+                    } else {
+                        throw new Exception("Unknown test parameters");
+                    }
                 })
                 .process(XdsCamelValidators.iti18ResponseValidator())
         ;
@@ -66,7 +94,7 @@ public class MhdTestRouteBuilder extends RouteBuilder {
                     RegisterDocumentSet updateRequest = exchange.getIn().getMandatoryBody(RegisterDocumentSet.class);
                     Response updateResponse = new Response();
 
-                    if ("testIti18-1".equals(updateRequest.getSubmissionSet().getPatientId().getId())) {
+                    if ("metadata-update-test-1".equals(updateRequest.getSubmissionSet().getPatientId().getId())) {
                         assertEquals(1, updateRequest.getAssociations().size());
                         assertEquals("42", updateRequest.getAssociations().get(0).getPreviousVersion());
 
