@@ -15,48 +15,15 @@ package ch.bfh.ti.i4mi.mag.mhd;
  * limitations under the License.
  */
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
-import org.apache.camel.Body;
 import org.apache.camel.Headers;
 import org.apache.camel.Processor;
 import org.apache.camel.http.common.HttpMessage;
-import org.hl7.fhir.r4.model.Patient;
 import org.openehealth.ipf.commons.ihe.fhir.Constants;
 import org.openehealth.ipf.commons.ihe.fhir.FhirSearchParameters;
-import org.openehealth.ipf.commons.ihe.fhir.iti66.Iti66SearchParameters;
-import org.openehealth.ipf.commons.ihe.fhir.iti67.Iti67SearchParameters;
-import org.openehealth.ipf.commons.ihe.xds.core.ebxml.ebxml30.RetrieveDocumentSetResponseType;
-import org.openehealth.ipf.commons.ihe.xds.core.ebxml.ebxml30.RetrieveDocumentSetResponseType.DocumentResponse;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.AvailabilityStatus;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.Code;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.DocumentEntry;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.ReferenceId;
-import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
-import org.openehealth.ipf.commons.ihe.xds.core.requests.QueryRegistry;
-import org.openehealth.ipf.commons.ihe.xds.core.requests.RetrieveDocumentSet;
-import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindDocumentsByReferenceIdQuery;
-import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindDocumentsQuery;
-import org.openehealth.ipf.commons.ihe.xds.core.requests.query.FindSubmissionSetsQuery;
-import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryList;
-import org.openehealth.ipf.commons.ihe.xds.core.requests.query.QueryReturnType;
-import org.openehealth.ipf.commons.ihe.xds.core.responses.RetrievedDocumentSet;
-
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ch.bfh.ti.i4mi.mag.Config;
 
 /**
  * utility classes for Mobile Access Gateway
@@ -65,7 +32,10 @@ import ch.bfh.ti.i4mi.mag.Config;
  */
 public class Utils {
 
-	public static final String KEPT_BODY = "KeptBody"; 
+	public static final String KEPT_BODY = "KeptBody";
+
+    public static final Pattern UNPREFIXED_OID_PATTERN = Pattern.compile("\\d+(\\.\\d+)+");
+    public static final Pattern UNPREFIXED_UUID_PATTERN = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
 	
     public static FhirSearchParameters searchParameterToBody(@Headers Map<String, Object> parameters) {        
             FhirSearchParameters searchParameter = (FhirSearchParameters) parameters
@@ -141,4 +111,12 @@ public class Utils {
         };
     }
    */
+
+    public static boolean isUnprefixedOid(final String oid) {
+        return oid != null && UNPREFIXED_OID_PATTERN.matcher(oid).matches();
+    }
+
+    public static boolean isUnprefixedUuid(final String uuid) {
+        return uuid != null && UNPREFIXED_UUID_PATTERN.matcher(uuid).matches();
+    }
 }
