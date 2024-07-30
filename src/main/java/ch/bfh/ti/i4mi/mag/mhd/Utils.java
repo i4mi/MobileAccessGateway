@@ -141,4 +141,12 @@ public class Utils {
         };
     }
    */
+
+    public static boolean isUnprefixedOid(final String oid) {
+        return oid != null && oid.matches("\\d+(\\.\\d+)+");
+    }
+
+    public static boolean isUnprefixedUuid(final String uuid) {
+        return uuid != null && uuid.matches("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+    }
 }
