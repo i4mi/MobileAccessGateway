@@ -1000,20 +1000,30 @@ public class Iti65RequestConverter extends BaseRequestConverter {
     }
 
 	/**
-	 * FHIR Organization -> XDS Organization
+	 * FHIR Organization -> IPF Organization (XDS XON)
 	 * @param org
 	 * @return
 	 */
 	public org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization transform(Organization org) {
-		org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization result = new org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization();
+		final var result = new org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization();
     	result.setOrganizationName(org.getName());
-    	Identifier identifier = org.getIdentifierFirstRep();
-    	if (identifier != null) {
-    		result.setIdNumber(identifier.getValue());
-    		result.setAssigningAuthority(new AssigningAuthority(noPrefix(identifier.getSystem())));
-    	}
-    	return result;
-    }
+    	final Identifier identifier = org.getIdentifierFirstRep();
+    	if (identifier != null && identifier.hasValue()) {
+			if (identifier.hasSystem()) {
+				if (identifier.getSystem().equals("urn:ietf:rfc:3986")) {
+					// The value is a URI, remove the prefix and ignore the system
+					result.setIdNumber(noPrefix(identifier.getValue()));
+				} else {
+					// The value is an identifier, use the system as assigning authority
+					result.setIdNumber(identifier.getValue());
+					result.setAssigningAuthority(new AssigningAuthority(noPrefix(identifier.getSystem())));
+				}
+			} else {
+				result.setIdNumber(identifier.getValue());
+			}
+		}
+		return result;
+	}
 
 	/**
 	 * FHIR Reference to Author -> XDS Author

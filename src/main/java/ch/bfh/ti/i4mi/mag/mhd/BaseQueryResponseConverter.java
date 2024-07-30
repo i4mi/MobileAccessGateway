@@ -56,6 +56,9 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 
+import static ch.bfh.ti.i4mi.mag.mhd.Utils.isUnprefixedOid;
+import static ch.bfh.ti.i4mi.mag.mhd.Utils.isUnprefixedUuid;
+
 /**
  * base query response converter XDS to MHD
  * @author alexander kreutz
@@ -236,21 +239,35 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
     }
     
     /**
-     * XDS Organization -> FHIR Organization
+     * IPF Organization (XDS XON) -> FHIR Organization
      * @param org
      * @return
      */
     public Organization transform(org.openehealth.ipf.commons.ihe.xds.core.metadata.Organization org) {
-    	if (org == null) return null;
-    	Organization result = new Organization();
+    	if (org == null) {
+			return null;
+		}
+    	final var result = new Organization();
     	result.setName(org.getOrganizationName());
-    	String id = org.getIdNumber();
-    	// TODO handle system not given
+		String id = org.getIdNumber();
+		if (isUnprefixedOid(id)) {
+			id = "urn:oid:" + id;
+		} else if (isUnprefixedUuid(id)) {
+			id = "urn:uuid:" + id;
+		}
     	
-    	if (org.getAssigningAuthority()!=null) {
-    	   String system = org.getAssigningAuthority().getUniversalId();
-    	   result.addIdentifier().setSystem("urn:oid:"+system).setValue(id);
-    	} else result.addIdentifier().setValue(id);
+    	if (org.getAssigningAuthority() != null) {
+			String system = org.getAssigningAuthority().getUniversalId();
+			if (isUnprefixedOid(system)) {
+				system = "urn:oid:" + system;
+			}
+			result.addIdentifier().setSystem(system).setValue(id);
+    	} else {
+			final var identifier = result.addIdentifier().setValue(id);
+			if (id.startsWith("urn:")) {
+				identifier.setSystem("urn:ietf:rfc:3986");
+			}
+		}
     	return result;
     }
     
