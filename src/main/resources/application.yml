@@ -91,10 +91,10 @@ server:
   error:
     whitelabel:
       enabled: false
-	jetty:
-    	accesslog:
-      		enabled: true
-      		use-slf4j: true
+    jetty:
+        accesslog:
+            enabled: true
+            use-slf4j: true
 
 logging:
   pattern:
