@@ -31,7 +31,6 @@ import javax.validation.spi.ValidationProvider;
  *
  * @author Oliver Egger
  */
-@SpringBootApplication(exclude = {org.springframework.cloud.sleuth.autoconfig.brave.BraveAutoConfiguration.class})
 @Slf4j
 @ComponentScan(basePackages={"ch.bfh.ti.i4mi.mag","org.openehealth.ipf","org.springframework.security.saml"})
 // without it does not work directly with mvn and current snapshot, when running the Pixm query an error is returned   "resourceType": "OperationOutcome", "issue": [ { "severity": "error", "code": "processing", "diagnostics": "Unknown resource type 'Patient' - Server knows how to handle: [StructureDefinition, OperationDefinition]" } ]
