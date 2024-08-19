@@ -1,6 +1,5 @@
 package ch.bfh.ti.i4mi.mag;
 
-import brave.propagation.B3Propagation;
 import brave.propagation.Propagation;
 import brave.propagation.TraceContext;
 import brave.propagation.TraceContextOrSamplingFlags;
@@ -15,15 +14,13 @@ public class CustomPropagationFactory extends Propagation.Factory {
 
     @Override
     public <K> Propagation<K> create(Propagation.KeyFactory<K> keyFactory) {
-        return new CustomPropagation<>(B3Propagation.FACTORY.create(keyFactory), keyFactory);
+        return new CustomPropagation<>(keyFactory);
     }
 
     static final class CustomPropagation<K> implements Propagation<K> {
-        final Propagation<K> b3;
         final K traceParentKey, traceStateKey;
 
-        CustomPropagation(Propagation<K> b3, KeyFactory<K> keyFactory) {
-            this.b3 = b3;
+        CustomPropagation(KeyFactory<K> keyFactory) {
             this.traceParentKey = keyFactory.create(TRACE_PARENT);
             this.traceStateKey = keyFactory.create(TRACE_STATE);
         }
@@ -35,7 +32,10 @@ public class CustomPropagationFactory extends Propagation.Factory {
 
         @Override
         public <C> TraceContext.Injector<C> injector(Setter<C, K> setter) {
-            return b3.injector(setter);
+            return (traceContext, carrier) -> {
+                setter.put(carrier, traceParentKey, formatTraceParent(traceContext));
+                setter.put(carrier, traceStateKey, "");
+            };
         }
 
         @Override
@@ -45,29 +45,37 @@ public class CustomPropagationFactory extends Propagation.Factory {
                 public TraceContextOrSamplingFlags extract(C carrier) {
                     String traceParent = getter.get(carrier, traceParentKey);
                     if (traceParent != null) {
-                        return extractFromTraceParent(traceParent);
+                        TraceContext context = extractFromTraceParent(traceParent);
+                        return context != null ? TraceContextOrSamplingFlags.create(context) : TraceContextOrSamplingFlags.EMPTY;
                     }
-                    return b3.extractor(getter).extract(carrier);
+                    return TraceContextOrSamplingFlags.EMPTY;
                 }
             };
         }
 
-        private TraceContextOrSamplingFlags extractFromTraceParent(String traceParent) {
+        private String formatTraceParent(TraceContext context) {
+            return String.format("00-%s-%s-%02x",
+                    context.traceIdString(),
+                    context.spanIdString(),
+                    context.sampledLocal() ? 1 : 0);
+        }
+
+        private TraceContext extractFromTraceParent(String traceParent) {
             String[] parts = traceParent.split("-");
             if (parts.length != 4) {
-                return TraceContextOrSamplingFlags.EMPTY;
+                return null;
             }
             long traceIdHigh = Long.parseUnsignedLong(parts[1].substring(0, 16), 16);
             long traceIdLow = Long.parseUnsignedLong(parts[1].substring(16), 16);
             long spanId = Long.parseUnsignedLong(parts[2], 16);
-            byte samplingFlags = Byte.parseByte(parts[3], 16);
+            boolean sampled = parts[3].equals("01");
 
-            return TraceContextOrSamplingFlags.create(TraceContext.newBuilder()
+            return TraceContext.newBuilder()
                     .traceIdHigh(traceIdHigh)
                     .traceId(traceIdLow)
                     .spanId(spanId)
-                    .sampled(samplingFlags == 1)
-                    .build());
+                    .sampled(sampled)
+                    .build();
         }
     }
 }

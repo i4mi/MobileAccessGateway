@@ -109,6 +109,9 @@ logging:
     org.springframework.cloud.sleuth: debug
     org.springframework.web: debug
     org.springframework.http: debug
+    io.micrometer.tracing: debug
+    ch.bfh.ti.i4mi.mag.LoggingSpanHandler: debug
+    brave: debug
   appender:
     console:
       enabled: true
@@ -127,23 +130,16 @@ spring:
   # W3C Trace-Id and related recommendations
   # https://www.w3.org/TR/trace-context/
   sleuth:
-    enabled: true
-    propagation:
-      type: CUSTOM
-    sampler:
+    enabled: false
+  tracing:
+    sampling:
       probability: 1.0
-      remote-fields:
-        - tracestate
-    trace-id128: true
-    supportsJoin: false
-    web:
-      client:
-        enabled: true
-      servlet:
-        enabled: true
-      filter-order: 0
-    zipkin:
-      enabled: false
+      baggage:
+        correlation:
+          enabled: true
+      propagation:
+        type: W3C
+    enabled: true
   log:
     slf4j:
       whitelisted-mdc-keys:
