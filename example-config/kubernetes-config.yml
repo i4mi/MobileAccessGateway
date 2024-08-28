@@ -21,7 +21,7 @@ spec:
           secretName: mobile-access-gateway-secret
       containers:
       - name: mobile-access-gateway
-        image: eu.gcr.io/fhir-ch/mag:v020        
+        image: europe-west6-docker.pkg.dev/ahdis-ch/ahdis/mag:v070        
         resources:
           requests:
             memory: "0.6Gi"
@@ -35,16 +35,16 @@ spec:
           mountPath: /secret
         livenessProbe:
           httpGet:
-            path: /fhir/metadata
+            path: /actuator/health
             port: 9090
-          initialDelaySeconds: 60
-          periodSeconds: 10
+          initialDelaySeconds: 20
+          periodSeconds: 2
         readinessProbe:
           httpGet:
-            path: /fhir/metadata
+            path: /actuator/health
             port: 9090
-          initialDelaySeconds: 90
-          periodSeconds: 10
+          initialDelaySeconds: 20
+          periodSeconds: 2
 ---
 apiVersion: v1
 kind: Service
@@ -55,10 +55,12 @@ spec:
   ports:
   - port: 9090
     name: http
-    targetPort: 9090    
+    targetPort: 9090
+    nodePort: 30090
   - port: 9091
     name: https
     targetPort: 9091
+    nodePort: 30091
   selector:
     app: mobile-access-gateway
 ---
