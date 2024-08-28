@@ -64,6 +64,7 @@ mag:
 
   ch-epr-fhir:
     ch-pixm-constraints: true
+    ch-pdqm-constraints: true
     epr-spid-as-patientid: true
 
 # certificate from https://ehealthsuisse.ihe-europe.net/gss/certificate/view.seam?id=386

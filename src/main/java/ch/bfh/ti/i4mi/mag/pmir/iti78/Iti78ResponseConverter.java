@@ -40,14 +40,15 @@ import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.openehealth.ipf.commons.ihe.fhir.translation.ToFhirTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
+import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.BasePMIRResponseConverter;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
@@ -97,7 +98,10 @@ public class Iti78ResponseConverter extends BasePMIRResponseConverter implements
 
 	@Autowired
 	PatientReferenceCreator patientRefCreator;
-	
+
+	@Autowired
+	private Config config;
+
 	@Autowired
 	SchemeMapper schemeMapper;
 	
@@ -249,14 +253,14 @@ public class Iti78ResponseConverter extends BasePMIRResponseConverter implements
 		}
 	}
 	
-	public List<Patient> translateToFhir(byte[] input, Map<String, Object> parameters)  {
+	public List<Resource> translateToFhir(byte[] input, Map<String, Object> parameters)  {
 		try {
 			
 			// FIX for xmlns:xmlns
 	    String content = new String(input);
 	    content = content.replace("xmlns:xmlns","xmlns:xxxxx");
 	    
-	    List<Patient> response = new ArrayList<Patient>();
+	    List<Resource> response = new ArrayList<Resource>();
 	    
         PRPAIN201306UV02Type msg = HL7V3Transformer.unmarshallMessage(PRPAIN201306UV02Type.class, new ByteArrayInputStream(content.getBytes()));
       
@@ -277,8 +281,23 @@ public class Iti78ResponseConverter extends BasePMIRResponseConverter implements
 		if ("AE".equals(queryResponseCode)) {
 			throw new InvalidRequestException("sourceIdentifier Assigning Authority not found", error(IssueType.INVALID, errtext.length()>0 ? errtext : "sourceIdentifier Assigning Authority not found"));
 		}
-		
+
 		List<PRPAIN201306UV02MFMIMT700711UV01Subject1> subjects = controlAct.getSubject();
+		if (config.isChPdqmConstraints() && subjects.size()>5) {
+			// https://github.com/i4mi/MobileAccessGateway/issues/171
+			OperationOutcome operationOutcome = new OperationOutcome();
+			CodeableConcept code = new CodeableConcept();
+			code.addCoding().setSystem("urn:oid:1.3.6.1.4.1.19376.1.2.27.1").setCode("LivingSubjectAdministrativeGenderRequested").setDisplay("LivingSubjectAdministrativeGenderRequested");
+			operationOutcome.addIssue().setSeverity(OperationOutcome.IssueSeverity.WARNING).setCode(OperationOutcome.IssueType.INCOMPLETE).setDetails(code);
+			code = new CodeableConcept();
+			code.addCoding().setSystem("urn:oid:1.3.6.1.4.1.19376.1.2.27.1").setCode("LivingSubjectBirthPlaceNameRequested").setDisplay("LivingSubjectBirthPlaceNameRequested");
+			operationOutcome.addIssue().setSeverity(OperationOutcome.IssueSeverity.WARNING).setCode(OperationOutcome.IssueType.INCOMPLETE).setDetails(code);
+			code = new CodeableConcept();
+			code.addCoding().setSystem("urn:oid:2.16.756.5.30.1.127.3.10.17").setCode("BirthNameRequested").setDisplay("BirthNameRequested");
+			operationOutcome.addIssue().setSeverity(OperationOutcome.IssueSeverity.WARNING).setCode(OperationOutcome.IssueType.INCOMPLETE).setDetails(code);
+			response.add(operationOutcome);
+			return response;
+		}
 		for (PRPAIN201306UV02MFMIMT700711UV01Subject1 subject : subjects) {
 			PRPAIN201306UV02MFMIMT700711UV01RegistrationEvent registrationEvent = subject.getRegistrationEvent();
 			PRPAIN201306UV02MFMIMT700711UV01Subject2 subject1 = registrationEvent.getSubject1();

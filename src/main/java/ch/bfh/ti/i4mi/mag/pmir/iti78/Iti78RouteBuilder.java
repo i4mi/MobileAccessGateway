@@ -26,9 +26,6 @@ import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
-import ch.bfh.ti.i4mi.mag.mhd.Utils;
-import ch.bfh.ti.i4mi.mag.mhd.iti67.IdRequestConverter;
-import ch.bfh.ti.i4mi.mag.mhd.iti67.Iti67RequestConverter;
 import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
