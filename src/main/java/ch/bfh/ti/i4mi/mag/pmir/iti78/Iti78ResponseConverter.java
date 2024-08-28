@@ -52,6 +52,7 @@ import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.BasePMIRResponseConverter;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
+import lombok.extern.slf4j.Slf4j;
 import net.ihe.gazelle.hl7v3.coctmt030007UV.COCTMT030007UVPerson;
 import net.ihe.gazelle.hl7v3.datatypes.AD;
 import net.ihe.gazelle.hl7v3.datatypes.AdxpStreetAddressLine;
@@ -93,6 +94,7 @@ import net.ihe.gazelle.hl7v3transformer.HL7V3Transformer;
  * @author alexander kreutz
  *
  */
+@Slf4j
 @Component
 public class Iti78ResponseConverter extends BasePMIRResponseConverter implements ToFhirTranslator<byte[]> {
 
@@ -312,7 +314,16 @@ public class Iti78ResponseConverter extends BasePMIRResponseConverter implements
 			
 			for (II patientId : patient.getId()) {
 				if (patientId.getRoot()==null && patientId.getExtension()==null) continue;
-				result.addIdentifier().setSystem(getSystem(patientId.getRoot())).setValue(patientId.getExtension());
+
+				if (config.isChPdqmConstraints()) {
+					if (config.getOidMpiPid().equals(patientId.getRoot()) || config.OID_EPRSPID.equals(patientId.getRoot())) {
+						result.addIdentifier().setSystem(getSystem(patientId.getRoot())).setValue(patientId.getExtension());
+					} else {
+						log.info("Ignoring patient identifier "+patientId.getRoot());
+					}
+				} else	{							
+					result.addIdentifier().setSystem(getSystem(patientId.getRoot())).setValue(patientId.getExtension());
+				}
 				
 				if (!idadded) {
 					result.setId(patientRefCreator.createPatientId(patientId.getRoot(), patientId.getExtension()));
@@ -323,7 +334,16 @@ public class Iti78ResponseConverter extends BasePMIRResponseConverter implements
 			for (PRPAMT201310UV02OtherIDs otherIds : patient.getPatientPerson().getAsOtherIDs()) {
 				for (II patientId : otherIds.getId()) {
 				   if (patientId.getRoot()==null && patientId.getExtension()==null) continue;
-				   result.addIdentifier().setSystem(getSystem(patientId.getRoot())).setValue(patientId.getExtension());	
+
+				   if (config.isChPdqmConstraints()) {
+						if (config.getOidMpiPid().equals(patientId.getRoot()) || config.OID_EPRSPID.equals(patientId.getRoot())) {
+							result.addIdentifier().setSystem(getSystem(patientId.getRoot())).setValue(patientId.getExtension());
+						} else {
+							log.info("Ignoring patient identifier "+patientId.getRoot());
+						}
+					} else	{							
+						result.addIdentifier().setSystem(getSystem(patientId.getRoot())).setValue(patientId.getExtension());
+					}
 				}
 			}
 			
