@@ -34,7 +34,6 @@ import org.apache.camel.support.jsse.KeyManagersParameters;
 import org.apache.camel.support.jsse.KeyStoreParameters;
 import org.apache.camel.support.jsse.SSLContextParameters;
 import org.apache.camel.support.jsse.TrustManagersParameters;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.openehealth.ipf.commons.audit.AuditContext;
 import org.openehealth.ipf.commons.audit.DefaultAuditContext;
 import org.openehealth.ipf.commons.audit.protocol.TCPSyslogSender;
@@ -51,8 +50,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.filter.CorsFilter;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import ch.bfh.ti.i4mi.mag.pmir.PatientReferenceCreator;
 import lombok.Data;
@@ -191,6 +188,12 @@ public class Config {
 
     @Value("${mag.pix.oids.local-patient-id-aa:}")
     private String localPatientIDAssigningAuthority;
+
+    @Value("${mag.ch-epr-fhir.ch-pixm-constraints:false}")
+    private boolean chPixmConstraints;
+
+    @Value("${mag.ch-epr-fhir.epr-spid-as-patientid:false}")
+    private boolean chEprspidAsPatientId;
 
 
     /**
@@ -434,4 +437,5 @@ public class Config {
                                      (clientSsl ? "&sslContextParameters=#sslContext" : ""),
                              assertionEndpointUrl, wsdl);
     }
+    
 }
