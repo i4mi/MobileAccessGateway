@@ -21,10 +21,8 @@ import org.hl7.fhir.r4.model.Reference;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.AssigningAuthority;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Identifiable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
-import ch.bfh.ti.i4mi.mag.MobileAccessGateway;
 import ch.bfh.ti.i4mi.mag.mhd.SchemeMapper;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,6 +57,9 @@ public class PatientReferenceCreator {
 	}
 	
 	public String createPatientId(String system, String value) {
+		if (system.equals(config.getOID_EPRSPID()) &&  config.isChEprspidAsPatientId()) {
+			return value;
+		}
 		return system+"-"+value;
 	}
 	
@@ -80,6 +81,10 @@ public class PatientReferenceCreator {
 		  } else {
 		    log.error("expected oid as a system for resolving Patient in: "+fullId);
 		  }
+		} else {
+			if (config.isChEprspidAsPatientId()) {
+				return new Identifiable(fullId, new AssigningAuthority(schemeMapper.getScheme(config.getOID_EPRSPID())));
+			}
 		}
 		return null;
 	}

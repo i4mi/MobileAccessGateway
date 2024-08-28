@@ -1,5 +1,6 @@
 mag:
-  baseurl: http://localhost
+# adjust here the baseurl to the external url which should be exposed
+  baseurl: http://localhost:9090
   client-ssl:
     enabled: true
 # certificate from https://ehealthsuisse.ihe-europe.net/gss/certificate/view.seam?id=386
@@ -60,6 +61,10 @@ mag:
     audit-repository-host: ehealthsuisse.ihe-europe.net
     audit-repository-port: 3202
     audit-repostiory-transport: TLS
+
+  ch-epr-fhir:
+    ch-pixm-constraints: true
+    epr-spid-as-patientid: true
 
 # certificate from https://ehealthsuisse.ihe-europe.net/gss/certificate/view.seam?id=386
 server:

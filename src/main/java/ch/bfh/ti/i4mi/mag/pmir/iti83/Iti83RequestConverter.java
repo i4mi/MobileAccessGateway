@@ -23,12 +23,15 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
+import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 import ch.bfh.ti.i4mi.mag.Config;
 import lombok.extern.slf4j.Slf4j;
@@ -66,10 +69,38 @@ public class Iti83RequestConverter extends BaseRequestConverter {
 
 	@Autowired
 	private Config config;
+
 	
+	public OperationOutcome getTargetDomainNotRecognized() {
+		OperationOutcome outcome = new OperationOutcome();
+		OperationOutcomeIssueComponent issue = outcome.addIssue();
+		issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+		issue.setCode(IssueType.CODEINVALID);
+		issue.setDiagnostics("targetSystem not found");
+		return outcome;
+	}
+
 	public String iti83ToIti45Converter(Parameters parameters) throws JAXBException {
 		List<Parameters.ParametersParameterComponent> targetSystemList = parameters.getParameters("targetSystem");
 		Identifier sourceIdentifier = (Identifier) parameters.getParameter("sourceIdentifier").getValue();
+
+		if (config.isChPixmConstraints()) {
+			// https://fhir.ch/ig/ch-epr-fhir/iti-83.html#message-semantics-1
+			if (sourceIdentifier == null) {
+				log.error("sourceIdentifier is missing");
+				throw new ForbiddenOperationException("sourceIdentifier is missing", getTargetDomainNotRecognized());
+			}
+			if (targetSystemList == null || (targetSystemList.size() != 2)) {
+				log.error("targetSystem need to be 2..2");
+				throw new ForbiddenOperationException("targetSystem need to be 2..2", getTargetDomainNotRecognized());
+			}
+			UriType uri1 = (UriType) targetSystemList.get(0).getValue();
+			UriType uri2 = (UriType) targetSystemList.get(1).getValue();
+			if (!((uri1.equals("urn:oid:"+config.OID_EPRSPID) && uri2.equals("urn:oid:"+config.getOidMpiPid()) || (uri1.equals("urn:oid:"+config.getOidMpiPid()) && uri2.equals("urn:oid:"+config.OID_EPRSPID))))) {
+				log.error("targetSystem is not restricted to the Assigning authority of the community and the EPR-SPID");
+				throw new ForbiddenOperationException("targetSystem is not restricted to the Assigning authority of the community and the EPR-SPID,", getTargetDomainNotRecognized());
+			}
+		}
 
 		PRPAIN201309UV02Type resultMsg = new PRPAIN201309UV02Type();
 		resultMsg.setITSVersion("XML_1.0");
