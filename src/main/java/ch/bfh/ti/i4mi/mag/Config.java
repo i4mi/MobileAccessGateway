@@ -192,6 +192,9 @@ public class Config {
     @Value("${mag.ch-epr-fhir.ch-pixm-constraints:false}")
     private boolean chPixmConstraints;
 
+    @Value("${mag.ch-epr-fhir.ch-pdqm-constraints:false}")
+    private boolean chPdqmConstraints;
+
     @Value("${mag.ch-epr-fhir.epr-spid-as-patientid:false}")
     private boolean chEprspidAsPatientId;
 
