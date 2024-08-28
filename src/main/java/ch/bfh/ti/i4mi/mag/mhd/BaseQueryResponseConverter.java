@@ -358,7 +358,6 @@ public abstract class BaseQueryResponseConverter extends BaseResponseConverter i
      * @return
      */
     public Reference transformPatient(Identifiable patient) {    	
-    	String baseUrl = config.getUriPatientEndpoint();
     	String system = patient.getAssigningAuthority().getUniversalId();
     	String value = patient.getId(); 
 		return patientReferenceCreator.createPatientReference(system, value);

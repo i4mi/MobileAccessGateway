@@ -122,13 +122,15 @@ public class Iti83ResponseConverter extends BasePMIRResponseConverter implements
 				  response.addParameter().setName("targetIdentifier").setValue((new Identifier()).setSystem("urn:oid:"+root).setValue(extension));
 				  noDuplicates.add(root);
 				}
-				if (!targetIdAdded && root.equals(config.getOidMpiPid())) {
+				if (!targetIdAdded && root.equals(config.getOidMpiPid()) && !config.isChEprspidAsPatientId()) {
 					response.addParameter().setName("targetId").setValue(patientRefCreator.createPatientReference(root, extension));
 					targetIdAdded = true;
 				}
-			}
-			
-			
+				if (!targetIdAdded && root.equals(config.OID_EPRSPID) && config.isChEprspidAsPatientId()) {
+					response.addParameter().setName("targetId").setValue(patientRefCreator.createPatientReference(root, extension));
+					targetIdAdded = true;
+				}
+			}	
 		}
 						
 		return response;
