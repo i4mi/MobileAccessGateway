@@ -33,6 +33,7 @@ mag:
       sender: 1.3.6.1.4.1.21367.2017.2.2.108
       receiver: 1.3.6.1.4.1.12559.11.25.1.10
       query: 1.3.6.1.4.1.21367.2017.2.1.104
+      mpi-pid: 1.3.6.1.4.1.12559.11.20.1
   iua:
     idp:
       name: idp-ehealthsuisse
@@ -66,6 +67,6 @@ server:
   ssl:
     key-alias: mag
     key-password: magpat
-    key-store: /secret/server.p12
+    key-store: secret/server.p12
     key-store-password: magpat
     client-auth: NEED   
