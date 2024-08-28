@@ -172,14 +172,21 @@ public class Iti78RequestConverter extends PMIRRequestConverter {
 		  		  		  
 		  TokenParam id = parameters.get_id();
 		  if (id != null) {
-			  String v = id.getValue();
-			  int idx = v.indexOf("-");
-			  if (idx > 0) {
-				  PRPAMT201306UV02LivingSubjectId livingSubjectId = new PRPAMT201306UV02LivingSubjectId();
-				  livingSubjectId.addValue(new II(v.substring(0,idx),v.substring(idx+1)));
-				  livingSubjectId.setSemanticsText(ST("LivingSubject.id"));
-				  parameterList.addLivingSubjectId(livingSubjectId);
-			  }
+			  if (config.isChEprspidAsPatientId()) {
+				PRPAMT201306UV02LivingSubjectId livingSubjectId = new PRPAMT201306UV02LivingSubjectId();
+				livingSubjectId.addValue(new II(config.OID_EPRSPID,id.getValue()));
+				livingSubjectId.setSemanticsText(ST("LivingSubject.id"));
+				parameterList.addLivingSubjectId(livingSubjectId);
+			  } else {
+				String v = id.getValue();
+				int idx = v.indexOf("-");
+				if (idx > 0) {
+					PRPAMT201306UV02LivingSubjectId livingSubjectId = new PRPAMT201306UV02LivingSubjectId();
+					livingSubjectId.addValue(new II(v.substring(0,idx),v.substring(idx+1)));
+					livingSubjectId.setSemanticsText(ST("LivingSubject.id"));
+					parameterList.addLivingSubjectId(livingSubjectId);
+				}
+			}
 		  }
 		  
 		  // active -> patientStatusCode
