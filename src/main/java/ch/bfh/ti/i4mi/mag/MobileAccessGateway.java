@@ -45,6 +45,10 @@ public class MobileAccessGateway {
      * @param args The list of CLI parameters.
      */
     public static void main(final String[] args) {
+
+        System.setProperty("javax.xml.accessExternalDTD", "all"); // or "http"
+        System.setProperty("javax.xml.accessExternalSchema", "all"); // or "http"
+
         log.info("Configuring Mobile Access Gateway");
 
         final SpringApplication application = new SpringApplication(MobileAccessGateway.class);
