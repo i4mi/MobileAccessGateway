@@ -86,8 +86,20 @@ public class Iti104ResponseConverter extends BasePMIRResponseConverter implement
 					//return new MethodOutcome(outcome).setCreated(false);
 				}
 			}
-			MethodOutcome out = new MethodOutcome(new IdType(noPrefix(identifier.getSystem())+"-"+identifier.getValue()));
-		
+
+			IdType idType = null;
+			if (config.isChEprspidAsPatientId()) {
+				for(Identifier id : request.getIdentifier()) {
+					if (id.getSystem().equals("urn:oid:"+config.OID_EPRSPID)) {
+						idType = new IdType(id.getValue());
+						break;
+					}
+				}
+			}
+			if (idType == null) {
+				idType = new IdType(noPrefix(identifier.getSystem())+"-"+identifier.getValue());
+			}
+			MethodOutcome out = new MethodOutcome(idType);
 			OperationOutcome outcome = new OperationOutcome();			
 			out.setOperationOutcome(outcome);
 			return out;
