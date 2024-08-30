@@ -66,7 +66,7 @@ class Iti83RouteBuilder extends RouteBuilder {
 		from("pixm-iti83:translation?audit=true&auditContext=#myAuditContext").routeId("pixm-adapter")
 				// pass back errors to the endpoint
 				.errorHandler(noErrorHandler())
-				.process(AuthTokenConverter.addWsHeader())
+				.process(AuthTokenConverter.forwardAuthToken())
 				.process(Utils.keepBody())
 				.bean(Iti83RequestConverter.class)
 				.doTry()

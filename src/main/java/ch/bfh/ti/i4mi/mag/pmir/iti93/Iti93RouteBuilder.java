@@ -69,7 +69,7 @@ class Iti93RouteBuilder extends RouteBuilder {
         from("pmir-iti93:stub?audit=true&auditContext=#myAuditContext").routeId("pmir-feed")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(AuthTokenConverter.addWsHeader())
+                .process(AuthTokenConverter.forwardAuthToken())
                 .process(Utils.keepBody())
                 .bean(Iti93RequestConverter.class)
                 .doTry()

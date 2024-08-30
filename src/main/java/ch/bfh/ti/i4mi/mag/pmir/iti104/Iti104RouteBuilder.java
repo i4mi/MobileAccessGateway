@@ -26,13 +26,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
 import ch.bfh.ti.i4mi.mag.pmir.iti78.Iti78RequestConverter;
 import ch.bfh.ti.i4mi.mag.pmir.iti78.Iti78ResponseConverter;
-import ch.bfh.ti.i4mi.mag.pmir.iti83.Iti83ResponseConverter;
 import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
  
@@ -88,7 +86,7 @@ class Iti104RouteBuilder extends RouteBuilder {
         from("pmir-iti104:stub?audit=true&auditContext=#myAuditContext").routeId("iti104-feed")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(AuthTokenConverter.addWsHeader())
+                .process(AuthTokenConverter.forwardAuthToken())
                 .process(Utils.keepBody())                
                 .bean(Iti104RequestConverter.class)
                 .doTry()
