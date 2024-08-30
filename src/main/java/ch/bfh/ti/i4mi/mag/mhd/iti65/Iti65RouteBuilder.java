@@ -84,12 +84,13 @@ class Iti65RouteBuilder extends RouteBuilder {
                 .process(AuthTokenConverter.addWsHeader())
                 // translate, forward, translate back
                 .process(Utils.keepBody())
+                .process(Utils.storeBodyToHeader("BundleRequest"))
                 .bean(Iti65RequestConverter.class)
+                .process(Utils.storeBodyToHeader("ProvideAndRegisterDocumentSet"))
                 .convertBodyTo(ProvideAndRegisterDocumentSetRequestType.class)               
                 //.process(iti41RequestValidator())
                 .to(xds41Endpoint)
                 .convertBodyTo(Response.class)
-                .process(Utils.keptBodyToHeader())
                 .process(translateToFhir(new Iti65ResponseConverter(config) , Response.class));
     }
 

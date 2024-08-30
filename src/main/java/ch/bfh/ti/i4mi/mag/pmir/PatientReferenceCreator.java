@@ -74,6 +74,8 @@ public class PatientReferenceCreator {
 	}
 	
 	public Identifiable resolvePatientId(String fullId) {
+		if (fullId==null) 
+			return null;
 		int splitIdx = fullId.indexOf("-");
 		if (splitIdx>0) {
 		  if (fullId.substring(0,splitIdx).contains(".")) {
@@ -82,8 +84,10 @@ public class PatientReferenceCreator {
 		    log.error("expected oid as a system for resolving Patient in: "+fullId);
 		  }
 		} else {
-			if (config.isChEprspidAsPatientId()) {
-				return new Identifiable(fullId, new AssigningAuthority(schemeMapper.getScheme(config.getOID_EPRSPID())));
+			if (config.isChEprspidAsPatientId() && fullId.startsWith("76133761")) {
+				if (fullId.matches("^[0-9]{18}$") ) {
+					return new Identifiable(fullId, new AssigningAuthority(schemeMapper.getScheme(config.getOID_EPRSPID())));
+				}
 			}
 		}
 		return null;
