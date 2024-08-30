@@ -65,7 +65,7 @@ class Iti66RouteBuilder extends RouteBuilder {
         from("mhd-iti66-v401:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentmanifest-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(AuthTokenConverter.addWsHeader()).choice()
+                .process(AuthTokenConverter.forwardAuthToken()).choice()
                 .when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())
                     .bean(Utils.class,"searchParameterToBody")
                     .bean(Iti66RequestConverter.class).endChoice()

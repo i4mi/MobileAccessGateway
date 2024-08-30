@@ -66,7 +66,7 @@ public class Iti78RouteBuilder extends RouteBuilder {
 		from("pdqm-iti78:translation?audit=true&auditContext=#myAuditContext").routeId("pdqm-adapter")
 				// pass back errors to the endpoint
 				.errorHandler(noErrorHandler())
-				.process(AuthTokenConverter.addWsHeader())
+				.process(AuthTokenConverter.forwardAuthToken())
 				.choice()									
 					.when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())
 					   .bean(Iti78RequestConverter.class, "iti78ToIti47Converter")  
