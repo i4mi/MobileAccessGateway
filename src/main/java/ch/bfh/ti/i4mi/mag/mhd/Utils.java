@@ -102,8 +102,16 @@ public class Utils {
         	exchange.getMessage().setHeader(KEPT_BODY, exchange.getProperty(KEPT_BODY));        	        
         };
     }
-    
-    
+
+    /**
+     * move previously stored message body to name property
+     * @return
+     */
+    public static Processor storeBodyToHeader(String name) {
+        return exchange -> {
+        	exchange.getMessage().setHeader(name, exchange.getIn().getBody());        	        
+        };
+    }
     
     public static Processor storePreferHeader() {
     	return exchange -> {

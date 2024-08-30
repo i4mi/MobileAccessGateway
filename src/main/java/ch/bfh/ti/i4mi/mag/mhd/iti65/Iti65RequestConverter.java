@@ -406,10 +406,13 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 	 * @param system
 	 * @return
 	 */
-	public String noPrefix(String system) {
+	static public String noPrefix(String system) {
 		if (system == null) return null;
 		if (system.startsWith("urn:oid:")) {
             system = system.substring(8);
+        }
+		if (system.startsWith("urn:uuid:")) {
+            system = system.substring(9);
         }
 		return system;
 	}
@@ -443,19 +446,23 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 	public  Identifiable transformReferenceToIdentifiable(Reference reference, DomainResource container) {
 		if (reference.hasReference()) {
 			String targetRef = reference.getReference();
-			List<Resource> resources = container.getContained();
-			for (Resource resource : resources) {
-				if (targetRef.equals(resource.getId())) {
-					if (resource instanceof Patient) {
-					  return transform(((Patient) resource).getIdentifierFirstRep());
-					} else if (resource instanceof Encounter) {
-						return transform(((Encounter) resource).getIdentifierFirstRep());
+			if (targetRef.startsWith("#")) {
+//				targetRef = targetRef.substring(1);  note: resource.getId() return the id wit the # prefix for the contained resources
+				List<Resource> resources = container.getContained();
+				for (Resource resource : resources) {
+					if (targetRef.equals(resource.getId())) {
+						if (resource instanceof Patient) {
+						return transform(((Patient) resource).getIdentifierFirstRep());
+						} else if (resource instanceof Encounter) {
+							return transform(((Encounter) resource).getIdentifierFirstRep());
+						}
 					}
 				}
 			}
 
 			Identifiable result = patientRefCreator.resolvePatientReference(reference.getReference());
-			if (result != null) return result;
+			if (result != null) 
+				return result;
 
 			MultiValueMap<String, String> vals = UriComponentsBuilder.fromUriString(targetRef).build().getQueryParams();
 			if (vals.containsKey("identifier")) {
@@ -472,6 +479,7 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 				String fhirBase = ref.substring(0, ref.indexOf("/Patient/"));
 
 				if (!fhirBase.equals(config.getUriExternalPatientEndpoint())) {
+					log.error("Patient url must be in the form "+config.getUriExternalPatientEndpoint()+"/Patient/... but was "+ref);
 					throw FhirUtils.invalidRequest(
 										OperationOutcome.IssueSeverity.ERROR,
 										OperationOutcome.IssueType.INVALID,

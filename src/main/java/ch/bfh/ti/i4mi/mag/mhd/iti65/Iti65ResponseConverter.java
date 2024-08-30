@@ -32,11 +32,14 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.openehealth.ipf.commons.ihe.fhir.translation.ToFhirTranslator;
+import org.openehealth.ipf.commons.ihe.xds.core.ebxml.ebxml30.ProvideAndRegisterDocumentSetRequestType;
+import org.openehealth.ipf.commons.ihe.xds.core.requests.ProvideAndRegisterDocumentSet;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.ErrorCode;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.ErrorInfo;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Response;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Severity;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Status;
+import org.openehealth.ipf.commons.ihe.xds.core.stub.ebrs30.rim.ExtrinsicObjectType;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ch.bfh.ti.i4mi.mag.Config;
@@ -61,14 +64,13 @@ public class Iti65ResponseConverter extends BaseResponseConverter implements ToF
 	 */
 	@Override
 	public Object translateToFhir(Response input, Map<String, Object> parameters) {
-		
+
+		String entryUuid = null;
 		if (input.getStatus().equals(Status.SUCCESS)) {
-		
 			Bundle responseBundle = new Bundle();		
-			Bundle requestBundle = (Bundle) parameters.get(Utils.KEPT_BODY);
-			
-			responseBundle.getMeta().addProfile("https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.ProvideDocumentBundleResponse");
-			
+			ProvideAndRegisterDocumentSet prb = (ProvideAndRegisterDocumentSet) parameters.get("ProvideAndRegisterDocumentSet");
+			entryUuid = Iti65RequestConverter.noPrefix(prb.getDocuments().get(0).getDocumentEntry().getEntryUuid());
+			Bundle requestBundle = (Bundle) parameters.get("BundleRequest");						
 			for (Bundle.BundleEntryComponent requestEntry : requestBundle.getEntry()) {
 	            Bundle.BundleEntryResponseComponent response = new Bundle.BundleEntryResponseComponent()
 	                    .setStatus("201 Created")
@@ -78,19 +80,15 @@ public class Iti65ResponseConverter extends BaseResponseConverter implements ToF
 	              response.setLocation(config.getUriMagXdsRetrieve() + "?uniqueId=" + uniqueId
                      + "&repositoryUniqueId=" + config.getRepositoryUniqueId());	            
 	            } else if (requestEntry.getResource() instanceof ListResource) {
-	            	String id = config.getSchemeMapper().getScheme(((ListResource) requestEntry.getResource()).getId());
-	            	response.setLocation(config.getBaseurl()+"/fhir/List/"+id);
+	            	response.setLocation(config.getBaseurl()+"/fhir/List/"+Iti65RequestConverter.noPrefix(prb.getSubmissionSet().getEntryUuid()));
 	            } else if (requestEntry.getResource() instanceof DocumentReference) {
-	            	String id = config.getSchemeMapper().getScheme(((DocumentReference) requestEntry.getResource()).getId());
-	            	response.setLocation(config.getBaseurl()+"/fhir/DocumentReference/"+id);	              
+	            	response.setLocation(config.getBaseurl()+"/fhir/DocumentReference/"+entryUuid);	              
 	            }
 	            responseBundle.addEntry()
 	                    .setResponse(response);
 	                    
 	        }
-					
-			return responseBundle;
-		
+			return responseBundle;		
 		} else {	
 			processError(input);
 			return null;
