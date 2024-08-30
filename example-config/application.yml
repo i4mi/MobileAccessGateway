@@ -40,7 +40,7 @@ mag:
     iti66: 
       disable: true
   pmir:
-    it93: 
+    iti93: 
       disable: true
   iua:
     idp:
