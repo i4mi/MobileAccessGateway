@@ -39,9 +39,14 @@ public class IdRequestConverter extends BaseRequestConverter {
         if (fhirHttpUri != null && fhirHttpUri.contains("/")) {
             boolean getLeafClass = true;
 
+            String uuid = "urn:uuid:"+fhirHttpUri.substring(fhirHttpUri.lastIndexOf("/") + 1);
+
             GetDocumentsQuery query = new GetDocumentsQuery();
             final QueryRegistry queryRegistry = new QueryRegistry(query);
-            query.setLogicalUuid(Collections.singletonList(extractId(fhirHttpUri)));
+            // FIXME should we not map DocumentReference.id to entryUUID ?  have to discuss this with https://github.com/i4mi/MobileAccessGateway/issues/71          
+            // query.setLogicalUuid(Collections.singletonList(extractId(fhirHttpUri))); XDS Toolkit is not able to handle logical ID? ("Do not understand parameter $XDSDocumentEntryLogicalID")
+            // and how we should provide the logicalID back after an ITI-65 request?
+            query.setUuids(Collections.singletonList(uuid));
             queryRegistry.setReturnType((getLeafClass) ? QueryReturnType.LEAF_CLASS : QueryReturnType.OBJECT_REF);
             return queryRegistry;
         }
