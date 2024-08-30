@@ -32,10 +32,16 @@ mag:
       url: ehealthsuisse.ihe-europe.net:10443/PAMSimulator-ejb/PDQSupplier_Service/PDQSupplier_PortType
     oids:
       sender: 1.3.6.1.4.1.21367.2017.2.2.108
-      receiver: 1.3.6.1.4.1.12559.11.25.1.10
-# gazelle Receiver organization OID 1.3.6.1.4.1.12559.11.25.1.12
+      receiver: 1.3.6.1.4.1.12559.11.20.1.10
+# gazelle Receiver organization OID 1.3.6.1.4.1.12559.11.25.1.12, 
       query: 1.3.6.1.4.1.21367.2017.2.1.104
       mpi-pid: 1.3.6.1.4.1.12559.11.20.1
+  mhd:
+    iti66: 
+      disable: true
+  pmir:
+    it93: 
+      disable: true
   iua:
     idp:
       name: idp-ehealthsuisse
@@ -45,7 +51,8 @@ mag:
       key-alias: magpat
       key-password: magpat
     sp:
-      entity-id: mag.pagekite.me
+#      entity-id: mag.pagekite.me old
+      entity-id: test.ahdis.ch
     ap:
       url: https://ehealthsuisse.ihe-europe.net/STS
       wsdl: https://ehealthsuisse.ihe-europe.net/STS?wsdl
