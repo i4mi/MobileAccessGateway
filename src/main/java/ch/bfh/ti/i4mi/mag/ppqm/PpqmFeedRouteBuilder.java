@@ -2,6 +2,8 @@ package ch.bfh.ti.i4mi.mag.ppqm;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.common.RequestHeadersForwarder;
+import ch.bfh.ti.i4mi.mag.common.TraceparentHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.openehealth.ipf.commons.ihe.fhir.chppqm.translation.FhirToXacmlTranslator;
@@ -85,6 +87,7 @@ abstract public class PpqmFeedRouteBuilder extends PpqmRouteBuilder {
         from(getUriSchema() + ":stub")
                 .setHeader(FhirCamelValidators.VALIDATION_MODE, constant(FhirCamelValidators.MODEL))
                 .process(FhirCamelValidators.itiRequestValidator())
+                .process(RequestHeadersForwarder.forward())
                 .process(exchange -> {
                     Object body = exchange.getMessage().getBody();
                     String method = extractHttpMethod(exchange);
@@ -105,6 +108,7 @@ abstract public class PpqmFeedRouteBuilder extends PpqmRouteBuilder {
                     log.info("Created PPQ-1 {}", ppqRequest.getClass().getSimpleName());
                 })
                 .to("ch-ppq1://" + config.getPpq1HostUrl())
+                .process(TraceparentHandler.updateHeaderForFhir())
                 .process(exchange -> {
                     log.info("Received PPQ-1 response, convert it to PPQm");
                     exchange.getMessage().setBody(createPpqmResponse(
@@ -124,7 +128,9 @@ abstract public class PpqmFeedRouteBuilder extends PpqmRouteBuilder {
                     exchange.getMessage().setBody(ppqMessageCreator.createPolicyQuery(policySetIds));
                     log.info("Created PPQ-2 request for {} policy set(s)", policySetIds.size());
                 })
+                .process(RequestHeadersForwarder.forward())
                 .to("ch-ppq2://" + config.getPpq2HostUrl())
+                .process(TraceparentHandler.updateHeaderForFhir())
                 .process(exchange -> {
                     log.info("Received PPQ-2 response");
                     ResponseType ppq2Response = exchange.getMessage().getMandatoryBody(ResponseType.class);

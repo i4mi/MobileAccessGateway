@@ -18,6 +18,8 @@ package ch.bfh.ti.i4mi.mag.pmir.iti104;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
+import ch.bfh.ti.i4mi.mag.common.RequestHeadersForwarder;
+import ch.bfh.ti.i4mi.mag.common.TraceparentHandler;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.support.ExpressionAdapter;
@@ -31,7 +33,6 @@ import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
 import ch.bfh.ti.i4mi.mag.pmir.iti78.Iti78RequestConverter;
 import ch.bfh.ti.i4mi.mag.pmir.iti78.Iti78ResponseConverter;
-import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
  
 /**
@@ -86,7 +87,7 @@ class Iti104RouteBuilder extends RouteBuilder {
         from("pmir-iti104:stub?audit=true&auditContext=#myAuditContext").routeId("iti104-feed")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(AuthTokenConverter.forwardAuthToken())
+                .process(RequestHeadersForwarder.forward())
                 .process(Utils.keepBody())                
                 .bean(Iti104RequestConverter.class)
                 .doTry()
@@ -94,12 +95,15 @@ class Iti104RouteBuilder extends RouteBuilder {
                   .process(Utils.keptBodyToHeader())
                   .process(Utils.storePreferHeader())
                   .process(translateToFhir(converter , byte[].class))
+                  .process(TraceparentHandler.updateHeaderForFhir())
                   .choice()
 	                    .when(header("Prefer").isEqualToIgnoreCase("return=Representation"))	                    
 	                    .process(Utils.keepBody())
 	                    .bean(Iti78RequestConverter.class, "fromMethodOutcome")
-	                    .to(xds47Endpoint)											
+                        .process(TraceparentHandler.updateHeaderForSoap())
+	                    .to(xds47Endpoint)
 	  			        .process(translateToFhir(converter_78 , byte[].class))
+                        .process(TraceparentHandler.updateHeaderForFhir())
 	  			        .process(Iti104ResponseConverter.addPatientToOutcome())
 	  			        .endChoice()
                   .end()                     

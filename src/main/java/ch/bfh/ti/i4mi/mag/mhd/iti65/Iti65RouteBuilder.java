@@ -18,6 +18,8 @@ package ch.bfh.ti.i4mi.mag.mhd.iti65;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
+import ch.bfh.ti.i4mi.mag.common.RequestHeadersForwarder;
+import ch.bfh.ti.i4mi.mag.common.TraceparentHandler;
 import org.apache.camel.builder.RouteBuilder;
 import org.openehealth.ipf.commons.ihe.xds.core.ebxml.ebxml30.ProvideAndRegisterDocumentSetRequestType;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.Response;
@@ -26,7 +28,6 @@ import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
-import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -65,7 +66,7 @@ class Iti65RouteBuilder extends RouteBuilder {
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 //.process(itiRequestValidator())
-                .process(AuthTokenConverter.forwardAuthToken())
+                .process(RequestHeadersForwarder.forward())
                 // translate, forward, translate back
                 .process(Utils.keepBody())
                 .process(Utils.storeBodyToHeader("BundleRequest"))
@@ -75,6 +76,7 @@ class Iti65RouteBuilder extends RouteBuilder {
                 //.process(iti41RequestValidator())
                 .to(xds41Endpoint)
                 .convertBodyTo(Response.class)
+                .process(TraceparentHandler.updateHeaderForFhir())
                 .process(translateToFhir(new Iti65ResponseConverter(config) , Response.class));
     }
 
