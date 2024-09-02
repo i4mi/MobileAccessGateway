@@ -18,6 +18,8 @@ package ch.bfh.ti.i4mi.mag.mhd.pharm5;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
+import ch.bfh.ti.i4mi.mag.common.RequestHeadersForwarder;
+import ch.bfh.ti.i4mi.mag.common.TraceparentHandler;
 import org.apache.camel.builder.RouteBuilder;
 import org.openehealth.ipf.commons.ihe.xds.core.responses.QueryResponse;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -25,7 +27,6 @@ import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.iti67.Iti67ResponseConverter;
-import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -60,9 +61,10 @@ class Pharm5RouteBuilder extends RouteBuilder {
         from("mhd-pharm5:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentreference-findmedicationlist-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(AuthTokenConverter.forwardAuthToken())
+                .process(RequestHeadersForwarder.forward())
                 .bean(Pharm5RequestConverter.class)
                 .to(endpoint)
+                .process(TraceparentHandler.updateHeaderForFhir())
                 .process(translateToFhir(new Iti67ResponseConverter(config) , QueryResponse.class));
     }
 }
