@@ -18,6 +18,8 @@ package ch.bfh.ti.i4mi.mag.pmir.iti78;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
+import ch.bfh.ti.i4mi.mag.common.RequestHeadersForwarder;
+import ch.bfh.ti.i4mi.mag.common.TraceparentHandler;
 import org.apache.camel.builder.RouteBuilder;
 import org.openehealth.ipf.commons.ihe.fhir.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,6 @@ import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
-import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -66,17 +67,18 @@ public class Iti78RouteBuilder extends RouteBuilder {
 		from("pdqm-iti78:translation?audit=true&auditContext=#myAuditContext").routeId("pdqm-adapter")
 				// pass back errors to the endpoint
 				.errorHandler(noErrorHandler())
-				.process(AuthTokenConverter.forwardAuthToken())
-				.choice()									
+				.process(RequestHeadersForwarder.forward())
+				.choice()
 					.when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())
-					   .bean(Iti78RequestConverter.class, "iti78ToIti47Converter")  
+					   .bean(Iti78RequestConverter.class, "iti78ToIti47Converter")
 	                .endChoice()
 	                .when(header("FhirHttpUri").isNotNull())
 	                   .bean(Iti78RequestConverter.class, "idConverter")
 	                .endChoice()
-                .end()								
+                .end()
 				.doTry()
-				  .to(xds47Endpoint)											
+				  .to(xds47Endpoint)
+				  .process(TraceparentHandler.updateHeaderForFhir())
 			      .process(translateToFhir(converter , byte[].class))
 				.doCatch(javax.xml.ws.soap.SOAPFaultException.class)
 				  .setBody(simple("${exception}"))

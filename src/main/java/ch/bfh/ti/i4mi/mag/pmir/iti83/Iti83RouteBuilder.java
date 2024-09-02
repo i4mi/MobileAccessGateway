@@ -18,6 +18,8 @@ package ch.bfh.ti.i4mi.mag.pmir.iti83;
 
 import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslators.translateToFhir;
 
+import ch.bfh.ti.i4mi.mag.common.RequestHeadersForwarder;
+import ch.bfh.ti.i4mi.mag.common.TraceparentHandler;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -26,7 +28,6 @@ import org.springframework.stereotype.Component;
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.BaseResponseConverter;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
-import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -66,12 +67,13 @@ class Iti83RouteBuilder extends RouteBuilder {
 		from("pixm-iti83:translation?audit=true&auditContext=#myAuditContext").routeId("pixm-adapter")
 				// pass back errors to the endpoint
 				.errorHandler(noErrorHandler())
-				.process(AuthTokenConverter.forwardAuthToken())
+				.process(RequestHeadersForwarder.forward())
 				.process(Utils.keepBody())
 				.bean(Iti83RequestConverter.class)
 				.doTry()
 				  .to(xds45Endpoint)	
 				  .process(Utils.keptBodyToHeader())
+				  .process(TraceparentHandler.updateHeaderForFhir())
 				  .process(translateToFhir(converter , byte[].class))
 				.doCatch(javax.xml.ws.soap.SOAPFaultException.class)
 				  .setBody(simple("${exception}"))

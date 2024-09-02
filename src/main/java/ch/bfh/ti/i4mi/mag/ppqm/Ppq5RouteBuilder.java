@@ -1,6 +1,8 @@
 package ch.bfh.ti.i4mi.mag.ppqm;
 
 import ch.bfh.ti.i4mi.mag.Config;
+import ch.bfh.ti.i4mi.mag.common.RequestHeadersForwarder;
+import ch.bfh.ti.i4mi.mag.common.TraceparentHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Consent;
 import org.openehealth.ipf.commons.ihe.fhir.Constants;
@@ -41,6 +43,7 @@ public class Ppq5RouteBuilder extends PpqmRouteBuilder {
         from("ch-ppq5:stub")
                 .setHeader(FhirCamelValidators.VALIDATION_MODE, constant(FhirCamelValidators.MODEL))
                 .process(FhirCamelValidators.itiRequestValidator())
+                .process(RequestHeadersForwarder.forward())
                 .process(exchange -> {
                     String ppq5Request = exchange.getMessage().getHeader(Constants.HTTP_QUERY, String.class);
                     XACMLPolicyQueryType ppq2Request = fhirToXacmlTranslator.translatePpq5To2Request(ppq5Request);
@@ -54,6 +57,7 @@ public class Ppq5RouteBuilder extends PpqmRouteBuilder {
                     exchange.getMessage().setBody(ppq5Response);
                     log.info("Received PPQ-2 response and converted to PPQ-5");
                 })
+                .process(TraceparentHandler.updateHeaderForFhir())
                 .setHeader(FhirCamelValidators.VALIDATION_MODE, constant(FhirCamelValidators.MODEL))
                 .process(FhirCamelValidators.itiResponseValidator())
         ;

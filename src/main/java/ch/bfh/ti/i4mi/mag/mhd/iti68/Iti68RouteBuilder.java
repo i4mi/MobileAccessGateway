@@ -16,13 +16,14 @@
 
 package ch.bfh.ti.i4mi.mag.mhd.iti68;
 
+import ch.bfh.ti.i4mi.mag.common.RequestHeadersForwarder;
+import ch.bfh.ti.i4mi.mag.common.TraceparentHandler;
 import org.apache.camel.builder.RouteBuilder;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
-import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -61,11 +62,12 @@ class Iti68RouteBuilder extends RouteBuilder {
         from("mhd-iti68:camel/xdsretrieve?audit=true&auditContext=#myAuditContext").routeId("ddh-retrievedoc-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(AuthTokenConverter.forwardAuthToken())
+                .process(RequestHeadersForwarder.forward())
                
                 // translate, forward, translate back
                 .bean(Iti68RequestConverter.class)                
                 .to(xds43Endpoint)
+                .process(TraceparentHandler.updateHeaderForFhir())
                 .bean(Iti68ResponseConverter.class,"retrievedDocumentSetToHttResponse"); 
                 // if removing retrievedDocumentSetToHttResponse its given an AmbiguousMethodCallException with two same methods??
                 // public java.lang.Object ch.bfh.ti.i4mi.mag.mhd.iti68.Iti68ResponseConverter.retrievedDocumentSetToHttResponse(org.openehealth.ipf.commons.ihe.xds.core.responses.RetrievedDocumentSet,java.util.Map) throws java.io.IOException,

@@ -21,6 +21,8 @@ import static org.openehealth.ipf.platform.camel.ihe.fhir.core.FhirCamelTranslat
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ch.bfh.ti.i4mi.mag.MagConstants;
+import ch.bfh.ti.i4mi.mag.common.RequestHeadersForwarder;
+import ch.bfh.ti.i4mi.mag.common.TraceparentHandler;
 import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.hl7.fhir.r4.model.DocumentReference;
@@ -35,7 +37,6 @@ import org.springframework.stereotype.Component;
 
 import ch.bfh.ti.i4mi.mag.Config;
 import ch.bfh.ti.i4mi.mag.mhd.Utils;
-import ch.bfh.ti.i4mi.mag.xua.AuthTokenConverter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -88,17 +89,19 @@ class Iti67RouteBuilder extends RouteBuilder {
         from("mhd-iti67-v401:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentreference-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(AuthTokenConverter.forwardAuthToken())
+                .process(RequestHeadersForwarder.forward())
                 .choice()
                   .when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())
                     .bean(Utils.class,"searchParameterToBody")
                     .bean(Iti67RequestConverter.class)
                     .to(metadataQueryEndpoint)
+                    .process(TraceparentHandler.updateHeaderForFhir())
                     .process(translateToFhir(iti67ResponseConverter, QueryResponse.class))
                     .endChoice()
                   .when(PredicateBuilder.and(header("FhirHttpUri").isNotNull(),header("FhirHttpMethod").isEqualTo("GET")))
                     .bean(IdRequestConverter.class)
                     .to(metadataQueryEndpoint)
+                    .process(TraceparentHandler.updateHeaderForFhir())
                     .process(translateToFhir(iti67ResponseConverter, QueryResponse.class))
                     .endChoice()
                   .when(PredicateBuilder.and(header("FhirHttpUri").isNotNull(),header("FhirHttpMethod").isEqualTo("PUT")))
@@ -108,6 +111,7 @@ class Iti67RouteBuilder extends RouteBuilder {
                         exchange.getMessage().setBody(submitObjectsRequest);
                     })
                     .to(metadataUpdateEndpoint)
+                    .process(TraceparentHandler.updateHeaderForFhir())
                     .process(translateToFhir(iti67FromIti57ResponseConverter, Response.class))
                     .endChoice()
                 .when(PredicateBuilder.and(header("FhirHttpUri").isNotNull(),header("FhirHttpMethod").isEqualTo("DELETE")))
@@ -116,6 +120,7 @@ class Iti67RouteBuilder extends RouteBuilder {
                     })
                     .bean(IdRequestConverter.class)
                     .to(metadataQueryEndpoint)
+                    .process(TraceparentHandler.updateHeaderForFhir())
                     .process(exchange -> {
                         QueryResponse queryResponse = exchange.getIn().getMandatoryBody(QueryResponse.class);
                         if (queryResponse.getStatus() != Status.SUCCESS) {
@@ -149,6 +154,7 @@ class Iti67RouteBuilder extends RouteBuilder {
                     .choice()
                         .when(exchange -> exchange.getIn().getBody() instanceof SubmitObjectsRequest)
                             .to(metadataUpdateEndpoint)
+                            .process(TraceparentHandler.updateHeaderForFhir())
                             .process(translateToFhir(new Iti67FromIti57ResponseConverter(config), Response.class))
                             .endChoice()
                         .end()
