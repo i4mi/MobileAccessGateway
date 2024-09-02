@@ -15,11 +15,11 @@ export class AppComponent {
     translateService.setDefaultLang('de');
     translateService.use(translateService.getBrowserLang());
 
-    let base = location.href;
-    if (base.indexOf('#') > 0) {
-      base = base.substring(0, base.indexOf('#') - 1) + '/fhir';
+    let base = location.origin + location.pathname;
+    if (base.endsWith('/')) {
+      base += 'fhir';
     } else {
-      base = base + 'fhir';
+      base += '/fhir';
     }
     console.log('note: using fhir base ' + base);
     fhirConfigService.changeMagMicroService(base);
