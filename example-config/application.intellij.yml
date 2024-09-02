@@ -1,0 +1,15 @@
+# Copy of application.yml, adjusted for direct use in IntelliJ
+# Use with -Dspring.config.additional-location=example-config/application.yml,example-config/application.intellij.yml
+
+mag:
+  client-ssl:
+    key-store:
+      path: file:example-config/client.jks
+    truststore:
+      path: file:example-config/client.jks
+  iua:
+    idp:
+      key-store: file:example-config/client.jks
+server:
+  ssl:
+    key-store: example-config/server.p12
