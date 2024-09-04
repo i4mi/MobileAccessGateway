@@ -1,3 +1,6 @@
+@host =  http://localhost:9090
+
+
 ### Responding Gateway configured
 GET http://localhost:9090/fhir/metadata HTTP/1.1
 Accept: application/fhir+json
@@ -30,6 +33,8 @@ Accept: application/fhir+json
 GET http://localhost:9090/fhir/Patient/761337610411265304 HTTP/1.1
 Accept: application/fhir+json
 
+### HL7v3 Responders Receiver device id.root OID 2.16.756.5.30.1.145.2024.1
+### HL7v3 Responders Organizationt OID 2.16.756.5.30.1.145.2024
 ### assuming ahdis has for testing an assiging authority of 2.16.756.5.30.1.145.1.1.1 (root id is 2.16.756.5.30.1.145), and we need to proivde the organization provider
 ### currently this gives however an error with the simulator: Failure during REST processing: ca.uhn.fhir.rest.server.exceptions.InvalidRequestException: 761337610411265304^^^SPID&2.16.756.5.30.1.127.3.10.3&ISO  is already used
 PUT http://localhost:9090/fhir/Patient?identifier=urn:oid:2.16.756.5.30.1.145.1.1.1|PAT001 HTTP/1.1
@@ -82,6 +87,104 @@ Content-Type: application/fhir+json
     }
   }
 }
+
+### try a new one
+
+
+PUT http://localhost:9090/fhir/Patient?identifier=urn:oid:2.16.756.5.30.1.145.2024.1|MAGMED006 HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json
+
+{
+  "resourceType": "Patient",
+  "identifier": [
+    {
+      "system": "urn:oid:2.16.756.5.30.1.127.3.10.3",
+      "value": "761337615758291048"
+    },
+    {
+      "system": "urn:oid:2.16.756.5.30.1.145.2024.1",
+      "value": "MAGMED006"
+    }
+  ],
+  "active": true,
+  "name": [
+    {
+      "family": "Sesztáková",
+      "given": [
+        "Jett Flynn"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1993-01-27",
+  "managingOrganization" : {
+    "identifier" : {
+      "system" : "urn:oid:2.51.1.3",
+      "value" : "7601000201041"
+    }
+  }
+}
+
+###
+PUT http://localhost:9090/fhir/Patient?identifier=urn:oid:1.3.6.1.4.1.21367.2017.2.5.46|MAGMED005 HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json
+
+{
+  "resourceType": "Patient",
+  "identifier": [
+    {
+      "system": "urn:oid:2.16.756.5.30.1.127.3.10.3",
+      "value": "761337611932009095"
+    },
+    {
+      "system": "urn:oid:1.3.6.1.4.1.21367.2017.2.5.46",
+      "value": "MAGMED005"
+    }
+  ],
+  "active": true,
+  "name": [
+    {
+      "family": "Behluli-Qazimi",
+      "given": [
+        "Leandra Corina"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "2002-12-21",
+  "managingOrganization" : {
+    "identifier" : {
+      "system" : "urn:oid:2.51.1.3",
+      "value" : "7601000201041"
+    }
+  }
+}
+
+###
+GET http://localhost:9090/fhir/Patient/761337611932009095 HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json
+
+
+
+### ITI-67 Find Document References XDSTools7 ahdis
+GET {{host}}/fhir/DocumentReference?status=current&patient.identifier=urn:oid:2.16.756.5.30.1.127.3.10.3|761337610411265304 HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json
+
+
+### 
+### ITI-65 Provide Document Bundle, you need to adapt the patient url in example to lo
+POST {{host}}/fhir/ HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json
+
+###
+GET {{host}}/fhir/DocumentReference/18e970bd-92db-4a06-a164-8ef65e8a038a HTTP/1.1
+Accept: application/fhir+json
+Content-Type: application/fhir+json
 
 
 ### registered also 1.3.6.1.4.1.12559.11.25.1.19 in our repository
