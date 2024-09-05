@@ -5,6 +5,10 @@
 GET http://localhost:9090/fhir/metadata HTTP/1.1
 Accept: application/fhir+json
 
+### Responding Gateway configured
+GET https://wswh3064-9090.euw.devtunnels.ms/fhir/metadata HTTP/1.1
+Accept: application/fhir+json
+
 ###
 GET https://localhost:9091/fhir/metadata HTTP/1.1
 Accept: application/fhir+json

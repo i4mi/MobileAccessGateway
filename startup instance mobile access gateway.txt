@@ -1,0 +1,6 @@
+docker container run -p 127.0.0.1:9090:9090/tcp -p 127.0.0.1:9091:9091/tcp -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config:/config -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config:/secret -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config\logs:/logs europe-west6-docker.pkg.dev/ahdis-ch/ahdis/mag:v1.0.0-pat2024-001
+
+"localhost:9091": {
+"cert": "C:\Users\sabri\GitHub\k8s-fhir.ch\configurations\gazelle-ehealthsuisse\386.cer",
+"key":  "C:\Users\sabri\GitHub\github\k8s-fhir.ch/configurations\gazelle-ehealthsuisse\386.key"
+}
