@@ -83,4 +83,5 @@ server:
     key-password: magpat
     key-store: secret/server.p12
     key-store-password: magpat
-    client-auth: NEED   
+    client-auth: NEED
+ipf.fhir.servlet.logging: true
