@@ -32,6 +32,7 @@ import org.openehealth.ipf.commons.ihe.xds.core.metadata.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ch.bfh.ti.i4mi.mag.BaseRequestConverter;
 import ch.bfh.ti.i4mi.mag.Config;
 import lombok.extern.slf4j.Slf4j;
@@ -88,15 +89,33 @@ public class Iti83RequestConverter extends BaseRequestConverter {
 			// https://fhir.ch/ig/ch-epr-fhir/iti-83.html#message-semantics-1
 			if (sourceIdentifier == null) {
 				log.error("sourceIdentifier is missing");
-				throw new ForbiddenOperationException("sourceIdentifier is missing", getTargetDomainNotRecognized());
+				throw new InvalidRequestException("sourceIdentifier is missing", getTargetDomainNotRecognized());
 			}
-			if (targetSystemList == null || (targetSystemList.size() != 2)) {
+
+			if (sourceIdentifier != null &&  (sourceIdentifier.getSystem() == null || sourceIdentifier.getValue() == null)) {
+				log.error("sourceIdentifier system or value is missing");
+				throw new InvalidRequestException("sourceIdentifier is missing", getTargetDomainNotRecognized());
+			}
+
+			// FIXME https://gazelle.ihe.net/jira/servicedesk/customer/portal/8/EHS-820
+			if (targetSystemList == null || (targetSystemList.size() == 0)) {
+//			if (targetSystemList == null || (targetSystemList.size() != 2)) {
 				log.error("targetSystem need to be 2..2");
 				throw new ForbiddenOperationException("targetSystem need to be 2..2", getTargetDomainNotRecognized());
 			}
+			// FIXME https://gazelle.ihe.net/jira/servicedesk/customer/portal/8/EHS-820
 			UriType uri1 = (UriType) targetSystemList.get(0).getValue();
-			UriType uri2 = (UriType) targetSystemList.get(1).getValue();
-			if (!((uri1.equals("urn:oid:"+config.OID_EPRSPID) && uri2.equals("urn:oid:"+config.getOidMpiPid()) || (uri1.equals("urn:oid:"+config.getOidMpiPid()) && uri2.equals("urn:oid:"+config.OID_EPRSPID))))) {
+			if (uri1.getValue().equals(config.OID_EPRSPID)) {
+				uri1.setValue("urn:oid:"+config.OID_EPRSPID);
+			}			
+			UriType uri2 = null;
+			if (targetSystemList.size()>1) {
+				uri2 = (UriType) targetSystemList.get(1).getValue();
+				if (uri2.getValue().equals(config.OID_EPRSPID)) {
+					uri2.setValue("urn:oid:"+config.OID_EPRSPID);
+				}
+			}
+			if (!((uri1.equals("urn:oid:"+config.OID_EPRSPID) && (uri2==null || uri2.equals("urn:oid:"+config.getOidMpiPid())) || (uri1.equals("urn:oid:"+config.getOidMpiPid()) && (uri2==null || uri2.equals("urn:oid:"+config.OID_EPRSPID)))))) {
 				log.error("targetSystem is not restricted to the Assigning authority of the community and the EPR-SPID");
 				throw new ForbiddenOperationException("targetSystem is not restricted to the Assigning authority of the community and the EPR-SPID,", getTargetDomainNotRecognized());
 			}
