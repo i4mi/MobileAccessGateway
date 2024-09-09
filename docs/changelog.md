@@ -1,7 +1,9 @@
 ## Unreleased
 
 - Fixed an NPE in the assertion route
-- capability statment validation issues [177](https://github.com/i4mi/MobileAccessGateway/issues/177)
+- capability statement validation issues [#177](https://github.com/i4mi/MobileAccessGateway/issues/177)
+- Add CH PIXm ITI-83 constraints for sourceIdentifier and targetSystem [#170](https://github.com/i4mi/MobileAccessGateway/issues/170)
+
 
 ## 2024/05/15 v070
 - support for multiple IDP's [128](https://github.com/i4mi/MobileAccessGateway/issues/128)
