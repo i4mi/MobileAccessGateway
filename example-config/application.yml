@@ -68,7 +68,7 @@ mag:
     audit-enterprise-site-id: 1.3.6.1.4.1.21367.2017.2.7.109
     audit-repository-host: ehealthsuisse.ihe-europe.net
     audit-repository-port: 3202
-    audit-repostiory-transport: TLS
+    audit-repository-transport: TLS
 
   ch-epr-fhir:
     ch-pixm-constraints: true
