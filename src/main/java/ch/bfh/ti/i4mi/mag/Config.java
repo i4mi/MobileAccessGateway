@@ -416,13 +416,20 @@ public class Config {
         return new MagCapabilityStatementProvider(fhirServer, baseUrl);
     }
 
+    @Bean
+    public IServerAddressStrategy serverAddressStrategy() {
+        // This sets the server address to the configured `mag.baseurl` value.
+        // Without that bean, IpfFhirAutoConfiguration will use the ApacheProxyAddressStrategy instead.
+        return new HardcodedServerAddressStrategy(this.getUriFhirEndpoint());
+    }
+
     // use to fix https://github.com/i4mi/MobileAccessGateway/issues/56, however we have the CapabilityStatement not filled out anymore
     @Bean
-    public RestfulServerConfiguration serverConfiguration() {
+    public RestfulServerConfiguration serverConfiguration(final IServerAddressStrategy serverAddressStrategy) {
         RestfulServerConfiguration config = new RestfulServerConfiguration();
         config.setResourceBindings(new ArrayList<>());
         config.setServerBindings(new ArrayList<>());
-        config.setServerAddressStrategy(new HardcodedServerAddressStrategy(getUriFhirEndpoint()));
+        config.setServerAddressStrategy(serverAddressStrategy);
         return config;
     }
 
