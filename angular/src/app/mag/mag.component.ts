@@ -570,8 +570,9 @@ export class MagComponent implements OnInit {
   async onAuthenticate() {
     this.cache();
     this.scopes = null;
-    const authCodeFlowConfig = await this.fhirConfigService.getAuthCodeFlowConfigFromMetadata('https://ehealthsuisse.ihe-europe.net/iua-simulator/rest/ch/.well-known');
-    console.log(authCodeFlowConfig);
+    //const authCodeFlowConfig = await
+    // this.fhirConfigService.getAuthCodeFlowConfigFromMetadata('https://ehealthsuisse.ihe-europe.net/iua-simulator/rest/ch/.well-known');
+    const authCodeFlowConfig = this.fhirConfigService.getAuthCodeFlowConfigForEHS();
     authCodeFlowConfig.scope = `person_id=${this.targetIdentifier2Value}^^^&2.16.756.5.30.1.127.3.10.3&ISO purpose_of_use=urn:oid:2.16.756.5.30.1.127.3.10.5|NORM subject_role=urn:oid:2.16.756.5.30.1.127.3.10.6|`;
     if (this.authenticate.value === 'HCP') {
       authCodeFlowConfig.scope += `HCP`;
