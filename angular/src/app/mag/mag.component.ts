@@ -567,24 +567,27 @@ export class MagComponent implements OnInit {
       });
   }
 
-  onAuthenticate() {
+  async onAuthenticate() {
     this.cache();
     this.scopes = null;
-    const authCodeFlowConfig = this.fhirConfigService.getAuthCodeFlowConfig(this.provider.value);
+    //const authCodeFlowConfig = await
+    // this.fhirConfigService.getAuthCodeFlowConfigFromMetadata('https://ehealthsuisse.ihe-europe.net/iua-simulator/rest/ch/.well-known');
+    const authCodeFlowConfig = this.fhirConfigService.getAuthCodeFlowConfigForEHS();
+    authCodeFlowConfig.scope = `person_id=${this.targetIdentifier2Value}^^^&2.16.756.5.30.1.127.3.10.3&ISO purpose_of_use=urn:oid:2.16.756.5.30.1.127.3.10.5|NORM subject_role=urn:oid:2.16.756.5.30.1.127.3.10.6|`;
     if (this.authenticate.value === 'HCP') {
-      authCodeFlowConfig.scope = `person_id=${this.targetIdentifier2Value}^^^&2.16.756.5.30.1.127.3.10.3&ISO purpose_of_use=urn:oid:2.16.756.5.30.1.127.3.10.5|NORM subject_role=urn:oid:2.16.756.5.30.1.127.3.10.6|HCP`;
+      authCodeFlowConfig.scope += `HCP`;
       localStorage.setItem(this.LS_OAUTH_CONF_KEY, JSON.stringify(authCodeFlowConfig));
       this.oauthService.configure(authCodeFlowConfig);
       this.oauthService.initCodeFlow();
-    }
-    if (this.authenticate.value === 'Patient') {
-      authCodeFlowConfig.scope = `person_id=${this.targetIdentifier2Value}^^^&2.16.756.5.30.1.127.3.10.3&ISO purpose_of_use=urn:oid:2.16.756.5.30.1.127.3.10.5|NORM subject_role=urn:oid:2.16.756.5.30.1.127.3.10.6|PAT`;
+    } else if (this.authenticate.value === 'Patient') {
+      authCodeFlowConfig.scope += `PAT`;
       localStorage.setItem(this.LS_OAUTH_CONF_KEY, JSON.stringify(authCodeFlowConfig));
       this.oauthService.configure(authCodeFlowConfig);
       this.oauthService.initCodeFlow();
-    }
-    if (this.authenticate.value === 'TCU') {
+    } else if (this.authenticate.value === 'TCU') {
       this.getSamlToken().then((value) => (this.json = value));
+    } else {
+      console.error("Unknown authentication type");
     }
   }
 

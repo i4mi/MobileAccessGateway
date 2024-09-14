@@ -69,6 +69,35 @@ export class FhirConfigService {
     return new FhirClient({ baseUrl: this.getMobileAccessGatewayService() });
   }
 
+  async getAuthCodeFlowConfigFromMetadata(metadataUrl: string): Promise<AuthConfig> {
+    const metadata = await fetch(metadataUrl).then(r => r.json());
+    console.log(metadata);
+    return {
+      loginUrl: metadata.authorization_endpoint,
+      tokenEndpoint: metadata.token_endpoint,
+      clientId: this.getClientSecret(),
+      redirectUri: location.origin + location.pathname,
+      responseType: 'code',
+      showDebugInformation: true,
+      timeoutFactor: 0.75,
+    } as AuthConfig;
+  }
+
+  getAuthCodeFlowConfigForEHS(): AuthConfig {
+    return {
+      loginUrl: 'https://ehealthsuisse.ihe-europe.net/iua-simulator/rest/ch/authorize',
+      tokenEndpoint: 'https://ehealthsuisse.ihe-europe.net/iua-simulator/rest/ch/token',
+      clientId: this.getClientSecret(),
+      redirectUri: location.origin + location.pathname,
+      customQueryParams: {
+        aud: location.origin + location.pathname,
+      },
+      responseType: 'code',
+      showDebugInformation: true,
+      timeoutFactor: 0.75,
+    } as AuthConfig;
+  }
+
   getAuthCodeFlowConfig(provider: string): AuthConfig {
     const idpAlias = provider ? ("/alias/" + provider) : "";
     return {
