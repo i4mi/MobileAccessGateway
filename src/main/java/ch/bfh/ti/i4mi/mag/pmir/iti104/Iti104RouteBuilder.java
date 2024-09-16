@@ -87,6 +87,7 @@ class Iti104RouteBuilder extends RouteBuilder {
         from("pmir-iti104:stub?audit=true&auditContext=#myAuditContext").routeId("iti104-feed")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
+                .process(RequestHeadersForwarder.checkAuthorization(config.isChPdqmConstraints()))
                 .process(RequestHeadersForwarder.forward())
                 .process(Utils.keepBody())                
                 .bean(Iti104RequestConverter.class)
