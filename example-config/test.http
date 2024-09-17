@@ -39,6 +39,7 @@ Accept: application/fhir+json
 GET {{host}}/fhir/Patient/761337610411265304 HTTP/1.1
 Accept: application/fhir+json
 
+
 ### HL7v3 Responders Receiver device id.root OID 2.16.756.5.30.1.145.2024.1
 ### HL7v3 Responders Organizationt OID 2.16.756.5.30.1.145.2024
 ### assuming ahdis has for testing an assiging authority of 2.16.756.5.30.1.145.1.1.1 (root id is 2.16.756.5.30.1.145), and we need to proivde the organization provider
@@ -97,7 +98,11 @@ Content-Type: application/fhir+json
 ### try a new one
 
 
+<<<<<<< HEAD
 PUT {{host}}fhir/Patient?identifier=urn:oid:2.16.756.5.30.1.145.2024.1|MAGMED006 HTTP/1.1
+=======
+PUT http://localhost:9090/fhir/Patient?identifier=urn:oid:1.3.6.1.4.1.12559.11.1.4.1.2|DDS-72619 HTTP/1.1
+>>>>>>> d2ab50b493c74ceba3ff7cfa0ef58d3aff4e40ac
 Accept: application/fhir+json
 Content-Type: application/fhir+json
 
@@ -106,23 +111,23 @@ Content-Type: application/fhir+json
   "identifier": [
     {
       "system": "urn:oid:2.16.756.5.30.1.127.3.10.3",
-      "value": "761337615758291048"
+      "value": "761337610067311311"
     },
     {
-      "system": "urn:oid:2.16.756.5.30.1.145.2024.1",
-      "value": "MAGMED006"
+      "system": "urn:oid:1.3.6.1.4.1.12559.11.1.4.1.2",
+      "value": "DDS-72619"
     }
   ],
   "active": true,
   "name": [
     {
-      "family": "Sesztáková",
+      "family": "PUTOD",
       "given": [
-        "Jett Flynn"
+        "Elvira"
       ]
     }
   ],
-  "gender": "male",
+  "gender": "female",
   "birthDate": "1993-01-27",
   "managingOrganization" : {
     "identifier" : {

@@ -75,6 +75,8 @@ mag:
     #audit-repository-transport: TLS
 
   ch-epr-fhir:
+    ch-mhd: true
+    ch-ppqm: true
     ch-pixm-constraints: true
     ch-pdqm-constraints: true
     epr-spid-as-patientid: true
@@ -88,4 +90,8 @@ server:
     key-store: secret/server.p12
     key-store-password: magpat
     client-auth: NEED
-ipf.fhir.servlet.logging: true
+ipf:
+  fhir:
+    servlet:
+      logging: true
+      highlight: false

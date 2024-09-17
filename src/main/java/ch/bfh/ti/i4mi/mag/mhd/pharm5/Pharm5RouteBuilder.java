@@ -61,6 +61,7 @@ class Pharm5RouteBuilder extends RouteBuilder {
         from("mhd-pharm5:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentreference-findmedicationlist-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
+                .process(RequestHeadersForwarder.checkAuthorization(config.isChMhd()))
                 .process(RequestHeadersForwarder.forward())
                 .bean(Pharm5RequestConverter.class)
                 .to(endpoint)

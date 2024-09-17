@@ -25,6 +25,13 @@ docker container run -p 127.0.0.1:9090:9090/tcp -p 127.0.0.1:9091:9091/tcp \
  mag:local1
 ```
 
+
+docker container run -p 127.0.0.1:9090:9090/tcp -p 127.0.0.1:9091:9091/tcp \
+-v /Users/oegger/Documents/github/MobileAccessGateway/example-config:/config \
+-v /Users/oegger/Documents/github/MobileAccessGateway/example-config:/secret \
+-v /Users/oegger/Documents/github/MobileAccessGateway/example-config/logs:/logs \
+europe-west6-docker.pkg.dev/ahdis-ch/ahdis/mag:v1.0.0-pat2024-001
+
 This will run the image, expose the ports 9090-9091 and mount the _example-config_ directory as /config and /secret 
 in the container.
 
