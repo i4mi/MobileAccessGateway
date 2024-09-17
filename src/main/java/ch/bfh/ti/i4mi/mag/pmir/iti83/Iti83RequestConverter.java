@@ -73,11 +73,19 @@ public class Iti83RequestConverter extends BaseRequestConverter {
 
 	
 	public OperationOutcome getTargetDomainNotRecognized() {
-		OperationOutcome outcome = new OperationOutcome();
-		OperationOutcomeIssueComponent issue = outcome.addIssue();
+		final var outcome = new OperationOutcome();
+		final OperationOutcomeIssueComponent issue = outcome.addIssue();
 		issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
 		issue.setCode(IssueType.CODEINVALID);
 		issue.setDiagnostics("targetSystem not found");
+		return outcome;
+	}
+	public OperationOutcome getSourceIdentifierMissing() {
+		final var outcome = new OperationOutcome();
+		final OperationOutcomeIssueComponent issue = outcome.addIssue();
+		issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+		issue.setCode(IssueType.CODEINVALID);
+		issue.setDiagnostics("sourceIdentifier is missing");
 		return outcome;
 	}
 
@@ -89,12 +97,12 @@ public class Iti83RequestConverter extends BaseRequestConverter {
 			// https://fhir.ch/ig/ch-epr-fhir/iti-83.html#message-semantics-1
 			if (sourceIdentifier == null) {
 				log.error("sourceIdentifier is missing");
-				throw new InvalidRequestException("sourceIdentifier is missing", getTargetDomainNotRecognized());
+				throw new InvalidRequestException("sourceIdentifier is missing", getSourceIdentifierMissing());
 			}
 
-			if (sourceIdentifier != null &&  (sourceIdentifier.getSystem() == null || sourceIdentifier.getValue() == null)) {
+			if (sourceIdentifier.getSystem() == null || sourceIdentifier.getValue() == null) {
 				log.error("sourceIdentifier system or value is missing");
-				throw new InvalidRequestException("sourceIdentifier is missing", getTargetDomainNotRecognized());
+				throw new InvalidRequestException("sourceIdentifier is missing", getSourceIdentifierMissing());
 			}
 
 			// FIXME https://gazelle.ihe.net/jira/servicedesk/customer/portal/8/EHS-820
