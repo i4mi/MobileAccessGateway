@@ -1,4 +1,16 @@
+1. checkout the mobile access gateway with git and switch/checkout branch pat2024.
+2. in terminal: docker pull europe-west6-docker.pkg.dev/ahdis-ch/ahdis/mag:v1.0.0-pat2024-001
+3. startup instance of mobile access gateway
+
 docker container run -p 127.0.0.1:9090:9090/tcp -p 127.0.0.1:9091:9091/tcp -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config:/config -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config:/secret -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config\logs:/logs europe-west6-docker.pkg.dev/ahdis-ch/ahdis/mag:v1.0.0-pat2024-001
+
+docker container run -p 127.0.0.1:9090:9090/tcp -p 127.0.0.1:9091:9091/tcp -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config:/config -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config:/secret -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config\logs:/logs europe-west6-docker.pkg.dev/ahdis-ch/ahdis/mag:v1.0.0-pat2024-002
+
+docker container run -p 127.0.0.1:9090:9090/tcp -p 127.0.0.1:9091:9091/tcp -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config:/config -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config:/secret -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config\logs:/logs europe-west6-docker.pkg.dev/ahdis-ch/ahdis/mag:v1.0.0-pat2024-003
+
+docker container run -p 127.0.0.1:9090:9090/tcp -p 127.0.0.1:9091:9091/tcp -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config:/config -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config:/secret -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config\logs:/logs europe-west6-docker.pkg.dev/ahdis-ch/ahdis/mag:v1.0.0-pat2024-004
+
+docker container run -p 127.0.0.1:9090:9090/tcp -p 127.0.0.1:9091:9091/tcp -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config:/config -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config:/secret -v C:\Users\sabri\GitHub\MobileAccessGateway\example-config\logs:/logs europe-west6-docker.pkg.dev/ahdis-ch/ahdis/mag:v1.0.0-pat2024-005
 
 "localhost:9091": {
 "cert": "C:\Users\sabri\GitHub\k8s-fhir.ch\configurations\gazelle-ehealthsuisse\386.cer",

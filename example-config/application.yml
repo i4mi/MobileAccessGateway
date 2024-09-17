@@ -1,6 +1,10 @@
 mag:
 # adjust here the baseurl to the external url which should be exposed
-  baseurl: http://localhost:9090
+  baseurl: http://10.34.0.17:9080
+   # https://localhost:9080
+  # https://localhost:9091
+  # https://ahdis0:9091/	
+  # http://ahdis0:9090/	
   client-ssl:
     enabled: true
 # certificate from https://ehealthsuisse.ihe-europe.net/gss/certificate/view.seam?id=386
@@ -20,7 +24,7 @@ mag:
     iti-41:
       url: ehealthsuisse.ihe-europe.net:10443/xdstools7/sim/default__ahdis/rep/prb
     retrieve:
-      url: http://localhost:9090/camel/xdsretrieve
+      url: http://10.34.0.17:9080/camel/xdsretrieve
       repositoryUniqueId: 1.1.4567332.1.2
   pix:
     https: true
