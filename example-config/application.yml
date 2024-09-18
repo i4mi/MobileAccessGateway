@@ -1,6 +1,7 @@
 mag:
 # adjust here the baseurl to the external url which should be exposed
   baseurl: http://localhost:9090
+  extpatienturl: https://ehealthsuisse.ihe-europe.net:9743/asbestos/proxy/default__default
   client-ssl:
     enabled: true
 # certificate from https://ehealthsuisse.ihe-europe.net/gss/certificate/view.seam?id=386
