@@ -493,7 +493,7 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 				client.setDontValidateConformance(true);
 				Patient patient = client.read(Patient.class, patientId);
 				if (patient!=null && patient.hasIdentifier()) {
-					String oidString = "urn:oid:"+config.getOidMpiPid();
+					String oidString = "urn:oid:"+(config.isChEprspidAsPatientId() ? config.OID_EPRSPID : config.getOidMpiPid());
 					for (Identifier identifier : patient.getIdentifier()) {
 						if (oidString.equals(identifier.getSystem())) {
 							return transform(identifier);
