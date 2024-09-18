@@ -1,6 +1,6 @@
 mag:
 # adjust here the baseurl to the external url which should be exposed
-  baseurl: http://10.34.0.17:9080/fhir
+  baseurl: http://10.34.0.17:9080
    # https://localhost:9080
   # https://localhost:9091
   # https://ahdis0:9091/	
