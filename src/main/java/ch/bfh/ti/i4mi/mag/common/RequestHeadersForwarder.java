@@ -44,11 +44,11 @@ public class RequestHeadersForwarder {
         };
     }
 
-    public static Processor checkAuthorization(boolean check) {
+    public static Processor checkAuthorization(final boolean check) {
         return exchange -> {
-            final var authorizationHeader = FhirExchanges.readRequestHttpHeader(AUTHORIZATION_HEADER, exchange, true);
+            final var authorizationHeader = FhirExchanges.readRequestHttpHeader(AUTHORIZATION_HEADER, exchange, false);
             if (check && authorizationHeader == null) {
-                throw new AuthenticationException();        
+                throw new AuthenticationException("The Authorization header is missing");
             }
             // TODO verify if the token is valid
         };
