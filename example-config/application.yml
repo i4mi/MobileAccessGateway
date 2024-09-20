@@ -5,7 +5,7 @@ mag:
   # https://localhost:9091
   # https://ahdis0:9091/	
   # http://ahdis0:9090/	
-  extpatienturl: https://ehealthsuisse.ihe-europe.net:9743/asbestos/proxy/default__default
+  extpatienturl: http://ehealthsuisse.ihe-europe.net:9760/asbestos/proxy/default__default
   client-ssl:
     enabled: true
 # certificate from https://ehealthsuisse.ihe-europe.net/gss/certificate/view.seam?id=386
@@ -76,7 +76,7 @@ mag:
     #audit-repository-transport: TLS
 
   ch-epr-fhir:
-    ch-mhd: true
+    ch-mhd: false
     ch-ppqm: true
     ch-pixm-constraints: true
     ch-pdqm-constraints: true
