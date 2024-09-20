@@ -8,7 +8,7 @@ public class MagConstants {
     @UtilityClass
     public static class FhirExtensionUrls {
         private static final String MHD_PREFIX = "https://profiles.ihe.net/ITI/MHD/StructureDefinition/";
-        private static final String CH_PREFIX  = "http://fhir.ch/ig/ch-epr-fhir";
+        private static final String CH_PREFIX  = "http://fhir.ch/ig/ch-epr-fhir/";
 
         // standard MHD extensions
         public static final String REPOSITORY_UNIQUE_ID   = MHD_PREFIX + "ihe-repositoryUniqueId";
