@@ -240,7 +240,7 @@ public class Iti65RequestConverter extends BaseRequestConverter {
 	                    entry.setSize((long) decoded.length);
 	                    entry.setHash(SHAsum(decoded));
 	                	Identifier masterIdentifier = documentReference.getMasterIdentifier();
-	                    binary.setUserData("masterIdentifier", noPrefix(masterIdentifier.getValue()));
+	                    binary.setUserData("masterIdentifier", masterIdentifier.getValue());
                     }
                 }
                 builder.withDocument(doc);
