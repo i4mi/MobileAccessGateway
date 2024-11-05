@@ -72,8 +72,8 @@ mag:
     #audit-repository-transport: TLS
 
   ch-epr-fhir:
-    ch-mhd: true
-    ch-ppqm: true
+    ch-mhd-constraints: true
+    ch-ppqm-constraints: true
     ch-pixm-constraints: true
     ch-pdqm-constraints: true
     epr-spid-as-patientid: true

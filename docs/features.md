@@ -20,3 +20,19 @@ For Authentication/Authorization you have two different options:
 
 1. Integrate the IdP into your software and exchange the IdP saml2 token over a REST API to a XUA token [link](/integration-primary-system/)
 2. Configure the IdP's with the Mobile Access Gateway and use an OAuth token (in development)
+
+## CH EPR Constraints
+
+The Swiss EPR defines contraints on the use of MHD, PIXm, PDQm and PPQm transactions. Those can be enabled in the 
+configuration file:
+```yml
+mag:
+  ch-epr-fhir:
+    ch-mhd-constraints: true
+    ch-ppqm-constraints: true
+    ch-pixm-constraints: true
+    ch-pdqm-constraints: true
+```
+
+Furthermore, the parameter `mag.ch-epr-fhir.epr-spid-as-patientid` allows to set the patient EPR-SPID as the FHIR 
+Patient id. The mapping will automatically be changed to support that.

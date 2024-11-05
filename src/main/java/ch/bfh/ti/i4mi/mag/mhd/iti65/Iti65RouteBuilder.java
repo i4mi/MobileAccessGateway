@@ -66,7 +66,7 @@ class Iti65RouteBuilder extends RouteBuilder {
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
                 //.process(itiRequestValidator())
-                .process(RequestHeadersForwarder.checkAuthorization(config.isChMhd()))
+                .process(RequestHeadersForwarder.checkAuthorization(config.isChMhdConstraints()))
                 .process(RequestHeadersForwarder.forward())
                 // translate, forward, translate back
                 .process(Utils.keepBody())
