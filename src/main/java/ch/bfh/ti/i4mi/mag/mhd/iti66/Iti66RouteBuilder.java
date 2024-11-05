@@ -66,7 +66,7 @@ class Iti66RouteBuilder extends RouteBuilder {
         from("mhd-iti66-v401:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentmanifest-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
-                .process(RequestHeadersForwarder.checkAuthorization(config.isChMhd()))
+                .process(RequestHeadersForwarder.checkAuthorization(config.isChMhdConstraints()))
                 .process(RequestHeadersForwarder.forward()).choice()
                 .when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())
                     .bean(Utils.class,"searchParameterToBody")
