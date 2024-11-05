@@ -62,6 +62,7 @@ class Iti68RouteBuilder extends RouteBuilder {
         from("mhd-iti68:camel/xdsretrieve?audit=true&auditContext=#myAuditContext").routeId("ddh-retrievedoc-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
+                .process(RequestHeadersForwarder.checkAuthorization(config.isChMhd()))
                 .process(RequestHeadersForwarder.forward())
                
                 // translate, forward, translate back

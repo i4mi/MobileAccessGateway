@@ -43,6 +43,7 @@ public class Ppq5RouteBuilder extends PpqmRouteBuilder {
         from("ch-ppq5:stub")
                 .setHeader(FhirCamelValidators.VALIDATION_MODE, constant(FhirCamelValidators.MODEL))
                 .process(FhirCamelValidators.itiRequestValidator())
+				.process(RequestHeadersForwarder.checkAuthorization(config.isChPpqm()))
                 .process(RequestHeadersForwarder.forward())
                 .process(exchange -> {
                     String ppq5Request = exchange.getMessage().getHeader(Constants.HTTP_QUERY, String.class);

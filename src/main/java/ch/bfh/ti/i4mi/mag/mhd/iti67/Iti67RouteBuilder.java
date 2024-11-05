@@ -89,6 +89,7 @@ class Iti67RouteBuilder extends RouteBuilder {
         from("mhd-iti67-v401:translation?audit=true&auditContext=#myAuditContext").routeId("mdh-documentreference-adapter")
                 // pass back errors to the endpoint
                 .errorHandler(noErrorHandler())
+                .process(RequestHeadersForwarder.checkAuthorization(config.isChMhd()))
                 .process(RequestHeadersForwarder.forward())
                 .choice()
                   .when(header(Constants.FHIR_REQUEST_PARAMETERS).isNotNull())

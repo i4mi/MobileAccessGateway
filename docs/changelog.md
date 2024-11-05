@@ -4,6 +4,7 @@
 - Improved mapping between XDS XON and FHIR Organization [165](https://github.com/i4mi/MobileAccessGateway/issues/165)
 - capability statement validation issues [#177](https://github.com/i4mi/MobileAccessGateway/issues/177)
 - Add CH PIXm ITI-83 constraints for sourceIdentifier and targetSystem [#170](https://github.com/i4mi/MobileAccessGateway/issues/170)
+- add support for 401 error code [#182](https://github.com/i4mi/MobileAccessGateway/issues/182)
 
 
 ## 2024/05/15 v070

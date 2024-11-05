@@ -12,6 +12,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.StringReader;
@@ -39,6 +41,16 @@ public class RequestHeadersForwarder {
             // Extract the traceparent header if present and update it for the next hop
             TraceparentHandler.saveHeader(exchange);
             TraceparentHandler.updateHeaderForSoap().process(exchange);
+        };
+    }
+
+    public static Processor checkAuthorization(boolean check) {
+        return exchange -> {
+            final var authorizationHeader = FhirExchanges.readRequestHttpHeader(AUTHORIZATION_HEADER, exchange, true);
+            if (check && authorizationHeader == null) {
+                throw new AuthenticationException();        
+            }
+            // TODO verify if the token is valid
         };
     }
 
