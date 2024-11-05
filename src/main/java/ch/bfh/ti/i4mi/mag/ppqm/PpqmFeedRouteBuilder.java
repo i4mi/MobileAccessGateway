@@ -87,6 +87,7 @@ abstract public class PpqmFeedRouteBuilder extends PpqmRouteBuilder {
         from(getUriSchema() + ":stub")
                 .setHeader(FhirCamelValidators.VALIDATION_MODE, constant(FhirCamelValidators.MODEL))
                 .process(FhirCamelValidators.itiRequestValidator())
+				.process(RequestHeadersForwarder.checkAuthorization(config.isChPpqm()))
                 .process(RequestHeadersForwarder.forward())
                 .process(exchange -> {
                     Object body = exchange.getMessage().getBody();
@@ -128,6 +129,7 @@ abstract public class PpqmFeedRouteBuilder extends PpqmRouteBuilder {
                     exchange.getMessage().setBody(ppqMessageCreator.createPolicyQuery(policySetIds));
                     log.info("Created PPQ-2 request for {} policy set(s)", policySetIds.size());
                 })
+				.process(RequestHeadersForwarder.checkAuthorization(config.isChPpqm()))
                 .process(RequestHeadersForwarder.forward())
                 .to("ch-ppq2://" + config.getPpq2HostUrl())
                 .process(TraceparentHandler.updateHeaderForFhir())

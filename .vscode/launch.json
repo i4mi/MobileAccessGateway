@@ -6,17 +6,12 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Debug (Launch) - Current File",
-            "request": "launch",
-            "mainClass": "${file}"
-        },
-        {
-            "type": "java",
-            "name": "Debug Mobile Access Gateway pmp",
+            "name": "Debug Mobile Access Gateway local",
             "request": "launch",
             "mainClass": "ch.bfh.ti.i4mi.mag.MobileAccessGateway",
             "projectName": "mobile-access-gateway",
-            "vmArgs": "-Dspring.config.additional-location=file:/Users/oliveregger/Documents/github/k8s-fhir.ch/configurations/mag-pmp2/application.yml",
+            "vmArgs": "-Dspring.config.additional-location=file:example-config/application.yml",
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
