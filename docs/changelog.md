@@ -1,4 +1,4 @@
-## Unreleased
+## 2024/11/26 v1.0.0
 
 - Fixed an NPE in the assertion route
 - Improved mapping between XDS XON and FHIR Organization [165](https://github.com/i4mi/MobileAccessGateway/issues/165)
