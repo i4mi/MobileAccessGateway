@@ -1,0 +1,11 @@
+POST /ARR/fhir/AuditEvent HTTP/1.1
+Content-Type: application/fhir+xml
+
+<Bundle>
+  <entry>
+    ...
+    <request>
+      <method value="POST"/>
+    </request>
+  </entry>
+</Bundle>

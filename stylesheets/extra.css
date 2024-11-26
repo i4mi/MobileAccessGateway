@@ -1,0 +1,14 @@
+[data-md-color-scheme="mag"] {
+  --md-primary-fg-color: #7e995f;
+  --md-primary-fg-color--light: #7e995f;
+  --md-primary-fg-color--dark: #7e995f;
+}
+.tabbed-content {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-top: 0;
+  padding: 0 1rem;
+  box-shadow: var(--md-shadow-z1);
+}
+.md-typeset svg {
+  vertical-align: sub;
+}
