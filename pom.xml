@@ -6,7 +6,7 @@
 
 	<groupId>ch.bfh</groupId>
 	<artifactId>mobile-access-gateway</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<description>FHIR Gateway supporting the PMIR and MHD server actors and uses XDS/PIXV3 to communicate with an XDS Affinity Domain</description>
 	<packaging>jar</packaging>
 
