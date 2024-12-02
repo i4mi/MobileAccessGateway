@@ -1,0 +1,290 @@
+POST / HTTP/1.1
+Content-Type: application/fhir+json;charset=UTF-8
+
+{
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:59f3a738-11c1-4a0e-a89b-c4552d0fe9a7",
+      "request": {
+        "method": "POST",
+        "url": "Binary"
+      },
+      "resource": {
+        "contentType": "application/pdf",
+        "data": "VGhlIHBkZiBmaWxlIGdvZXMgaGVyZQ==",
+        "resourceType": "Binary"
+      }
+    },
+    {
+      "fullUrl": "urn:uid:eb00c215-61cf-43a3-b99a-020ab21828fa",
+      "request": {
+        "method": "POST",
+        "url": "List"
+      },
+      "resource": {
+        "code": {
+          "coding": [
+            {
+              "code": "submissionset",
+              "display": "SubmissionSet as a FHIR List",
+              "system": "http://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes"
+            }
+          ]
+        },
+        "date": "2023-01-06T14:23:14+01:00",
+        "entry": [
+          {
+            "item": {
+              "reference": "urn:uuid:5ae558f6-c103-4566-9a7e-63242abd24ab"
+            }
+          }
+        ],
+        "extension": [
+          {
+            "url": "http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId",
+            "valueIdentifier": {
+              "value": "urn:oid:2.16.756.5.30.1.145.20.1"
+            }
+          },
+          {
+            "url": "http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-author-authorrole",
+            "valueCoding": {
+              "code": "HCP",
+              "display": "Healthcare professional",
+              "system": "urn:oid:2.16.756.5.30.1.127.3.10.6"
+            }
+          },
+          {
+            "url": "http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType",
+            "valueCodeableConcept": {
+              "coding": [
+                {
+                  "code": "71388002",
+                  "display": "Procedure (procedure)",
+                  "system": "http://snomed.info/sct"
+                }
+              ],
+              "text": "Procedure (procedure)"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "use": "official",
+            "value": "urn:uuid:ab1862da-e31e-4ca9-ab01-24883cda5404"
+          },
+          {
+            "system": "urn:ietf:rfc:3986",
+            "use": "usual",
+            "value": "urn:oid:2.999.123"
+          }
+        ],
+        "mode": "working",
+        "resourceType": "List",
+        "status": "current",
+        "subject": {
+          "reference": "Patient/2.16.756.5.30.1.191.1.0.2.1-c55f4ca7-bd4e-4134-8dcd-56b793ade958"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5ae558f6-c103-4566-9a7e-63242abd24ab",
+      "request": {
+        "method": "POST",
+        "url": "DocumentReference"
+      },
+      "resource": {
+        "author": [
+          {
+            "reference": "#practrole"
+          }
+        ],
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "405624007",
+                "display": "Administrative documentation (record artifact)",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          }
+        ],
+        "contained": [
+          {
+            "birthDate": "1993-01-27",
+            "gender": "male",
+            "id": "1",
+            "identifier": [
+              {
+                "system": "urn:oid:2.16.756.5.30.1.191.1.0.12.3.101",
+                "value": "MAGMED006"
+              },
+              {
+                "system": "urn:oid:2.16.756.5.30.1.191.1.0.2.1",
+                "value": "c55f4ca7-bd4e-4134-8dcd-56b793ade958"
+              }
+            ],
+            "name": [
+              {
+                "family": "Sesztáková",
+                "given": [
+                  "Jett Flynn"
+                ]
+              },
+              {
+                "family": "Sesztáková",
+                "given": [
+                  "Jett Flynn"
+                ]
+              }
+            ],
+            "resourceType": "Patient"
+          },
+          {
+            "address": [
+              {
+                "city": "Zürich",
+                "country": "CH",
+                "line": [
+                  "Krankenstrasse 2"
+                ],
+                "postalCode": "8005"
+              }
+            ],
+            "id": "org",
+            "identifier": [
+              {
+                "system": "urn:oid:2.51.1.3",
+                "value": "7601000234438"
+              }
+            ],
+            "name": "Hausarzt",
+            "resourceType": "Organization"
+          },
+          {
+            "id": "pract",
+            "identifier": [
+              {
+                "system": "urn:oid:2.51.1.3",
+                "value": "7601000234438"
+              }
+            ],
+            "name": [
+              {
+                "family": "Hausarzt",
+                "given": [
+                  "Familien"
+                ]
+              }
+            ],
+            "resourceType": "Practitioner"
+          },
+          {
+            "id": "practrole",
+            "organization": {
+              "reference": "#org"
+            },
+            "practitioner": {
+              "reference": "#pract"
+            },
+            "resourceType": "PractitionerRole"
+          }
+        ],
+        "content": [
+          {
+            "attachment": {
+              "contentType": "application/pdf",
+              "creation": "2011-11-29T11:00:00+01:00",
+              "language": "de-CH",
+              "url": "urn:uuid:59f3a738-11c1-4a0e-a89b-c4552d0fe9a7",
+              "title": "Document example title"
+            },
+            "format": {
+              "code": "urn:che:epr:EPR_Unstructured_Document",
+              "system": "urn:oid:2.16.756.5.30.1.127.3.10.10"
+            }
+          }
+        ],
+        "context": {
+          "facilityType": {
+            "coding": [
+              {
+                "code": "264358009",
+                "display": "General practice premises(environment)",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          },
+          "practiceSetting": {
+            "coding": [
+              {
+                "code": "394802001",
+                "display": "General medicine(qualifier value)",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          },
+          "sourcePatientInfo": {
+            "reference": "#1"
+          }
+        },
+        "date": "2011-11-29T11:00:00+01:00",
+        "description": "file.pdf",
+        "extension": [
+          {
+            "url": "http://fhir.ch/ig/ch-epr-mhealth/StructureDefinition/ch-ext-author-authorrole",
+            "valueCoding": {
+              "code": "HCP",
+              "display": "Healthcare professional",
+              "system": "urn:oid:2.16.756.5.30.1.127.3.10.6"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "use": "usual",
+            "value": "urn:oid:2.25.161286146254585515369612173924762763705"
+          }
+        ],
+        "masterIdentifier": {
+          "value": "urn:uuid:f3b905a6-f0e4-4ba6-9b6e-c7e7692c0438"
+        },
+        "resourceType": "DocumentReference",
+        "securityLabel": [
+          {
+            "coding": [
+              {
+                "code": "17621005",
+                "display": "Normally accessible",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          }
+        ],
+        "status": "current",
+        "subject": {
+          "reference": "Patient/2.16.756.5.30.1.191.1.0.2.1-c55f4ca7-bd4e-4134-8dcd-56b793ade958"
+        },
+        "type": {
+          "coding": [
+            {
+              "code": "772786005",
+              "display": "Medical certificate (record artifact)",
+              "system": "http://snomed.info/sct"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "meta": {
+    "profile": [
+      "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle"
+    ]
+  },
+  "resourceType": "Bundle",
+  "type": "transaction"
+}

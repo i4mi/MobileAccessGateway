@@ -1,0 +1,28 @@
+PUT /Patient?identifier=urn:oid:2.16.756.5.30.1.196.3.2.1|MAGMED001 HTTP/1.1
+Content-Type: application/fhir+json
+
+{
+    "active": true,
+    "birthDate": "1987-10-08",
+    "gender": "male",
+    "id": "2.16.756.5.30.1.127.3.10.3-761337611735842172",
+    "identifier": [
+        {
+            "system": "urn:oid:2.16.756.5.30.1.196.3.2.1",
+            "value": "MAGMED001"
+        },
+        {
+            "system": "urn:oid:2.999.42",
+            "value": "new-identifier-value"
+        }
+    ],
+    "name": [
+        {
+            "family": "NEFF-WINGEIER",
+            "given": [
+                "Trong Sang"
+            ]
+        }
+    ],
+    "resourceType": "Patient"
+}
