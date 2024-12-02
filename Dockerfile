@@ -4,7 +4,7 @@ EXPOSE 9090
 EXPOSE 9091
 VOLUME /tmp
 
-ARG JAR_FILE=target/mobile-access-gateway-1.0-SNAPSHOT-spring-boot.jar
+ARG JAR_FILE=target/mobile-access-gateway-1.0.0-spring-boot.jar
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
