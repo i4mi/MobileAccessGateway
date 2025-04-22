@@ -60,6 +60,6 @@ public class AuthenticationConfig {
 	@ConfigurationProperties("mag.iua.clients")
 	@Bean(name = "clients")
 	public Map<String, ClientDefinition> getClients() {
-		return new HashMap<String, ClientDefinition>();
+		return new HashMap<>();
 	}
 }

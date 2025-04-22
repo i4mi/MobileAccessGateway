@@ -27,8 +27,10 @@ import lombok.Data;
 @Data
 public class OAuth2TokenResponse {
 
+	// The access token is the XUA SAML token, encrypted
 	private String access_token;
-	
+
+	// The refresh token is the IDP SAML token, encrypted
 	private String refresh_token;
 	
 	private String token_type;
@@ -36,5 +38,4 @@ public class OAuth2TokenResponse {
 	private long expires_in;
 	 
 	private String scope;
-		
 }

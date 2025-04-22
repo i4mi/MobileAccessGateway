@@ -54,12 +54,12 @@ public class AssertionRequest {
 	private Object samlToken;
 	
 	public void addOrganizationID(String orgId) {
-		if (organizationID==null) organizationID = new ArrayList<String>();
+		if (organizationID==null) organizationID = new ArrayList<>();
 		organizationID.add(orgId);
 	}
 	
 	public void addOrganizationName(String orgName) {
-		if (organizationName==null) organizationName = new ArrayList<String>();
+		if (organizationName==null) organizationName = new ArrayList<>();
 		organizationName.add(orgName);
 	}
 }
