@@ -18,13 +18,11 @@
 package ch.bfh.ti.i4mi.mag.xua;
 
 import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
 
 import org.apache.camel.Body;
 import org.apache.camel.ExchangeProperty;
@@ -69,6 +67,9 @@ public class TokenEndpoint {
 	 */
 	private final BasicParserPool samlParserPool;
 
+	@Autowired
+	private final OAuth2TokenEncryptionService tokenCryptService;
+
 	public TokenEndpoint() {
 		this.assertionUnmarshaller = Configuration.getUnmarshallerFactory().getUnmarshaller(Assertion.DEFAULT_ELEMENT_NAME);
 		this.samlParserPool = new BasicParserPool();
@@ -94,7 +95,7 @@ public class TokenEndpoint {
 			@Header("client_id") String clientId,
 			@Header("client_secret") String clientSecret,
 			@Header("redirect_uri") String redirectUri)
-            throws UnsupportedEncodingException, AuthException, XMLParserException, UnmarshallingException {
+            throws Exception {
 		this.mustMatch(grantType, "authorization_code", "grant_type");
 		this.require(code, "code");
 		this.require(clientId, "client_id");
@@ -123,14 +124,10 @@ public class TokenEndpoint {
 							
 		final String assertion = request.getAssertion();
 		log.debug("Assertion for token: {}", assertion);
-		final String encoded = Base64.getEncoder().encodeToString(assertion.getBytes(StandardCharsets.UTF_8));
-		log.debug("Encoded token: {}", encoded);
 
-		String encodedIdp = Base64.getEncoder().encodeToString(request.getIdpAssertion().getBytes(StandardCharsets.UTF_8));
-		
 		final var result = new OAuth2TokenResponse();
-		result.setAccess_token(encoded);
-		result.setRefresh_token(encodedIdp);
+		result.setAccess_token(this.tokenCryptService.encrypt(assertion));
+		result.setRefresh_token(this.tokenCryptService.encrypt(request.getIdpAssertion()));
 		result.setExpires_in(this.computeExpiresInFromNotOnOrAfter(assertion)); // In seconds
 		result.setScope(request.getScope());
 		result.setToken_type("Bearer" /*request.getToken_type()*/);
@@ -149,15 +146,10 @@ public class TokenEndpoint {
 	
 	public OAuth2TokenResponse generateOAuth2TokenResponse(final @ExchangeProperty("oauthrequest") AuthenticationRequest authRequest,
 														   final @Body String assertion,
-														   final @Header("scope") String scope) throws XMLParserException, UnmarshallingException {
-
-		final String encoded = Base64.getEncoder().encodeToString(assertion.getBytes(StandardCharsets.UTF_8));
-		final String idpAssertion = authRequest.getIdpAssertion();
-		final String encodedIdp = Base64.getEncoder().encodeToString(idpAssertion.getBytes(StandardCharsets.UTF_8));
-		
+														   final @Header("scope") String scope) throws Exception {
 		final var result = new OAuth2TokenResponse();
-		result.setAccess_token(encoded);
-		result.setRefresh_token(encodedIdp);
+		result.setAccess_token(this.tokenCryptService.encrypt(assertion));
+		result.setRefresh_token(this.tokenCryptService.encrypt(authRequest.getIdpAssertion()));
 		result.setExpires_in(this.computeExpiresInFromNotOnOrAfter(assertion)); // In seconds
 		result.setScope(scope);
 		result.setToken_type("Bearer" /*request.getToken_type()*/);

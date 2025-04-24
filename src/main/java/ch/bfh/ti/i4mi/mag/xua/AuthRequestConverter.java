@@ -51,6 +51,9 @@ public class AuthRequestConverter {
 	
 	@Value("${mag.iua.sp.disable-code-challenge:false}")
 	private boolean disableCodeChallenge;
+
+	@Autowired
+	private OAuth2TokenEncryptionService tokenEncryptionService;
 	
 	public AuthenticationRequest buildAuthenticationRequest(
 			final @Header("scope") String scope,
@@ -118,10 +121,14 @@ public class AuthRequestConverter {
 		return this.buildAssertionRequestInternal(authorization, scope);
 	}
 	
-	public AssertionRequest buildAssertionRequestFromToken(@Header("refresh_token") String authorization,
+	public AssertionRequest buildAssertionRequestFromToken(final @Header("refresh_token") String refresh_token,
 														   final @Header("scope") String scope) throws AuthException {
-        authorization = new String(Base64.getDecoder().decode(authorization), StandardCharsets.UTF_8);
-        return this.buildAssertionRequestInternal(authorization, scope);
+		try {
+			final var idpAssertion = this.tokenEncryptionService.decrypt(refresh_token);
+			return this.buildAssertionRequestInternal(idpAssertion, scope);
+		} catch (final Exception e) {
+			throw this.throwInvalidRequest("Invalid IDP assertion in OAuth2 token");
+		}
     }
 		
 	private AssertionRequest buildAssertionRequestInternal(final Object authorization,
