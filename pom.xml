@@ -34,7 +34,6 @@
 		<spring-security-saml2-core-version>1.0.10.RELEASE</spring-security-saml2-core-version>
 		<velocity-version>2.3</velocity-version>
 
-
 		<start-class>ch.bfh.ti.i4mi.mag.MobileAccessGateway</start-class>
 	</properties>
 
@@ -102,17 +101,6 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>io.micrometer</groupId>
-			<artifactId>micrometer-registry-prometheus</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<!-- <dependency>
-		  <groupId>org.apache.camel.springboot</groupId>
-		  <artifactId>camel-rest-starter</artifactId>
-		</dependency>  -->
-
 		<!-- IPF -->
 		<dependency>
 			<groupId>org.openehealth.ipf.boot</groupId>
@@ -132,16 +120,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.openehealth.ipf.boot</groupId>
-			<artifactId>ipf-xacml20-spring-boot-starter</artifactId>
-			<version>${ipf-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openehealth.ipf.platform-camel</groupId>
-			<artifactId>ipf-platform-camel-ihe-fhir-r4-chppqm</artifactId>
-			<version>${ipf-version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.velocity</groupId>
 			<artifactId>velocity-engine-core</artifactId>
 			<version>${velocity-version}</version>
@@ -156,31 +134,6 @@
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-servlet-starter</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>org.openehealth.ipf.platform-camel</groupId>
-			<artifactId>ipf-platform-camel-ihe-fhir-r4-pixpdq</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openehealth.ipf.platform-camel</groupId>
-			<artifactId>ipf-platform-camel-ihe-fhir-r4-mhd</artifactId>
-		</dependency>
-
-		<dependency>
-           <groupId>org.openehealth.ipf.platform-camel</groupId>
-           <artifactId>ipf-platform-camel-ihe-fhir-stu3-pixpdq</artifactId>
-        </dependency>
-
-		<dependency>
-			<groupId>org.openehealth.ipf.platform-camel</groupId>
-			<artifactId>ipf-platform-camel-ihe-xds</artifactId>
-		</dependency>
-
-		<dependency>
-            <groupId>org.openehealth.ipf.platform-camel</groupId>
-            <artifactId>ipf-platform-camel-ihe-hl7v3</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.openehealth.ipf.commons</groupId>
@@ -203,17 +156,6 @@
 		<!-- <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-validator</artifactId>
 			</dependency> -->
 
-		<dependency>
-			<groupId>net.ihe.gazelle</groupId>
-			<artifactId>hl7v3-code-jar</artifactId>
-			<version>${hl7v3-code-jar-version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>saxon9he</groupId>
-					<artifactId>net.sf.saxon</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
@@ -361,16 +303,6 @@
                 <mainClass>${start-class}</mainClass>
               </configuration>
             </plugin>
-			<!-- tag::plugin[] -->
-			<plugin>
-				<groupId>com.spotify</groupId>
-				<artifactId>dockerfile-maven-plugin</artifactId>
-				<version>${dockerfile-plugin-version}</version>
-				<configuration>
-					<repository>${docker.image.prefix}/${project.artifactId}</repository>
-				</configuration>
-			</plugin>
-			<!-- end::plugin[] -->
 
 			<!-- tag::unpack[] -->
 			<plugin>
