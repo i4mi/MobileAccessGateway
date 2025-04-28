@@ -128,17 +128,14 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
     @Value("${mag.iua.idp.key-password}")
     private String keyPassword;
 
-    @Value("${mag.iua.crypt.key-store}")
+    @Value("${mag.iua.encrypt.key-store}")
     private String cryptKeystore;
 
-    @Value("${mag.iua.crypt.key-store-password}")
+    @Value("${mag.iua.encrypt.key-store-password}")
     private String cryptKeystorePass;
 
-    @Value("${mag.iua.crypt.key-alias}")
+    @Value("${mag.iua.encrypt.key-alias}")
     private String cryptKeyAlias;
-
-    @Value("${mag.iua.crypt.key-password}")
-    private String cryptKeyPassword;
 
     @Value("${mag.iua.sp.entity-id}")
     private String spEntityId;

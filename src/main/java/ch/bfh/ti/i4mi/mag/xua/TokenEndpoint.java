@@ -68,7 +68,7 @@ public class TokenEndpoint {
 	private final BasicParserPool samlParserPool;
 
 	@Autowired
-	private final OAuth2TokenEncryptionService tokenCryptService;
+	private OAuth2TokenEncryptionService tokenCryptService;
 
 	public TokenEndpoint() {
 		this.assertionUnmarshaller = Configuration.getUnmarshallerFactory().getUnmarshaller(Assertion.DEFAULT_ELEMENT_NAME);
