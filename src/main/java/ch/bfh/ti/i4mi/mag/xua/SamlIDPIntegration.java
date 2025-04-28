@@ -94,6 +94,7 @@ import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.net.URL;
 import java.security.KeyStore;
 import java.util.ArrayList;
@@ -331,12 +332,12 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 
     // Central storage of cryptographic keys
     @Bean
-    public KeyManager keyManager() {
+    public JKSKeyManager keyManager() {
         DefaultResourceLoader loader = new DefaultResourceLoader();
         Resource storeFile = loader
                 .getResource(samlKeystore);
         String storePass = keystorePass;
-        Map<String, String> passwords = new HashMap<String, String>();
+        Map<String, String> passwords = new HashMap<>();
 
         passwords.put(keyAlias, keyPassword);
 
@@ -352,7 +353,6 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 
         // String defaultKey = conf.getKeyAlias();
         return new JKSKeyManager(storeFile, storePass, passwords, keyAlias);
-
     }
 
     @Bean
@@ -665,9 +665,8 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 
     @Bean
     public OAuth2TokenEncryptionService oAuth2TokenEncryptionService() throws Exception {
-        final Resource storeFile = new DefaultResourceLoader().getResource(this.cryptKeystore);
         final var keyStore = KeyStore.getInstance("PKCS12");
-        try (final var inputStream = storeFile.getInputStream()) {
+        try (final var inputStream = new FileInputStream(this.cryptKeystore)) {
             keyStore.load(inputStream, this.cryptKeystorePass.toCharArray());
         } catch (Exception e) {
             throw new RuntimeException("Failed to load Oauth2 crypt keystore", e);

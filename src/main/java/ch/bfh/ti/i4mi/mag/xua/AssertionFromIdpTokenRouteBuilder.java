@@ -16,14 +16,13 @@
 
 package ch.bfh.ti.i4mi.mag.xua;
 
+import ch.bfh.ti.i4mi.mag.Utils;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import ch.bfh.ti.i4mi.mag.mhd.Utils;
 
 @Component
 public class AssertionFromIdpTokenRouteBuilder extends RouteBuilder {
