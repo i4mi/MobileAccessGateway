@@ -22,6 +22,8 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.annotation.Nullable;
+
 /**
  * Information for a Get-X-User Assertion Request
  * @author alexander kreutz
@@ -34,8 +36,12 @@ public class AssertionRequest {
 	
 	@Getter @Setter
 	private String role;
-	
-	@Getter @Setter
+
+	/**
+	 * When a patient is connecting from the Geneva PMP portal, the EPR-SPID is not specified in the request but will
+	 * be determined by the user's email address and the configured mapping.
+	 */
+	@Getter @Setter @Nullable
 	private String resourceId;
 	
 	@Getter @Setter
