@@ -16,7 +16,7 @@
             "request": "launch",
             "mainClass": "ch.bfh.ti.i4mi.mag.MobileAccessGateway",
             "projectName": "mobile-access-gateway",
-            "vmArgs": "-Dspring.config.additional-location=file:/Users/oliveregger/Documents/github/k8s-fhir.ch/configurations/mag-pmp2/application.yml",
+            "vmArgs": "-Dspring.config.additional-location=file:/Users/oegger/Documents/github/k8s-fhir.ch/ahdis-infomaniak/ahdis-test-ch/mag-pmp-int/application.yml",
         }
     ]
 }

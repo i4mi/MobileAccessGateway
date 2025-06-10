@@ -1,3 +1,6 @@
+## 2024/06/10 v070-medcard
+- GUI: change formatcode for medication card [192](https://github.com/i4mi/MobileAccessGateway/issues/192)
+
 ## 2024/05/15 v070
 - support for multiple IDP's [128](https://github.com/i4mi/MobileAccessGateway/issues/128)
 - reenable $find-medication-list
