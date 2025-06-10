@@ -8,6 +8,7 @@ import org.apache.camel.support.DefaultExchange;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openehealth.ipf.commons.ihe.fhir.chppqm.ChPpqmUtils;
 import org.openehealth.ipf.platform.camel.core.util.Exchanges;
@@ -21,7 +22,7 @@ import static org.openehealth.ipf.commons.ihe.fhir.chppqm.ChPpqmConsentCreator.*
 /**
  * @author Dmytro Rud
  */
-@Ignore
+@Disabled
 public class Ppq4Test extends PpqmTestBase {
 
     private Exchange send(Bundle request) throws Exception {
