@@ -53,7 +53,7 @@ public class Iti71RouteBuilder extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
 				
-		final String assertionEndpoint = String.format("cxf://%s?dataFormat=CXF_MESSAGE&wsdlURL=%s&loggingFeatureEnabled=true"+
+		final String assertionEndpoint = String.format("cxf://%s?dataFormat=CXF_MESSAGE&wsdlURL=%s&loggingFeatureEnabled=false"+
 				((endpointName!=null && endpointName.length()>0) ? "&endpointName="+endpointName : "")+
                 "&inInterceptors=#soapResponseLogger" + 
                 "&inFaultInterceptors=#soapResponseLogger"+
