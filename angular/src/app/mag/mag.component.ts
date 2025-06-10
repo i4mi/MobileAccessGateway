@@ -784,7 +784,7 @@ export class MagComponent implements OnInit {
     this.cache();
     try {
       const bundle = await this.findMedicationList(
-        'urn:oid:2.16.756.5.30.1.127.3.10.10|urn:che:epr:ch-emed:medication-card:2022'
+        'urn:oid:2.16.756.5.30.1.127.3.10.10|urn:che:epr:ch-emed:medication-card:2023'
       );
       this.setDocumentReferenceResult(bundle);
       if (bundle.entry && bundle.entry.length == 1) {
