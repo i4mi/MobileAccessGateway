@@ -16,8 +16,11 @@
 
 package ch.bfh.ti.i4mi.mag.xua;
 
+import java.io.IOException;
 import java.io.StringReader;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -27,6 +30,8 @@ import org.apache.camel.ExchangeProperty;
 import org.apache.camel.Processor;
 import org.apache.camel.http.common.HttpMessage;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
+import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
@@ -34,7 +39,6 @@ import org.opensaml.common.SignableSAMLObject;
 import org.opensaml.ws.soap.client.BasicSOAPMessageContext;
 import org.opensaml.ws.soap.client.http.HttpClientBuilder;
 import org.opensaml.ws.soap.client.http.HttpSOAPClient;
-import org.opensaml.ws.soap.client.http.TLSProtocolSocketFactory;
 import org.opensaml.ws.soap.common.SOAPException;
 import org.opensaml.ws.soap.soap11.Envelope;
 import org.opensaml.ws.soap.soap11.Header;
@@ -64,7 +68,6 @@ import org.opensaml.xml.security.credential.UsageType;
 import org.opensaml.xml.security.criteria.EntityIDCriteria;
 import org.opensaml.xml.security.criteria.UsageCriteria;
 import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
-import org.opensaml.xml.security.x509.X509Credential;
 
 import org.opensaml.xml.signature.DocumentInternalIDContentReference;
 import org.opensaml.xml.signature.KeyInfo;
@@ -78,8 +81,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.key.KeyManager;
-import org.springframework.security.saml.trust.X509KeyManager;
-import org.springframework.security.saml.trust.X509TrustManager;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -94,6 +95,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetAddress;
+import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -117,15 +120,18 @@ public class SAMLRenewSecurityTokenBuilder {
     }
 
     private final KeyManager keyManager;
+    private final SSLContext idpSslContext;
     private final SAMLContextProvider contextProvider;
     private final String keyAlias;
     private final Map<String, IDPConfig> idps;
 
     public SAMLRenewSecurityTokenBuilder(final KeyManager keyManager,
+                                         final @Qualifier("idpSslContext") SSLContext idpSslContext,
                                          final SAMLContextProvider contextProvider,
                                          final @Value("${mag.iua.idp.key-alias}") String keyAlias,
                                          final @Qualifier("idps") Map<String, IDPConfig> idps) {
         this.keyManager = keyManager;
+        this.idpSslContext = idpSslContext;
         this.contextProvider = contextProvider;
         this.keyAlias = keyAlias;
         this.idps = idps;
@@ -337,9 +343,7 @@ public class SAMLRenewSecurityTokenBuilder {
         criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
         criteriaSet.add(new UsageCriteria(UsageType.UNSPECIFIED));
 
-        final var trustManager = new X509TrustManager(criteriaSet, context.getLocalSSLTrustEngine());
-        final var manager = new X509KeyManager((X509Credential) this.keyManager.getCredential(idp.getTlsKeyAlias()));
-        clientBuilder.setHttpsProtocolSocketFactory(new TLSProtocolSocketFactory(manager, trustManager));
+        clientBuilder.setHttpsProtocolSocketFactory(new CustomSSLProtocolSocketFactory(this.idpSslContext));
 
         final HttpClient httpClient = clientBuilder.buildClient();
         final var soapClient = new HttpSOAPClient(httpClient, new BasicParserPool());
@@ -348,5 +352,41 @@ public class SAMLRenewSecurityTokenBuilder {
         soapClient.send(targetUrl, soapContext);
 
         return (Envelope)soapContext.getInboundMessage();
+    }
+
+    private static class CustomSSLProtocolSocketFactory implements SecureProtocolSocketFactory {
+        private final SSLContext sslContext;
+
+        public CustomSSLProtocolSocketFactory(final SSLContext sslContext) {
+            this.sslContext = sslContext;
+        }
+
+        @Override
+        public Socket createSocket(String host, int port) throws IOException {
+            final SSLSocketFactory factory = this.sslContext.getSocketFactory();
+            return factory.createSocket(host, port);
+        }
+
+        @Override
+        public Socket createSocket(String host, int port, InetAddress localAddress, int localPort) throws IOException {
+            final SSLSocketFactory factory = this.sslContext.getSocketFactory();
+            return factory.createSocket(host, port, localAddress, localPort);
+        }
+
+        @Override
+        public Socket createSocket(final String host,
+                                   final int port,
+                                   final InetAddress localAddress,
+                                   final int localPort,
+                                   final HttpConnectionParams params) throws IOException {
+            final SSLSocketFactory factory = this.sslContext.getSocketFactory();
+            return factory.createSocket(host, port, localAddress, localPort);
+        }
+
+        @Override
+        public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException {
+            final SSLSocketFactory factory = this.sslContext.getSocketFactory();
+            return factory.createSocket(socket, host, port, autoClose);
+        }
     }
 }

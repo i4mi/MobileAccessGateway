@@ -18,7 +18,7 @@ COPY ${JAR_FILE} /app.jar
 #        "-keystore", "$JAVA_HOME/lib/security/cacerts", \
 #        "-file", "/usr/local/share/ca-certificates/oiste_wisekey.crt"]
 
-ENTRYPOINT java -Xmx1G -jar /app.jar -Dspring.config.additional-location=optional:file:/config/application.yml
+ENTRYPOINT java -Xmx1G -jar /app.jar -Dspring.config.additional-location=file:/config/application.yml
 
 # export PROJECT_ID="$(gcloud config get-value project -q)"
 # docker build -t eu.gcr.io/${PROJECT_ID}/mag:v016 .

@@ -52,7 +52,6 @@ import org.springframework.security.saml.SAMLProcessingFilter;
 import org.springframework.security.saml.SAMLWebSSOHoKProcessingFilter;
 import org.springframework.security.saml.context.SAMLContextProviderImpl;
 import org.springframework.security.saml.key.JKSKeyManager;
-import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.log.SAMLDefaultLogger;
 import org.springframework.security.saml.metadata.CachingMetadataManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
@@ -93,6 +92,8 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
@@ -353,6 +354,25 @@ public class SamlIDPIntegration extends WebSecurityConfigurerAdapter implements 
 
         // String defaultKey = conf.getKeyAlias();
         return new JKSKeyManager(storeFile, storePass, passwords, keyAlias);
+    }
+
+    @Bean(name = "idpSslContext")
+    public SSLContext idpSslContext() {
+        try {
+            DefaultResourceLoader loader = new DefaultResourceLoader();
+            Resource storeFile = loader.getResource(this.samlKeystore);
+            KeyStore keyStore = KeyStore.getInstance("JKS");
+            try (FileInputStream fis = new FileInputStream(storeFile.getFile())) {
+                keyStore.load(fis, this.keystorePass.toCharArray());
+            }
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            final TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(keyStore);
+            sslContext.init(null, tmf.getTrustManagers(), null);
+            return sslContext;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize SSLContext from keystore", e);
+        }
     }
 
     @Bean

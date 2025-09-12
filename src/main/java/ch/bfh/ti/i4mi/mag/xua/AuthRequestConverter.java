@@ -17,13 +17,14 @@
 package ch.bfh.ti.i4mi.mag.xua;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 import javax.ws.rs.BadRequestException;
 
 import org.apache.camel.Body;
 import org.apache.camel.ExchangeProperty;
 import org.apache.camel.Header;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AuthRequestConverter {
+    private static final Logger log = LoggerFactory.getLogger(AuthRequestConverter.class);
 
 	public static final String SCOPE_PURPOSEOFUSE = "purpose_of_use=";
 	public static final String RESOURCE_ID = "person_id=";
@@ -127,6 +129,7 @@ public class AuthRequestConverter {
 			final var idpAssertion = this.tokenEncryptionService.decrypt(refresh_token);
 			return this.buildAssertionRequestInternal(idpAssertion, scope);
 		} catch (final Exception e) {
+            log.warn("Exception in buildAssertionRequestFromToken", e);
 			throw this.throwInvalidRequest("Invalid IDP assertion in OAuth2 token");
 		}
     }
